@@ -1,0 +1,59 @@
+# Cobbler setup/config - 2016.04.11 PM
+
+# Copy os *.iso to local dir (e.g.: /home/ubuntu/install_isos/ubuntu/ubuntu-14.04.4-server-amd64.iso)
+    mkdir -p ~/ygg/image; scp ~/ygg/image
+    scp sm0:/home/ubuntu/install_isos/ubuntu/ubuntu-14.04.4-server-amd64.iso .
+
+# Mount iso and import (need to be root)
+    mount -t iso9660 -o loop,ro ubuntu-14.04.4-server-amd64.iso /mnt
+    cobbler import --name=ubuntu-14.04.4-server-amd64 --arch=x86_64 --path=/mnt
+
+# Use cobbler 'list' function to verify
+    cobbler list distros
+
+# Add systems
+    cobbler system add --name=sm1 --profile=ubuntu-14.04.4-server-x86_64
+    cobbler system add --name=sm2 --profile=ubuntu-14.04.4-server-x86_64
+    cobbler system add --name=sm3 --profile=ubuntu-14.04.4-server-x86_64
+
+# detour #
+    apt-get install fence-tools
+    cobbler sync
+    cobbler reposync
+
+# Add "power management" (bmc) parameters to systems
+    cobbler system edit --name=sm1 --power-type=ipmilan --power-address=sm1bmc.aus.stglabs.ibm.com --power-user=ADMIN --power-pass=ADMIN --power-id=sm1bmc
+    cobbler system edit --name=sm2 --power-type=ipmilan --power-address=sm2bmc.aus.stglabs.ibm.com --power-user=ADMIN --power-pass=ADMIN --power-id=sm2bmc
+    cobbler system edit --name=sm3 --power-type=ipmilan --power-address=sm3bmc.aus.stglabs.ibm.com --power-user=ADMIN --power-pass=ADMIN --power-id=sm3bmc
+
+# Add kernel options needed to access supermicro console
+    cobbler system edit --name=sm1 --kopts="console=tty2 console=ttyS2,8,n,1"
+    cobbler system edit --name=sm2 --kopts="console=tty2 console=ttyS2,8,n,1"
+    cobbler system edit --name=sm3 --kopts="console=tty2 console=ttyS2,8,n,1"
+
+# /etc/cobbler/settings
+manage_dhcp: 0 -> manage_dhcp: 1
+manage_dns: 0 -> manage_dns: 1
+
+# /etc/cobbler/dhcp.template
+replace 192.168.1.* with 192.168.3.* ; set server ip (192.168.3.24)
+
+root@sm4:~# sdiff -s /etc/cobbler/modules.conf /etc/cobbler/modules.conf.orig
+module = manage_dnsmasq                                       | module = manage_bind
+module = manage_dnsmasq                                       | module = manage_isc
+
+# Add host net interface to use for pxe boot
+    cobbler system edit --name=sm1 --interface=eth0 --ip-address=192.168.3.21 --mac=0c:c4:7a:53:54:94 --dns-name=sm1.aus.stglabs.ibm.com
+    cobbler system edit --name=sm2 --interface=eth0 --ip-address=192.168.3.22 --mac=0c:c4:7a:53:57:a6 --dns-name=sm2.aus.stglabs.ibm.com
+    cobbler system edit --name=sm3 --interface=eth0 --ip-address=192.168.3.23 --mac=0c:c4:7a:53:57:a2 --dns-name=sm3.aus.stglabs.ibm.com
+
+# Set system static flag 
+    cobbler system edit --name=sm1 --static=1
+    cobbler system edit --name=sm2 --static=1
+    cobbler system edit --name=sm3 --static=1
+
+# re-sync (not sure if it's needed)
+    cobbler sync
+
+# Set preseed path
+    cobbler profile edit --name=ubuntu-14.04.4-server-x86_64 --kickstart=/var/lib/cobbler/kickstarts/ubuntu_14044_amd64.cfg
