@@ -27,9 +27,9 @@
     cobbler system edit --name=sm3 --power-type=ipmilan --power-address=sm3bmc.aus.stglabs.ibm.com --power-user=ADMIN --power-pass=ADMIN --power-id=sm3bmc
 
 # Add kernel options needed to access supermicro console
-    cobbler system edit --name=sm1 --kopts="console=tty2 console=ttyS2,8,n,1"
-    cobbler system edit --name=sm2 --kopts="console=tty2 console=ttyS2,8,n,1"
-    cobbler system edit --name=sm3 --kopts="console=tty2 console=ttyS2,8,n,1"
+    cobbler system edit --name=sm1 --kopts="console=tty2 console=ttyS2,115200n8"
+    cobbler system edit --name=sm2 --kopts="console=tty2 console=ttyS2,115200n8"
+    cobbler system edit --name=sm3 --kopts="console=tty2 console=ttyS2,115200n8"
 
 # /etc/cobbler/settings
 manage_dhcp: 0 -> manage_dhcp: 1
@@ -47,7 +47,7 @@ module = manage_dnsmasq                                       | module = manage_
     cobbler system edit --name=sm2 --interface=eth0 --ip-address=192.168.3.22 --mac=0c:c4:7a:53:57:a6 --dns-name=sm2.aus.stglabs.ibm.com
     cobbler system edit --name=sm3 --interface=eth0 --ip-address=192.168.3.23 --mac=0c:c4:7a:53:57:a2 --dns-name=sm3.aus.stglabs.ibm.com
 
-# Set system static flag 
+# Set system static flag
     cobbler system edit --name=sm1 --static=1
     cobbler system edit --name=sm2 --static=1
     cobbler system edit --name=sm3 --static=1
