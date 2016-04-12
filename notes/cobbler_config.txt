@@ -57,3 +57,58 @@ module = manage_dnsmasq                                       | module = manage_
 
 # Set preseed path
     cobbler profile edit --name=ubuntu-14.04.4-server-x86_64 --kickstart=/var/lib/cobbler/kickstarts/ubuntu_14044_amd64.cfg
+
+
+
+# Continuation of cobbler config - 2016.04.12
+
+# /etc/cobbler/dnsmasq.template
+dhcp-range=192.168.1.5,192.168.1.200 >> dhcp-range=192.168.3.150,192.168.3.200
+
+# /var/lib/cobbler/kickstarts/ubuntu_14044_amd64.cfg
+#   set netcfg/choose_interface select auto
+#   commented out squashfs line
+#   commented out preseed/late_command lines
+
+# /etc/cobbler/modules.conf
+[tftpd]
+module = manage_in_tftpd >> module = manage_tftpd_py
+
+# /etc/cobbler/dnsmasq.template
+#add:
+enable-tftp
+tftp-root=/tftpboot
+
+# /etc/cobbler/modules.conf
+[tftpd]
+module = manage_tftpd_py >> module = manage_in_tftpd
+
+# Modify kernel options needed to specify installer interface
+    cobbler system edit --name=sm1 --kopts="console=tty2 console=ttyS2,115200n8 interface=eth0"
+    cobbler system edit --name=sm2 --kopts="console=tty2 console=ttyS2,115200n8 interface=eth0"
+    cobbler system edit --name=sm3 --kopts="console=tty2 console=ttyS2,115200n8 interface=eth0"
+
+# /var/lib/cobbler/kickstarts/ubuntu_14044_amd64.cfg
+    d-i netcfg/choose_interface select auto >> d-i netcfg/choose_interface select eth0
+    >> d-i apt-setup/use_mirror boolean false
+    # comment these:
+    #d-i mirror/country string manual
+    #d-i mirror/http/hostname string 192.168.3.20
+    #d-i mirror/http/directory string /ubuntu/14.04.4/amd64
+    #d-i mirror/http/proxy string
+    #d-i live-installer/net-image string http://192.168.3.20/ubuntu/14.04.4/amd64/install/filesystem.squashfs
+
+# Add repo to profile
+    cobbler profile edit --name=ubuntu-14.04.4-server-x86_64 --repo=ubuntu-14.04.4-server-x86_64
+    
+# Experiment
+    cobbler system edit --name=sm2 --kopts="console=tty2 console=ttyS2,115200n8 interface=p1p1"
+
+# What is this command?? We do NOT need to set this (I think).
+    cobbler system edit --name=sm2 --management_eth0=True
+
+# Add kernel option to profile
+    netcfg/choose_interface=auto
+
+
+
