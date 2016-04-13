@@ -1,0 +1,72 @@
+# Targets need to have hostIP and password variable defined
+---
+- name: Install git and setup "stack" user account.
+  hosts: devstack
+  remote_user: root
+  tasks:
+
+  - name: Update aptitude repository cache ("apt-get update").
+    apt: update_cache=yes
+
+  - name: Install git using apt.
+    apt: name=git state=present
+
+  - name: Create new "stack" group.
+    group: name=stack state=present
+
+  - name: Create new "stack" user.
+    user: name=stack
+          state=present
+          group=stack
+          groups=stack,sudo
+          shell=/bin/bash
+          password=$6$Gd2q/.2/ejY1yO15$mZOyts40s6URITiUs9wpIgw2wXp9dhnXVTLQHKW4gjbHl31pABR.3gLPxSl6ixzS5ndoUM9kRDt8pbQoS3oBC1
+
+  - name: Copy public key to new "stack" user's authorized_keys file.
+    authorized_key: user=stack key="{{ lookup('file', '/home/ubuntu/.ssh/id_rsa.pub') }}"
+
+  - name: Touch "/etc/sudoers.d/myOverrides" to make sure it exists.
+    file: path=/etc/sudoers.d/myOverrides state=touch
+
+  - name: Enable passwordless sudo for new "stack" user.
+    lineinfile: >
+                dest=/etc/sudoers.d/myOverrides
+                regexp=''
+                insertafter=EOF
+                line="stack  ALL=NOPASSWD: ALL"
+
+- name: Install devstack as "stack" user.
+  hosts: devstack
+  remote_user: stack
+  tasks:
+
+  - name: Clone devstack openstack.org git repository to "~/devstack".
+    git: repo=https://git.openstack.org/openstack-dev/devstack
+         dest=~/devstack
+
+  - name: Copy sample local.conf into "~/devstack".
+    command: mv ~/devstack/samples/local.conf ~/devstack/local.conf
+
+  - name: Set local.conf ADMIN_PASSWORD to "{{ password }}".
+    replace: dest=~/devstack/local.conf
+             regexp="ADMIN_PASSWORD=nomoresecret"
+             replace="ADMIN_PASSWORD={{ password }}"
+  - name: Set local.conf DATABASE_PASSWORD to "{{ password }}".
+    replace: dest=~/devstack/local.conf
+             regexp="DATABASE_PASSWORD=stackdb"
+             replace="DATABASE_PASSWORD=$ADMIN_PASSWORD"
+  - name: Set local.conf RABBIT_PASSWORD to "{{ password }}".
+    replace: dest=~/devstack/local.conf
+             regexp="RABBIT_PASSWORD=stackqueue"
+             replace="RABBIT_PASSWORD=$ADMIN_PASSWORD"
+  - name: Set local.conf HOST_IP to "{{ hostIP }}".
+    replace: dest=~/devstack/local.conf
+             regexp="#HOST_IP=w.x.y.z"
+             replace="HOST_IP={{ hostIP }}"
+
+  - name: Run "stack.sh" install script.
+    shell: chdir=~/devstack ./stack.sh
+    register: stack_return
+
+#  - debug: msg="{{ stack_return.stdout }}"
+

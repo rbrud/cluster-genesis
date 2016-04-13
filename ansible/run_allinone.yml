@@ -1,0 +1,79 @@
+---
+# Playbook to setup and run the openstack-ansible All In One deployment
+#
+#   Created by Kyle Henderson (shared via email on 2016.04.11)
+
+- name: Install openstack-ansible and run all-in-one
+  hosts: all
+  become: true
+  vars:
+    osa_git_path: /opt/openstack-ansible
+  tasks:
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+        cache_valid_time: 600
+      register: apt_update
+      until: apt_update|success
+      retries: 5
+      delay: 2
+
+    - name: Install apt packages
+      apt:
+        pkg: "{{ item }}"
+        state: latest
+      register: install_packages
+      until: install_packages|success
+      retries: 5
+      delay: 2
+      with_items:
+        - linux-generic
+        - git
+        - htop
+        - aptitude
+        - build-essential
+        - ntp
+        - ntpdate
+        - python-dev
+
+    - name: Upgrade distro
+      apt:
+        upgrade: dist
+      register: apt_upgrade
+      when: apt_update
+
+    - name: reboot now
+      command: reboot
+      when: apt_upgrade.changed
+
+    - name: Wait for system to come back up
+      local_action: wait_for state=started delay=30 timeout=30 host="{{ inventory_hostname }}"
+      register: ssh_wait_check
+      until: ssh_wait_check | success
+      retries: 3
+      when: apt_upgrade.changed
+
+    - name: Get openstack-ansible
+      git:
+        repo: https://github.com/openstack/openstack-ansible
+        dest: "{{ osa_git_path }}"
+        version: "{{ openstack_ansible_version | default('master') }}"
+
+    - name: Bootstrap ansible
+      shell: scripts/bootstrap-ansible.sh
+      args:
+        chdir: "{{ osa_git_path }}"
+        creates: /usr/local/bin/openstack-ansible
+
+    - name: Bootstrap all in one
+      shell: scripts/bootstrap-aio.sh
+      args:
+        chdir: "{{ osa_git_path }}"
+        creates: /etc/openstack_deploy
+
+    - name: Run all in one playbooks
+      shell: scripts/run-playbooks.sh | tee -a /root/run-playbooks.out || touch /openstack/ALLINONE.complete
+      args:
+        chdir: "{{ osa_git_path }}"
+        creates: /openstack/ALLINONE.complete
+
