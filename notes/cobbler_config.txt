@@ -131,7 +131,21 @@ module = manage_tftpd_py >> module = manage_in_tftpd
 #  First needed to copy my ppc64 preseed to /var/lib/cobbler/kickstarts/
     cobbler profile add --name=ubuntu-14.04.4-server-ppc64 \
     --distro=ubuntu-14.04.4-server-ppc64 \
-    --kopts="netcfg/dhcp_timeout=1024, netcfg/choose_interface=auto, ipv6.disable=1" \
+    --kopts="netcfg/dhcp_timeout=1024 netcfg/choose_interface=auto ipv6.disable=1" \
     --kickstart=/var/lib/cobbler/kickstarts/ubuntu_14044_ppc64.cfg
+
+
+
+# 2016.04.13
+# Want to image firestone ppc64el ubuntu
+
+# Adding OS Version to ppc64el distro
+    cobbler distro edit --name=ubuntu-14.04.4-server-ppc64  --os-version=trusty
+
+# note: Kickstart Metadata is not set... not sure if it's needed.
+
+# Create new firestone "system" - using cobbler system copy:
+    cobbler system copy --name=sm2 --newname=firestone1
+
 
 
