@@ -17,7 +17,7 @@
     cobbler system add --name=sm3 --profile=ubuntu-14.04.4-server-x86_64
 
 # detour #
-    apt-get install fence-tools
+    apt-get install fence-agents
     cobbler sync
     cobbler reposync
 
@@ -147,5 +147,26 @@ module = manage_tftpd_py >> module = manage_in_tftpd
 # Create new firestone "system" - using cobbler system copy:
     cobbler system copy --name=sm2 --newname=firestone1
 
+
+
+# 2016.04.13 PM
+
+# Need to eliminate PXE boot loop
+# update /etc/cobbler/settings
+    pxe_just_once: 0    >> pxe_just_once: 1
+
+# To 'activate' changes to settings here you must sync AND restart cobblerd service!
+
+# preseed needs to use early_command & late_command to notify cobbler of install start/stop
+#   in order for pxe_just_once to work.
+# append following two lines to both amd64 & ppc64el preseed files
+    d-i preseed/early_command string $SNIPPET('kickstart_start')
+    d-i preseed/late_command string $SNIPPET('kickstart_done')
+
+# had to modify the snippet template
+root@sm4:~# sdiff -s /var/lib/cobbler/snippets/kickstart_done.orig /var/lib/cobbler/snippets/kickstart_done     
+            #set nopxe = "\nwget \"http://%s/cblr/svc/op/nopx |             #set nopxe = "\\\nwget \"http://%s/cblr/svc/op/no
+            #set saveks = "\nwget \"http://%s/cblr/svc/op/ks/ |             #set saveks = "\\\nwget \"http://%s/cblr/svc/op/k
+            #set runpost = "\nwget \"http://%s/cblr/svc/op/tr |             #set runpost = "\\\nwget \"http://%s/cblr/svc/op/
 
 
