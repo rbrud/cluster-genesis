@@ -5,29 +5,45 @@
   remote_user: root
   tasks:
 
-    # apt-get update/upgrade
-    - name: Update aptitude repository cache ("apt-get update").
-      apt: update_cache=yes
-
-    # reboot ?
 
     # Copy key and setup cobbler repo source
-
-    - name: Install software packages.
-      apt: name={{ item }} state=latest
+    - name: Update apt cache and install software packages.
+      apt:
+        update_cache: yes
+        name: {{ item }}
+        state: latest
       with_items:
         - cobbler
         - dnsmasq
         - fence-agents
 
+    # reboot - I don't think so
+
     #### Configure dnsmasq
-    # mkdir /tftpboot
+    # Create /tftpboot if it doesn't exist
+    - file:
+        path: /tftpboot
+        state: directory
+        mode: 0755
+
     # /etc/cobbler/dnsmasq.template
     #add:
     #enable-tftp
     #tftp-root=/tftpboot
     #? interface=eth0
     #dhcp-range=192.168.1.5,192.168.1.200 >> dhcp-range=192.168.3.150,192.168.3.200
+
+    - name: Configure dnsmasq
+      lineinfile:
+        dest: /etc/cobbler/dnsmasq.template
+        backup: yes
+        regexp: "{{ item.regexp }}"
+        line: "{{ item.line }}"
+      with_items:
+        - { regexp: '', line: 'enable-tftp' }
+        - { regexp: '', line: 'tftp-root=/tftpboot' }
+        - { regexp: '192.168.1.5,192.168.1.200'
+            line: '192.168.3.150,192.168.3.200' }
 
     #### /etc/cobbler/modules.conf
     #[tftpd]
