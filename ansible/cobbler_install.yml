@@ -5,7 +5,6 @@
   remote_user: root
   tasks:
 
-
     # Copy key and setup cobbler repo source
     - name: Update apt cache and install software packages.
       apt:
@@ -19,21 +18,13 @@
 
     # reboot - I don't think so
 
-    #### Configure dnsmasq
-    # Create /tftpboot if it doesn't exist
-    - file:
+    - name: Create /tftpboot if it doesn't exist.
+      file:
         path: /tftpboot
         state: directory
         mode: 0755
 
-    # /etc/cobbler/dnsmasq.template
-    #add:
-    #enable-tftp
-    #tftp-root=/tftpboot
-    #? interface=eth0
-    #dhcp-range=192.168.1.5,192.168.1.200 >> dhcp-range=192.168.3.150,192.168.3.200
-
-    - name: Configure dnsmasq
+    - name: Configure dnsmasq for DHCP, DNS and TFTP.
       lineinfile:
         dest: /etc/cobbler/dnsmasq.template
         backup: yes
@@ -48,6 +39,7 @@
     #### /etc/cobbler/modules.conf
     #[tftpd]
     #module = manage_tftpd_py >> module = manage_in_tftpd
+    #**NOTE: I think we ended up leaving this back on the default setting
 
     #### Configure cobbler
     #cp -p /etc/apache2/conf.d/cobbler.conf /etc/apache2/conf.d/cobbler.conf.orig
