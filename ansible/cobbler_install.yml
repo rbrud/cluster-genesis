@@ -1,0 +1,105 @@
+# Targets need to have hostIP and password variable defined
+---
+- name: Install and configure cobbler
+  hosts: devstack
+  remote_user: root
+  tasks:
+
+    # Copy key and setup cobbler repo source
+    - name: Update apt cache and install software packages.
+      apt:
+        update_cache: yes
+        name: {{ item }}
+        state: latest
+      with_items:
+        - cobbler
+        - dnsmasq
+        - fence-agents
+
+    # reboot - I don't think so
+
+    - name: Create /tftpboot if it doesn't exist.
+      file:
+        path: /tftpboot
+        state: directory
+        mode: 0755
+
+    - name: Configure dnsmasq for DHCP, DNS and TFTP.
+      lineinfile:
+        dest: /etc/cobbler/dnsmasq.template
+        backup: yes
+        regexp: "{{ item.regexp }}"
+        line: "{{ item.line }}"
+      with_items:
+        - { regexp: '', line: 'enable-tftp' }
+        - { regexp: '', line: 'tftp-root=/tftpboot' }
+        - { regexp: '192.168.1.5,192.168.1.200'
+            line: '192.168.3.150,192.168.3.200' }
+
+    #### /etc/cobbler/modules.conf
+    #[tftpd]
+    #module = manage_tftpd_py >> module = manage_in_tftpd
+    #**NOTE: I think we ended up leaving this back on the default setting
+
+    #### Configure cobbler
+    #cp -p /etc/apache2/conf.d/cobbler.conf /etc/apache2/conf.d/cobbler.conf.orig
+    #sed -i 's/var\/www\/cobbler/usr\/share\/cobbler\/web/' /etc/apache2/conf.d/cobbler.conf
+    #cp /etc/apache2/conf.d/cobbler.conf /etc/apache2/conf-available/
+    #cp /etc/apache2/conf.d/cobbler_web.conf /etc/apache2/conf-available/
+    #a2enconf cobbler cobbler_web
+    #a2enmod proxy
+    #a2enmod proxy_http
+    #SECRET_KEY=$(python -c 'import re;from random import choice; import sys; sys.stdout.write(re.escape("".join([choice("abcdefghijklmnopqrstuvwxyz0123456789^&*(-_=+)") for i in range(100)])))'
+    #cp -p /usr/share/cobbler/web/settings.py /usr/share/cobbler/web/settings.py.orig
+    #sed -i "s/^SECRET_KEY = .*/SECRET_KEY = '${SECRET_KEY}'/" /usr/share/cobbler/web/settings.py
+    #cp -p /etc/cobbler/settings /etc/cobbler/settings.orig
+    #sed -i "s/127\.0\.0\.1/192\.168\.3\.24/" /etc/cobbler/settings
+    #cp -p /etc/apache2/conf-enabled/cobbler.conf /etc/apache2/conf-enabled/cobbler.conf.orig
+    #cp -p /etc/apache2/conf-enabled/cobbler_web.conf /etc/apache2/conf-enabled/cobbler_web.conf.orig
+    #sed -i "/Order allow,deny/d" /etc/apache2/conf-enabled/cobbler*.conf
+    #sed -i "s/Allow from all/Require all granted/" /etc/apache2/conf-enabled/cobbler*.conf
+    #chown www-data /var/lib/cobbler/webui_sessions
+
+    #### /etc/cobbler/settings
+    #manage_dhcp: 0 -> manage_dhcp: 1
+    #manage_dns: 0 -> manage_dns: 1
+    #pxe_just_once: 0    >> pxe_just_once: 1
+
+    #### /etc/cobbler/dhcp.template
+    #replace 192.168.1.* with 192.168.3.* ; set server ip (192.168.3.24)
+
+    ####root@sm4:~# sdiff -s /etc/cobbler/modules.conf /etc/cobbler/modules.conf.orig
+    #module = manage_dnsmasq                                       | module = manage_bind
+    #module = manage_dnsmasq                                       | module = manage_isc
+
+    #### had to modify the snippet template
+    #root@sm4:~# sdiff -s /var/lib/cobbler/snippets/kickstart_done.orig /var/lib/cobbler/snippets/kickstart_done
+    #            #set nopxe = "\nwget \"http://%s/cblr/svc/op/nopx |             #set nopxe = "\\\nwget \"http://%s/cblr/svc/op/no
+    #            #set saveks = "\nwget \"http://%s/cblr/svc/op/ks/ |             #set saveks = "\\\nwget \"http://%s/cblr/svc/op/k
+    #            #set runpost = "\nwget \"http://%s/cblr/svc/op/tr |             #set runpost = "\\\nwget \"http://%s/cblr/svc/op/
+
+    #### Restart services
+    #service cobblerd restart
+    #service apache2 restart
+    ##### Get Loaders
+    #cobbler get-loaders
+    ##### Update Cobbler Signatures
+    #cobbler signature update
+    ##### Restart services again and configure autostart
+    #service cobblerd restart
+    #service apache2 restart
+    #service dnsmasq restart
+    #update-rc.d cobblerd defaults
+    ##### Sync cobbler configuration
+    #cobbler sync
+
+    #### Copy os *.iso to local dir (e.g.: /home/ubuntu/install_isos/ubuntu/ubuntu-14.04.4-server-amd64.iso)
+    #mkdir -p ~/ygg/image; scp ~/ygg/image
+    #scp sm0:/home/ubuntu/install_isos/ubuntu/ubuntu-14.04.4-server-amd64.iso .
+
+    #### Mount iso and import (need to be root)
+    #mount -t iso9660 -o loop,ro ubuntu-14.04.4-server-amd64.iso /mnt
+    #cobbler import --name=ubuntu-14.04.4-server-amd64 --arch=x86_64 --path=/mnt
+
+    #### Create System profiles?
+

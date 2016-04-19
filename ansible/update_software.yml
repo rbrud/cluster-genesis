@@ -4,8 +4,8 @@
   remote_user: root
   tasks:
 
-  - name: Update aptitude repository cache ("apt-get update").
-    apt: update_cache=yes
+    - name: Update aptitude repository cache ("apt-get update").
+      apt: update_cache=yes
 
-  - name: Update all packages to the latest version ("apt-get upgrade").
-    apt: upgrade=dist
+    - name: Update all packages to the latest version ("apt-get upgrade").
+      apt: upgrade=dist
