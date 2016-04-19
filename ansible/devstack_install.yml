@@ -1,3 +1,4 @@
+#!/usr/bin/ansible-playbook
 # Targets need to have hostIP and password variable defined
 ---
 - name: Install git and setup "stack" user account.
@@ -23,7 +24,8 @@
           password=$6$Gd2q/.2/ejY1yO15$mZOyts40s6URITiUs9wpIgw2wXp9dhnXVTLQHKW4gjbHl31pABR.3gLPxSl6ixzS5ndoUM9kRDt8pbQoS3oBC1
 
   - name: Copy public key to new "stack" user's authorized_keys file.
-    authorized_key: user=stack key="{{ lookup('file', '/home/ubuntu/.ssh/id_rsa.pub') }}"
+    authorized_key: user=stack
+                    key="{{ lookup('file', '/home/ubuntu/.ssh/id_rsa.pub') }}"
 
   - name: Touch "/etc/sudoers.d/myOverrides" to make sure it exists.
     file: path=/etc/sudoers.d/myOverrides state=touch
