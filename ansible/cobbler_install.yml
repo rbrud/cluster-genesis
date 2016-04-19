@@ -41,6 +41,10 @@
     #module = manage_tftpd_py >> module = manage_in_tftpd
     #**NOTE: I think we ended up leaving this back on the default setting
 
+    ####root@sm4:~# sdiff -s /etc/cobbler/modules.conf /etc/cobbler/modules.conf.orig
+    #module = manage_dnsmasq                                       | module = manage_bind
+    #module = manage_dnsmasq                                       | module = manage_isc
+
     #### Configure cobbler
     #cp -p /etc/apache2/conf.d/cobbler.conf /etc/apache2/conf.d/cobbler.conf.orig
     #sed -i 's/var\/www\/cobbler/usr\/share\/cobbler\/web/' /etc/apache2/conf.d/cobbler.conf
@@ -49,7 +53,7 @@
     #a2enconf cobbler cobbler_web
     #a2enmod proxy
     #a2enmod proxy_http
-    #SECRET_KEY=$(python -c 'import re;from random import choice; import sys; sys.stdout.write(re.escape("".join([choice("abcdefghijklmnopqrstuvwxyz0123456789^&*(-_=+)") for i in range(100)])))'
+    #SECRET_KEY=$(python -c 'import re;from random import choice; import sys; sys.stdout.write(re.escape("".join([choice("abcdefghijklmnopqrstuvwxyz0123456789^&*(-_=+)") for i in range(100)])))')
     #cp -p /usr/share/cobbler/web/settings.py /usr/share/cobbler/web/settings.py.orig
     #sed -i "s/^SECRET_KEY = .*/SECRET_KEY = '${SECRET_KEY}'/" /usr/share/cobbler/web/settings.py
     #cp -p /etc/cobbler/settings /etc/cobbler/settings.orig
@@ -66,11 +70,8 @@
     #pxe_just_once: 0    >> pxe_just_once: 1
 
     #### /etc/cobbler/dhcp.template
+    #**NOTE: I don't think we need with if we're using dnsmasq for DHCP. Should be changing /etc/cobbler/dnsmasq.template isntead
     #replace 192.168.1.* with 192.168.3.* ; set server ip (192.168.3.24)
-
-    ####root@sm4:~# sdiff -s /etc/cobbler/modules.conf /etc/cobbler/modules.conf.orig
-    #module = manage_dnsmasq                                       | module = manage_bind
-    #module = manage_dnsmasq                                       | module = manage_isc
 
     #### had to modify the snippet template
     #root@sm4:~# sdiff -s /var/lib/cobbler/snippets/kickstart_done.orig /var/lib/cobbler/snippets/kickstart_done
