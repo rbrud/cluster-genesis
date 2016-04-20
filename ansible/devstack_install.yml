@@ -1,3 +1,4 @@
+#!/usr/bin/ansible-playbook
 # Targets need to have hostIP and password variable defined
 ---
 - name: Install git and setup "stack" user account.

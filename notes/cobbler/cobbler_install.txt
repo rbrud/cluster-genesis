@@ -32,7 +32,7 @@ https://gist.github.com/luisbolson/1d0dc42976d2468171d0
     a2enconf cobbler cobbler_web
     a2enmod proxy
     a2enmod proxy_http
-    SECRET_KEY=$(python -c 'import re;from random import choice; import sys; sys.stdout.write(re.escape("".join([choice("abcdefghijklmnopqrstuvwxyz0123456789^&*(-_=+)") for i in range(100)])))'
+    SECRET_KEY=$(python -c 'import re;from random import choice; import sys; sys.stdout.write(re.escape("".join([choice("abcdefghijklmnopqrstuvwxyz0123456789^&*(-_=+)") for i in range(100)])))')
     cp -p /usr/share/cobbler/web/settings.py /usr/share/cobbler/web/settings.py.orig
     sed -i "s/^SECRET_KEY = .*/SECRET_KEY = '${SECRET_KEY}'/" /usr/share/cobbler/web/settings.py
     cp -p /etc/cobbler/settings /etc/cobbler/settings.orig
