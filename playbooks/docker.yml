@@ -1,0 +1,26 @@
+---
+- hosts: localhost
+  tasks:
+    - apt: update_cache=yes upgrade=safe
+      become: yes
+      become_method: sudo
+    - apt: name={{ item }}
+      with_items:
+      - docker.io
+      - python-docker
+      become: yes
+      become_method: sudo
+    - docker_image:
+          name: ubuntu
+          tag: 14.04_deployment
+          path: /home/deployer/ygg/playbooks/docker-image
+      become: yes
+      become_method: sudo
+    - docker:
+          name: Ubuntu_14.04_Deployment_Container
+          image: ubuntu:14.04_deployment
+          tty: yes
+          stdin_open: yes
+          docker_user: deployer
+      become: yes
+      become_method: sudo
