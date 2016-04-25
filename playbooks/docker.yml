@@ -1,7 +1,9 @@
 ---
 - hosts: localhost
   tasks:
-    - apt: update_cache=yes upgrade=safe
+    - apt:
+         update_cache: yes
+         upgrade: safe
       become: yes
       become_method: sudo
     - apt: name={{ item }}

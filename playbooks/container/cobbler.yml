@@ -1,0 +1,23 @@
+---
+- hosts: localhost
+  tasks:
+    - apt_key:
+          url: http://download.opensuse.org/repositories/home:/libertas-ict:/cobbler26/xUbuntu_14.04/Release.key
+      become: yes
+      become_method: sudo
+    - apt_repository:
+          repo: deb http://download.opensuse.org/repositories/home:/libertas-ict:/cobbler26/xUbuntu_14.04 /
+      become: yes
+      become_method: sudo
+    - apt:
+          update_cache: yes
+          upgrade: safe
+      become: yes
+      become_method: sudo
+    - apt: name={{ item }}
+      with_items:
+      - cobbler
+      - dnsmasq
+      - fence-agents
+      become: yes
+      become_method: sudo

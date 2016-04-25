@@ -1,0 +1,3 @@
+---
+- hosts: localhost
+- include: docker.yml
