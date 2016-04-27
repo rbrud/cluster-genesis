@@ -2,6 +2,11 @@
 - hosts: localhost
   tasks:
 
+    - name: "Install vim - used for debug."
+      apt: name=vim
+      become: yes
+      become_method: sudo
+
     - name: "Install aptitude so we can use apt upgrade safe."
       apt: name=aptitude
       become: yes
@@ -44,46 +49,54 @@
       become: yes
       become_method: sudo
 
+    - name: "Save original /etc/cobbler/dnsmasq.template file."
+      copy:
+          src: /etc/cobbler/dnsmasq.template
+          dest: /etc/cobbler/dnsmasq.template.orig
+      become: yes
+      become_method: sudo
+
     - name: "Set IP address range to use for unrecognized DHCP clients."
       replace:
           dest: /etc/cobbler/dnsmasq.template
-          backup: yes
-          regexp: "192.168.1.5,192.168.1.200"
-          replace: "192.168.3.150,192.168.3.200"
+          regexp: "{{ item.regexp }}"
+          replace: "{{ item.replace }}"
       become: yes
       become_method: sudo
+      with_items:
+      - { regexp: '#domain-needed', replace: 'domain-needed' }
+      - { regexp: '192.168.1.5,192.168.1.200',
+          replace: '192.168.3.150,192.168.3.200' }
 
     - name: "Configure dnsmasq to enable TFTP server."
       lineinfile:
           dest: /etc/cobbler/dnsmasq.template
-          backup: yes
           line: "{{ item }}"
       with_items:
       - enable-tftp
       - tftp-root=/tftpboot
       - user=root
+      - interface=docker0
+      become: yes
+      become_method: sudo
+
+    - name: "Save original /etc/cobbler/modules.conf file."
+      copy:
+          src: /etc/cobbler/modules.conf
+          dest: /etc/cobbler/modules.conf.orig
       become: yes
       become_method: sudo
 
     - name: "Configure Cobbler to use dnsmasq for DHCP and DNS services."
       replace:
           dest: /etc/cobbler/modules.conf
-          backup: yes
           regexp: "{{ item.regexp }}"
           replace: "{{ item.line }}"
       with_items:
-      - { regexp: 'manage_bind', line: 'manage_dnsmasq' }
-      - { regexp: 'manage_isc', line: 'manage_dnsmasq' }
+      - { regexp: 'module = manage_bind', line: 'module = manage_dnsmasq' }
+      - { regexp: 'module = manage_isc', line: 'module = manage_dnsmasq' }
       become: yes
       become_method: sudo
-
-#    - lineinfile:
-#          dest: /etc/apache2/conf.d/cobbler.conf
-#          backup: yes
-#          regexp: "var/www/cobbler"
-#          line: "usr/share/cobbler/web"
-#      become: yes
-#      become_method: sudo
 
     - copy:
           src: /etc/apache2/conf.d/cobbler.conf
@@ -113,10 +126,41 @@
     #cp -p /usr/share/cobbler/web/settings.py /usr/share/cobbler/web/settings.py.orig
     #sed -i "s/^SECRET_KEY = .*/SECRET_KEY = '${SECRET_KEY}'/" /usr/share/cobbler/web/settings.py
 
-    #cp -p /etc/apache2/conf-enabled/cobbler.conf /etc/apache2/conf-enabled/cobbler.conf.orig
-    #cp -p /etc/apache2/conf-enabled/cobbler_web.conf /etc/apache2/conf-enabled/cobbler_web.conf.orig
-    #sed -i "/Order allow,deny/d" /etc/apache2/conf-enabled/cobbler*.conf
-    #sed -i "s/Allow from all/Require all granted/" /etc/apache2/conf-enabled/cobbler*.conf
+    - name: "Save original /etc/apache2/conf-enabled/cobbler.conf file."
+      copy:
+          src: /etc/apache2/conf-enabled/cobbler.conf
+          dest: /etc/apache2/conf-enabled/cobbler.conf.orig
+      become: yes
+      become_method: sudo
+
+    - name: "Save original /etc/apache2/conf-enabled/cobbler_web.conf file."
+      copy:
+          src: /etc/apache2/conf-enabled/cobbler_web.conf
+          dest: /etc/apache2/conf-enabled/cobbler_web.conf.orig
+      become: yes
+      become_method: sudo
+
+    - name: "Apache2 config"
+      lineinfile:
+          dest: "{{ item }}"
+          regexp: "Order allow,deny"
+          state: absent
+      with_items:
+      - /etc/apache2/conf-enabled/cobbler.conf
+      - /etc/apache2/conf-enabled/cobbler_web.conf
+      become: yes
+      become_method: sudo
+
+    - name: "Apache2 config"
+      replace:
+          dest: "{{ item }}"
+          regexp: "Allow from all"
+          replace: "Require all granted"
+      with_items:
+      - /etc/apache2/conf-enabled/cobbler.conf
+      - /etc/apache2/conf-enabled/cobbler_web.conf
+      become: yes
+      become_method: sudo
 
     - file:
           path: /var/lib/cobbler/webui_sessions
@@ -124,9 +168,15 @@
       become: yes
       become_method: sudo
 
+    - name: "Save original /etc/cobbler/settings file."
+      copy:
+          src: /etc/cobbler/settings
+          dest: /etc/cobbler/settings.orig
+      become: yes
+      become_method: sudo
+
     - replace:
           dest: /etc/cobbler/settings
-          backup: yes
           regexp: "{{ item.regexp }}"
           replace: "{{ item.line }}"
       with_items:
@@ -137,6 +187,12 @@
       become: yes
       become_method: sudo
 
+    - name: "Save original /var/lib/cobbler/snippets/kickstart_done file."
+      copy:
+          src: /var/lib/cobbler/snippets/kickstart_done
+          dest: /var/lib/cobbler/snippets/kickstart_done.orig
+      become: yes
+      become_method: sudo
     #### had to modify the snippet template
     #root@sm4:~# sdiff -s /var/lib/cobbler/snippets/kickstart_done.orig /var/lib/cobbler/snippets/kickstart_done
     #            #set nopxe = "\nwget \"http://%s/cblr/svc/op/nopx |             #set nopxe = "\\\nwget \"http://%s/cblr/svc/op/no
@@ -193,7 +249,13 @@
       become: yes
       become_method: sudo
 
-    #update-rc.d cobblerd defaults
+    # Does this make sense in a container context?
+    - name: "Set cobblerd service to start on boot."
+      service:
+          name: cobblerd
+          enabled: yes
+      become: yes
+      become_method: sudo
 
     #### Copy os *.iso to local dir (e.g.: /home/ubuntu/install_isos/ubuntu/ubuntu-14.04.4-server-amd64.iso)
     #mkdir -p ~/ygg/image; scp ~/ygg/image
