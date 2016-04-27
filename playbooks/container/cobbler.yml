@@ -1,23 +1,206 @@
 ---
 - hosts: localhost
   tasks:
-    - apt_key:
+
+    - name: "Install aptitude so we can use apt upgrade safe."
+      apt: name=aptitude
+      become: yes
+      become_method: sudo
+
+    - name: "Add apt key for opensuse.org cobbler repository."
+      apt_key:
           url: http://download.opensuse.org/repositories/home:/libertas-ict:/cobbler26/xUbuntu_14.04/Release.key
       become: yes
       become_method: sudo
-    - apt_repository:
+
+    - name: "Add opensuse.org cobbler repository."
+      apt_repository:
           repo: deb http://download.opensuse.org/repositories/home:/libertas-ict:/cobbler26/xUbuntu_14.04 /
       become: yes
       become_method: sudo
-    - apt:
+
+    - name: "Update apt cache & upgrade packages (safe)."
+      apt:
           update_cache: yes
           upgrade: safe
       become: yes
       become_method: sudo
-    - apt: name={{ item }}
+
+    - name: "Install software packages."
+      apt: name={{ item }}
       with_items:
       - cobbler
       - dnsmasq
       - fence-agents
+      - wget
       become: yes
       become_method: sudo
+
+    - name: "Create tftp root directory."
+      file:
+          path: /tftpboot
+          state: directory
+          mode: 0755
+      become: yes
+      become_method: sudo
+
+    - name: "Set IP address range to use for unrecognized DHCP clients."
+      replace:
+          dest: /etc/cobbler/dnsmasq.template
+          backup: yes
+          regexp: "192.168.1.5,192.168.1.200"
+          replace: "192.168.3.150,192.168.3.200"
+      become: yes
+      become_method: sudo
+
+    - name: "Configure dnsmasq to enable TFTP server."
+      lineinfile:
+          dest: /etc/cobbler/dnsmasq.template
+          backup: yes
+          line: "{{ item }}"
+      with_items:
+      - enable-tftp
+      - tftp-root=/tftpboot
+      - user=root
+      become: yes
+      become_method: sudo
+
+    - name: "Configure Cobbler to use dnsmasq for DHCP and DNS services."
+      replace:
+          dest: /etc/cobbler/modules.conf
+          backup: yes
+          regexp: "{{ item.regexp }}"
+          replace: "{{ item.line }}"
+      with_items:
+      - { regexp: 'manage_bind', line: 'manage_dnsmasq' }
+      - { regexp: 'manage_isc', line: 'manage_dnsmasq' }
+      become: yes
+      become_method: sudo
+
+#    - lineinfile:
+#          dest: /etc/apache2/conf.d/cobbler.conf
+#          backup: yes
+#          regexp: "var/www/cobbler"
+#          line: "usr/share/cobbler/web"
+#      become: yes
+#      become_method: sudo
+
+    - copy:
+          src: /etc/apache2/conf.d/cobbler.conf
+          dest: /etc/apache2/conf-available/cobbler.conf 
+      become: yes
+      become_method: sudo
+
+    - copy:
+          src: /etc/apache2/conf.d/cobbler_web.conf
+          dest: /etc/apache2/conf-available/cobbler_web.conf
+      become: yes
+      become_method: sudo
+
+    - command: /usr/sbin/a2enconf cobbler cobbler_web
+      become: yes
+      become_method: sudo
+
+    - command: /usr/sbin/a2enmod proxy
+      become: yes
+      become_method: sudo
+
+    - command: /usr/sbin/a2enmod proxy_http
+      become: yes
+      become_method: sudo
+
+    #SECRET_KEY=$(python -c 'import re;from random import choice; import sys; sys.stdout.write(re.escape("".join([choice("abcdefghijklmnopqrstuvwxyz0123456789^&*(-_=+)") for i in range(100)])))')
+    #cp -p /usr/share/cobbler/web/settings.py /usr/share/cobbler/web/settings.py.orig
+    #sed -i "s/^SECRET_KEY = .*/SECRET_KEY = '${SECRET_KEY}'/" /usr/share/cobbler/web/settings.py
+
+    #cp -p /etc/apache2/conf-enabled/cobbler.conf /etc/apache2/conf-enabled/cobbler.conf.orig
+    #cp -p /etc/apache2/conf-enabled/cobbler_web.conf /etc/apache2/conf-enabled/cobbler_web.conf.orig
+    #sed -i "/Order allow,deny/d" /etc/apache2/conf-enabled/cobbler*.conf
+    #sed -i "s/Allow from all/Require all granted/" /etc/apache2/conf-enabled/cobbler*.conf
+
+    - file:
+          path: /var/lib/cobbler/webui_sessions
+          owner: www-data
+      become: yes
+      become_method: sudo
+
+    - replace:
+          dest: /etc/cobbler/settings
+          backup: yes
+          regexp: "{{ item.regexp }}"
+          replace: "{{ item.line }}"
+      with_items:
+    #  - { regexp: '127.0.0.1', line: '192.168.3.24' }
+      - { regexp: 'manage_dhcp: 0', line: 'manage_dhcp: 1' }
+      - { regexp: 'manage_dns: 0', line: 'manage_dns: 1' }
+      - { regexp: 'pxe_just_once: 0', line: 'pxe_just_once: 1' }
+      become: yes
+      become_method: sudo
+
+    #### had to modify the snippet template
+    #root@sm4:~# sdiff -s /var/lib/cobbler/snippets/kickstart_done.orig /var/lib/cobbler/snippets/kickstart_done
+    #            #set nopxe = "\nwget \"http://%s/cblr/svc/op/nopx |             #set nopxe = "\\\nwget \"http://%s/cblr/svc/op/no
+    #            #set saveks = "\nwget \"http://%s/cblr/svc/op/ks/ |             #set saveks = "\\\nwget \"http://%s/cblr/svc/op/k
+    #            #set runpost = "\nwget \"http://%s/cblr/svc/op/tr |             #set runpost = "\\\nwget \"http://%s/cblr/svc/op/
+
+    - name: "Restart cobblerd service."
+      service:
+          name: cobblerd
+          state: restarted
+      become: yes
+      become_method: sudo
+
+    - name: "Restart apache2 service."
+      service:
+          name: apache2
+          state: restarted
+      become: yes
+      become_method: sudo
+
+    - name: "Update boot-loader files."
+      command: /usr/bin/cobbler get-loaders
+      become: yes
+      become_method: sudo
+
+    - name: "Update cobbler list of OS signatures."
+      command: /usr/bin/cobbler signature update
+      become: yes
+      become_method: sudo
+
+    - name: "Run cobbler sync."
+      command: /usr/bin/cobbler sync
+      become: yes
+      become_method: sudo
+
+    - name: "Restart cobblerd service (again)."
+      service:
+          name: cobblerd
+          state: restarted
+      become: yes
+      become_method: sudo
+
+    - name: "Restart apache2 service (again)."
+      service:
+          name: apache2
+          state: restarted
+      become: yes
+      become_method: sudo
+
+    - name: "Restart dnsmasq service."
+      service:
+          name: dnsmasq
+          state: restarted
+      become: yes
+      become_method: sudo
+
+    #update-rc.d cobblerd defaults
+
+    #### Copy os *.iso to local dir (e.g.: /home/ubuntu/install_isos/ubuntu/ubuntu-14.04.4-server-amd64.iso)
+    #mkdir -p ~/ygg/image; scp ~/ygg/image
+    #scp sm0:/home/ubuntu/install_isos/ubuntu/ubuntu-14.04.4-server-amd64.iso .
+
+    #### Mount iso and import (need to be root)
+    #mount -t iso9660 -o loop,ro ubuntu-14.04.4-server-amd64.iso /mnt
+    #cobbler import --name=ubuntu-14.04.4-server-amd64 --arch=x86_64 --path=/mnt
+
+    #### Create System profiles?
