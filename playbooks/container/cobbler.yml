@@ -76,7 +76,6 @@
       - enable-tftp
       - tftp-root=/tftpboot
       - user=root
-      - interface=docker0
       become: yes
       become_method: sudo
 
@@ -122,9 +121,24 @@
       become: yes
       become_method: sudo
 
-    #SECRET_KEY=$(python -c 'import re;from random import choice; import sys; sys.stdout.write(re.escape("".join([choice("abcdefghijklmnopqrstuvwxyz0123456789^&*(-_=+)") for i in range(100)])))')
-    #cp -p /usr/share/cobbler/web/settings.py /usr/share/cobbler/web/settings.py.orig
-    #sed -i "s/^SECRET_KEY = .*/SECRET_KEY = '${SECRET_KEY}'/" /usr/share/cobbler/web/settings.py
+    - name: "Save original /usr/share/cobbler/web/settings.py file."
+      copy:
+          src: /usr/share/cobbler/web/settings.py
+          dest: /usr/share/cobbler/web/settings.py.orig
+      become: yes
+      become_method: sudo
+
+    - name: "Generate 100 random characters to use as secret key in /usr/share/cobbler/web/settings.py"
+      command: python -c 'import re;from random import choice; import sys; sys.stdout.write(re.escape("".join([choice("abcdefghijklmnopqrstuvwxyz0123456789^&*(-_=+)") for i in range(100)])))'
+      register: SECRET_KEY
+
+    - name: "Set secret key in /usr/share/cobbler/web/settings.py"
+      replace:
+          dest: /usr/share/cobbler/web/settings.py
+          regexp: "^SECRET_KEY = .*"
+          replace: "SECRET_KEY = {{ SECRET_KEY.stdout }}"
+      become: yes
+      become_method: sudo
 
     - name: "Save original /etc/apache2/conf-enabled/cobbler.conf file."
       copy:
