@@ -1,0 +1,30 @@
+---
+mgmt-network: 192.168.100.0/20 ==> octet #3 we assume will be '0'; '100' was just to illustrate, see below
+userid-mgmt-switch-default: user
+password-mgmt-switch-default: passw0rd
+cell:
+    5:
+        ipaddr-mgmt-switch: 192.168.105.251 ==> octet #3 auto-generated from cell 5 + mgmt-network
+        userid-mgmt-switch: dude
+        password-mgmt-switch: verylongpassw0rd
+        port:
+            8:
+                ipv4-mgmt: 192.168.105.8 ==> octet #4 from switch port 8
+                mac-mgmt: 01:23:45:67:89:ab
+                hostname: host-105-8
+            13:
+                ipv4-mgmt: 192.168.105.13 ==> octet #4 from switch port 13
+                mac-mgmt: ab:23:45:67:89:ab
+                hostname: host-105-13
+    12:
+        ipaddr-mgmt-switch: 192.168.112.251  ==> octet #3 auto-generated from cell 12 + mgmt-network
+        port:
+            1:
+                ipv4-mgmt: 192.168.112.1 ==> octet #4 from switch port 1
+                mac-mgmt: cd:23:45:67:89:ab
+                hostname: host-112-1
+
+            2:
+                ipv4-mgmt: 192.168.112.2 ==> octet #4 from switch port 2
+                mac-mgmt: ef:23:45:67:89:ab
+                hostname: host-112-2

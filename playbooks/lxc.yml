@@ -1,0 +1,56 @@
+---
+- hosts: localhost
+  vars:
+      user: "{{ lookup('env','USER') }}"
+      proj: /home/deployer/ygg
+      venv: "{{ proj }}/deployenv"
+  tasks:
+    - apt:
+         update_cache: yes
+         upgrade: safe
+      become: yes
+      become_method: sudo
+    - apt: name={{ item }}
+      with_items:
+      - lxc
+      - python-lxc
+      become: yes
+      become_method: sudo
+    - lineinfile:
+          dest: ~/.config/lxc/default.conf
+          line: "{{ item }}"
+          create: yes
+      with_items:
+      - lxc.id_map = u 0 100000 65536
+      - lxc.id_map = g 0 100000 65536
+      - lxc.network.type = veth
+      - lxc.network.link = lxcbr0
+    - copy:
+          src: /etc/lxc/lxc-usernet
+          dest: /etc/lxc/lxc-usernet.orig
+      become: yes
+      become_method: sudo
+    - lineinfile:
+          dest: /etc/lxc/lxc-usernet
+          line: "{{ user }} veth lxcbr0 2"
+      become: yes
+      become_method: sudo
+    - lxc_container:
+          name: ubuntu_14.04_deployment
+          template: ubuntu
+          template_options: --release=trusty --arch=amd64
+          container_command: |
+              groupadd -r deployer && useradd -m -r -g deployer deployer
+              cp -p /etc/sudoers /etc/sudoers.orig
+              sed -i '/^root/a deployer\tALL=NOPASSWD: ALL' /etc/sudoers
+              apt-get update && sudo apt-get -y upgrade
+              apt-get -y --force-yes install python-pip python-dev
+              pip install --upgrade pip
+              pip install --upgrade setuptools
+              pip install --upgrade wheel
+              pip install virtualenv
+              sudo -H -u deployer mkdir -p {{ proj }}
+              sudo -H -u deployer virtualenv --no-wheel --system-site-packages {{ venv }}
+              sudo -H -u deployer /bin/bash -c "source {{ venv }}/bin/activate && pip install --ignore-installed ansible && deactivate"
+      become: yes
+      become_method: sudo
