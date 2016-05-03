@@ -1,3 +1,6 @@
 *********
 Yggdrasil
 *********
+
+Install:
+$ cd yggdrasil
