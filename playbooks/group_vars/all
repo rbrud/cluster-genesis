@@ -1,0 +1,5 @@
+---
+user: deployer
+group: "{{ user }}"
+proj: "{{ ansible_env.PWD | regex_replace('^(.+)/playbooks$', '\\1')}}"
+venv: "{{ proj }}/deployenv"
