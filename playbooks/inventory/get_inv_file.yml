@@ -1,0 +1,13 @@
+---
+- hosts: localhost
+  tasks:
+    - command: "{{ scripts }}/inventory.py {{ file }}"
+      register: output
+    - debug:
+        msg: "{{ output.stdout }}"
+    - copy:
+        content: "{{ output.stdout | to_nice_yaml( width=80 ) }}"
+        dest: "/home/deployer/dude.yml"
+    - copy:
+        content: "{{ output.stdout }}"
+        dest: "/home/deployer/dude.json"

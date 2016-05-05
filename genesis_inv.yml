@@ -1,0 +1,18 @@
+---
+mgmt-network: 192.168.100.0
+userid-mgmt-switch-default: user
+password-mgmt-switch-default: passw0rd
+cell:
+    5:
+        ipaddr-mgmt-switch: 192.168.105.251
+        userid-mgmt-switch: dude
+        password-mgmt-switch: verylongpassw0rd
+        port:
+            8:
+                ipv4-mgmt: 192.168.105.8
+                mac-mgmt: 01:23:45:67:89:ab
+                hostname: host-105-8
+            13:
+                ipv4-mgmt: 192.168.105.13
+                mac-mgmt: ab:23:45:67:89:ab
+                hostname: host-105-13
