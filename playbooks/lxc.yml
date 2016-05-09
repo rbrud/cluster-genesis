@@ -7,14 +7,16 @@
       - "Project name: {{ proj }}"
       - "Virtual environment dir: {{ venv }}"
     - apt:
+         name: aptitude
+         update_cache: yes
+      become: yes
+      become_method: sudo
+    - apt:
          update_cache: yes
          upgrade: safe
       become: yes
       become_method: sudo
-    - apt: name={{ item }}
-      with_items:
-      - aptitude
-      - lxc
+    - apt: name=lxc
       become: yes
       become_method: sudo
     - apt: name=liblxc1
