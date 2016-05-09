@@ -1,13 +1,13 @@
 ---
-- hosts: localhost
+- hosts: deployer
   tasks:
-    - command: "{{ scripts }}/inventory.py {{ file }}"
+    - command: "{{ scripts }}/inventory.py {{ genesis_inventory }}"
       register: output
     - debug:
         msg: "{{ output.stdout }}"
     - copy:
         content: "{{ output.stdout | to_nice_yaml( width=80 ) }}"
-        dest: "/home/deployer/dude.yml"
+        dest: "{{ file }}.yaml"
     - copy:
         content: "{{ output.stdout }}"
-        dest: "/home/deployer/dude.json"
+        dest: "{{ file }}.json"

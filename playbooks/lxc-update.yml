@@ -1,0 +1,30 @@
+---
+- hosts: deployer1
+  tasks:
+    - apt:
+        update_cache: yes
+        upgrade: safe
+      become: yes
+      become_method: sudo
+    - apt: name="{{ item }}"
+      with_items:
+      - python-pip 
+      - python-dev
+      - libffi-dev
+      - libssl-dev
+      become: yes
+      become_method: sudo
+    - pip: name="{{ item }}"
+      with_items:
+      - pip
+      - setuptools
+      - wheel
+      - virtualenv
+      become: yes
+      become_method: sudo
+    - command: mkdir -p {{ proj }}
+    - file:
+        path: "{{ proj }}"
+        state: directory
+    - command: virtualenv --no-wheel --system-site-packages {{ venv }}
+    - command: /bin/bash -c "source {{ venv }}/bin/activate && pip install --ignore-installed ansible && deactivate"
