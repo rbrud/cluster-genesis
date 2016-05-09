@@ -1,4 +1,7 @@
 sudo apt-get -y install python-pip python-dev
+if [[ $(lsb_release -sr) == "14.04" ]]; then
+    sudo apt-get -y install libffi-dev libssl-dev
+fi
 sudo -H pip install --upgrade pip
 sudo -H pip install --upgrade setuptools
 sudo -H pip install --upgrade wheel
