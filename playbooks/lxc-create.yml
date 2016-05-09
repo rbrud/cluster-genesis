@@ -7,17 +7,26 @@
       - "Project name: {{ proj }}"
       - "Virtual environment dir: {{ venv }}"
     - apt:
+        name: aptitude
+        update_cache: yes
+      become: yes
+      become_method: sudo
+    - apt:
         update_cache: yes
         upgrade: safe
       become: yes
       become_method: sudo
-    - apt: name={{ item }}
-      with_items:
-      - aptitude
-      - lxc
-      - python-lxc
+    - apt: name=lxc
       become: yes
       become_method: sudo
+    - apt: name=liblxc1
+      become: yes
+      become_method: sudo
+      when: ansible_distribution_version == "14.04"
+    - apt: name=python-lxc
+      become: yes
+      become_method: sudo
+      when: ansible_distribution_version == "16.04"
     - lineinfile:
         dest: ~/.config/lxc/default.conf
         line: "{{ item }}"
@@ -35,7 +44,7 @@
         line: "{{ user }} veth lxcbr0 2"
       become: yes
       become_method: sudo
-    - file: 
+    - file:
         path: ~/.ssh/id_rsa
         state: absent
     - command: ssh-keygen -q -t rsa -N '' -f ~/.ssh/id_rsa
