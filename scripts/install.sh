@@ -1,7 +1,7 @@
 DISTRIB_RELEASE=$(lsb_release -sr)
-sudo apt-get -y install python-pip python-dev
+sudo apt-get -y install python-pip python-dev libffi-dev libssl-dev
 if [[ $DISTRIB_RELEASE == "14.04" ]]; then
-    sudo apt-get -y install libffi-dev libssl-dev lxc-dev
+    sudo apt-get -y install lxc-dev
 fi
 sudo -H pip install --upgrade pip
 sudo -H pip install --upgrade setuptools
