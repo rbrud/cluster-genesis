@@ -44,10 +44,9 @@
         line: "{{ user }} veth lxcbr0 2"
       become: yes
       become_method: sudo
-    - file:
-        path: ~/.ssh/id_rsa
-        state: absent
-    - command: ssh-keygen -q -t rsa -N '' -f ~/.ssh/id_rsa
+    - user:
+        name: "{{ ansible_env.USER }}"
+        generate_ssh_key: yes
     - lxc_container:
         name: "{{ deploy_cont_name }}"
         template: ubuntu
