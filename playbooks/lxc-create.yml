@@ -1,0 +1,101 @@
+---
+- hosts: localhost
+  tasks:
+    - debug:
+        msg: "{{ item }}"
+      with_items:
+      - "Project name: {{ proj }}"
+      - "Virtual environment dir: {{ venv }}"
+    - apt:
+        name: aptitude
+        update_cache: yes
+      become: yes
+      become_method: sudo
+    - apt:
+        update_cache: yes
+        upgrade: safe
+      become: yes
+      become_method: sudo
+    - apt: name=lxc
+      become: yes
+      become_method: sudo
+    - apt: name=liblxc1
+      become: yes
+      become_method: sudo
+      when: ansible_distribution_version == "14.04"
+    - apt: name=python-lxc
+      become: yes
+      become_method: sudo
+      when: ansible_distribution_version == "16.04"
+    - lineinfile:
+        dest: ~/.config/lxc/default.conf
+        line: "{{ item }}"
+        create: yes
+      with_items:
+      - lxc.id_map = u 0 100000 65536
+      - lxc.id_map = g 0 100000 65536
+    - copy:
+        src: /etc/lxc/lxc-usernet
+        dest: /etc/lxc/lxc-usernet.orig
+      become: yes
+      become_method: sudo
+    - lineinfile:
+        dest: /etc/lxc/lxc-usernet
+        line: "{{ user }} veth lxcbr0 2"
+      become: yes
+      become_method: sudo
+    - user:
+        name: "{{ ansible_env.USER }}"
+        generate_ssh_key: yes
+    - lxc_container:
+        name: "{{ deploy_cont_name }}"
+        template: ubuntu
+        template_options:
+            --user {{ user }}
+            --password {{ password }}
+            --auth-key {{ ansible_env.HOME }}/.ssh/id_rsa.pub
+            --release trusty
+            --arch amd64
+            --packages python,aptitude
+        container_command: |
+            cp -p /etc/sudoers /etc/sudoers.orig
+            echo -e "{{ user }}\tALL=NOPASSWD: ALL" >> /etc/sudoers
+      register: container_info
+      become: yes
+      become_method: sudo
+    - pause: seconds=5
+    - command: lxc-info -n {{ deploy_cont_name }} -iH
+      register: container_ip
+      become: yes
+      become_method: sudo
+    - debug: msg="Deployment container IP:port {{ container_ip.stdout }}:{{ container_port }}"
+    - command:
+        iptables
+        -t nat
+        -A PREROUTING
+        -p tcp
+        --dport {{ container_port }}
+        -j DNAT
+        --to {{ container_ip.stdout }}:22
+      become: yes
+      become_method: sudo
+    - command:
+        iptables
+        -t nat
+        -A OUTPUT
+        -p tcp
+        --dport {{ container_port }}
+        -j DNAT
+        --to {{ container_ip.stdout }}:22
+      become: yes
+      become_method: sudo
+    - command:
+        iptables
+        -t nat
+        -A POSTROUTING
+        -p all
+        -s {{ private_subnet }}
+        ! -d {{ private_subnet }}
+        -j MASQUERADE
+      become: yes
+      become_method: sudo

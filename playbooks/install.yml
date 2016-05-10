@@ -1,3 +1,4 @@
 ---
 - hosts: localhost
-- include: lxc.yml
+- include: lxc-create.yml
+- include: lxc-update.yml

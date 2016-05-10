@@ -1,2 +1,4 @@
-[default]
-msg="Dummy"
+localhost ansible_connection=local
+
+[deployer]
+deployer1 ansible_user=deployer ansible_port=26 ansible_host=9.3.89.147
