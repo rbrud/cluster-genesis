@@ -1,11 +1,5 @@
 ---
-container_port: 26
-deploy_host_name: deployer
-deploy_cont_name: ubuntu_14.04_deployment
+project_name: "yggdrasil"
 user: deployer
 password: passw0rd
-proj: "{{ ansible_env.PWD | regex_replace('^(.+)/playbooks', '\\1')}}"
-venv: "{{ proj }}/deployenv"
-scripts: "{{ proj }}/scripts"
-genesis_inventory: "{{ proj }}/genesis_inventory.yml"
-private_subnet: "10.0.3.0/24"
+project_path: "/home/{{ user }}/{{ project_name }}"

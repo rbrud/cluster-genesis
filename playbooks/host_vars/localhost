@@ -1,10 +1,4 @@
 ---
-deploy_host_ip: "{{ ansible_default_ipv4.address }}"
+container_name: ubuntu_14.04_deployment
 container_port: 26
-deploy_host_name: deployer
-deploy_cont_name: ubuntu_14.04_deployment
-user: deployer
-password: passw0rd
-proj: "{{ ansible_env.PWD | regex_replace('^(.+)/playbooks$', '\\1')}}"
-venv: "{{ proj }}/deployenv"
-scripts: "{{ proj }}/scripts"
+private_subnet: "10.0.3.0/24"
