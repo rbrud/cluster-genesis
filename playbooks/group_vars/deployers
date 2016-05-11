@@ -1,0 +1,3 @@
+---
+scripts_path: "{{ project_path }}/scripts"
+genesis_inventory: "{{ project_path }}/genesis_inventory.yml"

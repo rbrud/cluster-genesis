@@ -1,11 +1,14 @@
 ---
 - hosts: localhost
+  vars:
+      project_path_local: "{{ ansible_env.PWD }} | regex_replace('^(.+/yggdrasil).+?$', '\\1')}}"
+      venv_path_local: "{{ project_path_local }}/deployenv"
   tasks:
     - debug:
         msg: "{{ item }}"
       with_items:
-      - "Project name: {{ proj }}"
-      - "Virtual environment dir: {{ venv }}"
+      - "Project name: {{ project_path_local }}"
+      - "Virtual environment dir: {{ venv_path_local }}"
     - apt:
         update_cache: yes
         upgrade: safe
@@ -40,7 +43,7 @@
         state: absent
     - command: ssh-keygen -q -t rsa -N '' -f ~/.ssh/id_rsa
     - lxc_container:
-        name: "{{ deploy_cont_name }}"
+        name: "{{ container_name }}"
         template: ubuntu
         template_options:
             --user {{ user }}
@@ -56,11 +59,18 @@
       become: yes
       become_method: sudo
     - pause: seconds=5
-    - command: lxc-info -n {{ deploy_cont_name }} -iH
+    - command: lxc-info -n {{ container_name }} -iH
       register: container_ip
       become: yes
       become_method: sudo
     - debug: msg="Deployment container IP:port {{ container_ip.stdout }}:{{ container_port }}"
+    - lineinfile:
+        dest: /home/deployer/yggdrasil/playbooks/hosts
+        regexp: '^(installer .+?)=\d+\.\d+\.\d+\.\d+$'
+        line: '\1={{ container_ip.stdout }}'
+        backrefs: yes
+      become: yes
+      become_method: sudo
     - command:
         iptables
         -t nat
