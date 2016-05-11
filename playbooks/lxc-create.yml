@@ -47,17 +47,16 @@
         line: "{{ user }} veth lxcbr0 2"
       become: yes
       become_method: sudo
-    - file:
-        path: ~/.ssh/id_rsa
-        state: absent
-    - command: ssh-keygen -q -t rsa -N '' -f ~/.ssh/id_rsa
+    - user:
+        name: "{{ ansible_env.USER }}"
+        generate_ssh_key: yes
     - lxc_container:
         name: "{{ container_name }}"
         template: ubuntu
         template_options:
             --user {{ user }}
             --password {{ password }}
-            --auth-key /home/{{ user }}/.ssh/id_rsa.pub
+            --auth-key {{ ansible_env.HOME }}/.ssh/id_rsa.pub
             --release trusty
             --arch amd64
             --packages python,aptitude
