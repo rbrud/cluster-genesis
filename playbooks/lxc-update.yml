@@ -6,7 +6,6 @@
       project_path_local: "{{ hostvars['localhost']['ansible_env']['PWD'] | regex_replace('^(.+/yggdrasil).+?$', '\\1')}}"
       scripts_path_local: "{{ project_path_local }}/scripts"
       genesis_inventory_local: "{{ project_path_local }}/genesis_inventory.yml"
-  become: yes
   tasks:
     - apt:
         update_cache: yes
