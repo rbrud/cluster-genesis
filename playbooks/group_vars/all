@@ -1,5 +1,6 @@
 ---
 project_name: "yggdrasil"
 user: deployer
-password: passw0rd
 project_path: "/home/{{ user }}/{{ project_name }}"
+venv_path: "{{ project_path }}/deployenv"
+python_executable: "{{ venv_path }}/bin/python"
