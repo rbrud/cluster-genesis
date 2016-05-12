@@ -55,7 +55,6 @@
         template: ubuntu
         template_options:
             --user {{ user }}
-            --password {{ password }}
             --auth-key {{ ansible_env.HOME }}/.ssh/id_rsa.pub
             --release trusty
             --arch amd64
