@@ -27,14 +27,13 @@
       - setuptools
       - wheel
       - virtualenv
-      - pyaml
       become: yes
       become_method: sudo
     - file:
         path: "{{ project_path }}"
         state: directory
     - command: virtualenv --no-wheel --system-site-packages {{ venv_path }}
-    - command: /bin/bash -c "source {{ venv_path }}/bin/activate && pip install --ignore-installed ansible && deactivate"
+    - command: /bin/bash -c "source {{ venv_path }}/bin/activate && pip install --ignore-installed pyaml && deactivate"
     - copy:
         src: "{{ genesis_inventory_local }}"
         dest: "{{ project_path }}"

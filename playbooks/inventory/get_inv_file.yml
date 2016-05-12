@@ -1,7 +1,7 @@
 ---
 - hosts: deployer
   tasks:
-    - command: "python {{ scripts_path }}/inventory.py {{ genesis_inventory }}"
+    - command: "{{ python_executable }} {{ scripts_path }}/inventory.py {{ genesis_inventory }}"
       register: output
     - debug:
         msg: "{{ output.stdout }}"
