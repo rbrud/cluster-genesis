@@ -80,6 +80,11 @@
       become: yes
       become_method: sudo
     - command:
+        sudo iptables -t nat -F
+      become: yes
+      become_method: sudo
+    # Implement this with iptables module with Ansible 2.1
+    - command:
         iptables
         -t nat
         -A PREROUTING
@@ -89,6 +94,7 @@
         --to {{ container_ip.stdout }}:22
       become: yes
       become_method: sudo
+    # Implement this with iptables module with Ansible 2.1
     - command:
         iptables
         -t nat
