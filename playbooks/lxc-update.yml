@@ -18,6 +18,7 @@
       - python-dev
       - libffi-dev
       - libssl-dev
+      - python-pysnmp4
       become: yes
       become_method: sudo
     - pip: name="{{ item }}"
@@ -32,7 +33,7 @@
         path: "{{ project_path }}"
         state: directory
     - command: virtualenv --no-wheel --system-site-packages {{ venv_path }}
-    - command: /bin/bash -c "source {{ venv_path }}/bin/activate && pip install --ignore-installed pyaml && deactivate"
+    - command: /bin/bash -c "source {{ venv_path }}/bin/activate && pip install --ignore-installed pyaml orderedattrdict pysnmp && deactivate"
     - copy:
         src: "{{ genesis_inventory_local }}"
         dest: "{{ project_path }}"
