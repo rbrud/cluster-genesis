@@ -1,0 +1,4 @@
+- hosts: deployer
+  tasks:
+    - command: "{{ python_executable }} {{ scripts_path }}/ipmi/get_ipmi_data.py {{ genesis_inventory }}"
+      register: output

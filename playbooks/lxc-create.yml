@@ -79,7 +79,7 @@
       become: yes
       become_method: sudo
     - command:
-        sudo iptables -t nat -F
+        iptables -t nat -F
       become: yes
       become_method: sudo
     # Implement this with iptables module with Ansible 2.1
