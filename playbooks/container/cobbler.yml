@@ -2,7 +2,7 @@
 - hosts: localhost
   gather_facts: yes
 
-- hosts: deployer
+- hosts: installer
   tasks:
 
     - name: "Install vim - used for debug."
@@ -144,7 +144,7 @@
       replace:
           dest: /usr/share/cobbler/web/settings.py
           regexp: "^SECRET_KEY = .*"
-          replace: "SECRET_KEY = {{ SECRET_KEY.stdout }}"
+          replace: "SECRET_KEY = '{{ SECRET_KEY.stdout }}'"
       become: yes
       become_method: sudo
 
@@ -205,7 +205,7 @@
           regexp: "{{ item.regexp }}"
           replace: "{{ item.line }}"
       with_items:
-      - { regexp: '127.0.0.1', line: "{{ hostvars['localhost']['ansible_default_ipv4.address'] }}" }
+      - { regexp: '127.0.0.1', line: "{{ ansible_default_ipv4.address }}" }
       - { regexp: 'manage_dhcp: 0', line: 'manage_dhcp: 1' }
       - { regexp: 'manage_dns: 0', line: 'manage_dns: 1' }
       - { regexp: 'pxe_just_once: 0', line: 'pxe_just_once: 1' }
