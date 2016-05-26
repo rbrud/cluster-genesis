@@ -59,6 +59,9 @@
             --release trusty
             --arch amd64
             --packages python,aptitude
+        container_config:
+            - "lxc.aa_profile=unconfined"
+            - "lxc.cgroup.devices.allow=a *:* rmw"
         container_command: |
             cp -p /etc/sudoers /etc/sudoers.orig
             echo -e "{{ user }}\tALL=NOPASSWD: ALL" >> /etc/sudoers
