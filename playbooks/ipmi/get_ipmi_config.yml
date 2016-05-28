@@ -1,4 +1,5 @@
 - hosts: deployer
+  vars:
+    log_level: ""
   tasks:
-    - command: "{{ python_executable }} {{ scripts_path }}/ipmi/get_ipmi_data.py {{ genesis_inventory }}"
-      register: output
+    - command: "{{ python_executable }} {{ scripts_path }}/python/ipmi/get_ipmi_data.py {{ genesis_inventory }} {{ log_level }}"
