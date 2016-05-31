@@ -1,15 +1,7 @@
 ---
 - hosts: deployer
   tasks:
-    - command: "{{ python_executable }} {{ scripts_path }}/inventory.py {{ genesis_inventory }}"
-      register: output
-    - debug:
-        msg: "{{ output.stdout }}"
     - fetch:
-        src: "{{ output.stdout | to_nice_yaml( width=80 ) }}"
-        dest: "{{ file }}.yaml"
+        src: "{{ genesis_inventory }}"
+        dest: "{{ dest }}"
         flat: yes
-#    - fetch:
-#        src: "{{ output.stdout }}"
-#        dest: "{{ file }}.json"
-#        flat: yes
