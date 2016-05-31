@@ -5,17 +5,10 @@ import sys
 import os.path
 from pyghmi.ipmi import command as ipmi_command
 
-from inventory import Inventory
-from logger import Logger
+from lib.inventory import Inventory
+from lib.logger import Logger
 
 FILE_PATH = os.path.dirname(os.path.abspath(__file__))
-LIB_PATH = os.path.abspath(
-    FILE_PATH +
-    os.path.sep +
-    '..' +
-    os.path.sep +
-    'lib')
-sys.path.append(LIB_PATH)
 
 
 class Ipmi(object):
@@ -97,7 +90,7 @@ class Ipmi(object):
                 str(ipmi_value[ipmi_field]))
             inv[inv_field] = str(ipmi_value[ipmi_field])
         else:
-            self.log.warning(
+            self.log.info(
                 inv[self.INV_IPV4_ADDR] +
                 ": '" +
                 ipmi_key + '[' + ipmi_field + ']' +
