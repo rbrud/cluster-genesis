@@ -1,5 +1,6 @@
 ---
 - hosts: deployer
+  vars:
+      log_level: ""
   tasks:
-    - command: "{{ python_executable }} {{ scripts_path }}/snmp/get_mgmt_switch_config.py {{ genesis_inventory }}"
-      register: output
+    - command: "{{ python_executable }} {{ scripts_path }}/python/get_mgmt_switch_config.py {{ genesis_inventory }} {{ log_level }}"
