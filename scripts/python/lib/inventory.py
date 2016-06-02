@@ -14,7 +14,6 @@ class Inventory():
     INV_PASSWORD_IPMI = 'password-ipmi'
     INV_ARCHITECTURE = 'architecture'
 
-
     def __init__(self):
         pass
 

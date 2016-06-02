@@ -54,10 +54,12 @@ class Ipmi(object):
                     bmc=node_inv[inv_key][i][inv.INV_IPV4_ADDR],
                     userid=node_inv[inv_key][i][inv.INV_USERID_IPMI],
                     password=node_inv[inv_key][i][inv.INV_PASSWORD_IPMI])
-                fw = ipmi_cmd.get_inventory_of_component(self.IPMI_SYSTEM_FIRMWARE)
+                fw = ipmi_cmd.get_inventory_of_component(
+                    self.IPMI_SYSTEM_FIRMWARE)
                 try:
                     if self.IPMI_PRODUCT_NAME in fw.keys():
-                        if fw[self.IPMI_PRODUCT_NAME] == self.IPMI_OPENPOWER_FW:
+                        if (fw[self.IPMI_PRODUCT_NAME] ==
+                                self.IPMI_OPENPOWER_FW):
                             self.get_ipmi(
                                 self.IPMI_SYSTEM_FIRMWARE,
                                 self.IPMI_PRODUCT_NAME,
@@ -99,7 +101,10 @@ class Ipmi(object):
 
         inv.dump(inventory, self.log)
 
-    def get_ipmi(self, ipmi_key, ipmi_field, ipmi_value, inv, inv_field, inv_value=None):
+    def get_ipmi(
+        self,
+        ipmi_key, ipmi_field, ipmi_value,
+            inv, inv_field, inv_value=None):
         if ipmi_field in ipmi_value:
             self.log.info(
                 inv[self.INV_IPV4_ADDR] +
