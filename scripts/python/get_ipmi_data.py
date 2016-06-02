@@ -32,13 +32,18 @@ class Ipmi(object):
 
         SNMP_PORT = 161
 
-        IPMI_SYSTEM = 'System'
-        IPMI_NODE1 = 'NODE 1'
-        self.IPMI_CHASSIS_PART_NUMBER = 'Chassis part number'
-        self.IPMI_CHASSIS_SERIAL_NUMBER = 'Chassis serial number'
-        self.IPMI_MODEL = 'Model'
-        self.IPMI_SERIAL_NUMBER = 'Serial Number'
+        IPMI_SYSTEM = b'System'
+        IPMI_NODE1 = b'NODE 1'
+        self.IPMI_CHASSIS_PART_NUMBER = b'Chassis part number'
+        self.IPMI_CHASSIS_SERIAL_NUMBER = b'Chassis serial number'
+        self.IPMI_MODEL = b'Model'
+        self.IPMI_SERIAL_NUMBER = b'Serial Number'
+        self.IPMI_SYSTEM_FIRMWARE = b'System Firmware'
+        self.IPMI_PRODUCT_NAME = b'Product name'
+        self.IPMI_OPENPOWER_FW = b'OpenPOWER Firmware'
         self.INV_IPV4_ADDR = inv.INV_IPV4_ADDR
+        self.PPC64 = b'ppc64'
+        self.X86_64 = b'x86_64'
 
         inventory = inv.load(INV_FILE, self.log)
 
@@ -49,46 +54,63 @@ class Ipmi(object):
                     bmc=node_inv[inv_key][i][inv.INV_IPV4_ADDR],
                     userid=node_inv[inv_key][i][inv.INV_USERID_IPMI],
                     password=node_inv[inv_key][i][inv.INV_PASSWORD_IPMI])
+                fw = ipmi_cmd.get_inventory_of_component(self.IPMI_SYSTEM_FIRMWARE)
+                try:
+                    if self.IPMI_PRODUCT_NAME in fw.keys():
+                        if fw[self.IPMI_PRODUCT_NAME] == self.IPMI_OPENPOWER_FW:
+                            self.get_ipmi(
+                                self.IPMI_SYSTEM_FIRMWARE,
+                                self.IPMI_PRODUCT_NAME,
+                                fw,
+                                node_inv[inv_key][i],
+                                inv.INV_ARCHITECTURE,
+                                self.PPC64)
+                except AttributeError:
+                    node_inv[inv_key][i][inv.INV_ARCHITECTURE] = self.X86_64
                 for ipmi_key, ipmi_value in ipmi_cmd.get_inventory():
+                    self.log.debug('%s: %s' % (ipmi_key, ipmi_value))
                     if ipmi_key == IPMI_SYSTEM or ipmi_key == IPMI_NODE1:
                         self.get_ipmi(
-                            node_inv[inv_key][i],
-                            inv.INV_CHASSIS_PART_NUMBER,
                             ipmi_key,
+                            self.IPMI_CHASSIS_PART_NUMBER,
                             ipmi_value,
-                            self.IPMI_CHASSIS_PART_NUMBER)
+                            node_inv[inv_key][i],
+                            inv.INV_CHASSIS_PART_NUMBER)
                         self.get_ipmi(
-                            node_inv[inv_key][i],
-                            inv.INV_CHASSIS_SERIAL_NUMBER,
                             ipmi_key,
+                            self.IPMI_CHASSIS_SERIAL_NUMBER,
                             ipmi_value,
-                            self.IPMI_CHASSIS_SERIAL_NUMBER)
+                            node_inv[inv_key][i],
+                            inv.INV_CHASSIS_SERIAL_NUMBER)
                         self.get_ipmi(
-                            node_inv[inv_key][i],
-                            inv.INV_MODEL,
                             ipmi_key,
+                            self.IPMI_MODEL,
                             ipmi_value,
-                            self.IPMI_MODEL)
+                            node_inv[inv_key][i],
+                            inv.INV_MODEL)
                         self.get_ipmi(
-                            node_inv[inv_key][i],
-                            inv.INV_SERIAL_NUMBER,
                             ipmi_key,
+                            self.IPMI_SERIAL_NUMBER,
                             ipmi_value,
-                            self.IPMI_SERIAL_NUMBER)
+                            node_inv[inv_key][i],
+                            inv.INV_SERIAL_NUMBER)
                         if ipmi_key == IPMI_NODE1:
                             break
 
         inv.dump(inventory, self.log)
 
-    def get_ipmi(self, inv, inv_field, ipmi_key, ipmi_value, ipmi_field):
+    def get_ipmi(self, ipmi_key, ipmi_field, ipmi_value, inv, inv_field, inv_value=None):
         if ipmi_field in ipmi_value:
             self.log.info(
                 inv[self.INV_IPV4_ADDR] +
                 ": '" +
                 ipmi_key + '[' + ipmi_field + ']' +
                 "' = " +
-                str(ipmi_value[ipmi_field]))
-            inv[inv_field] = str(ipmi_value[ipmi_field])
+                ipmi_value[ipmi_field])
+            if inv_value:
+                inv[inv_field] = inv_value
+            else:
+                inv[inv_field] = str(ipmi_value[ipmi_field])
         else:
             self.log.info(
                 inv[self.INV_IPV4_ADDR] +
