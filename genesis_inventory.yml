@@ -2,15 +2,19 @@ mgmt_network: 192.168.3.0/20
 ipaddr_mgmt_switch: 192.168.3.5
 nodes:
     control:
-    -   port: 2
+    -   port-ipmi: 2
+        port-pxe: 20
         userid-ipmi: ADMIN
         password-ipmi: ADMIN
-    -   port: 3
+    -   port-ipmi: 3
+        port-pxe: 21
         userid-ipmi: ADMIN
         password-ipmi: ADMIN
-    -   port: 5
+    -   port-ipmi: 5
+        port-pxe: 23
         userid-ipmi: ADMIN
         password-ipmi: ADMIN
-    -   port: 6
+    -   port-ipmi: 6
+        port-pxe: 24
         userid-ipmi: ADMIN
         password-ipmi: admin

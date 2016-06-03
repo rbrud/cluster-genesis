@@ -41,9 +41,8 @@ class Ipmi(object):
         self.IPMI_SYSTEM_FIRMWARE = b'System Firmware'
         self.IPMI_PRODUCT_NAME = b'Product name'
         self.IPMI_OPENPOWER_FW = b'OpenPOWER Firmware'
-        self.INV_IPV4_ADDR = inv.INV_IPV4_ADDR
+        self.INV_IPV4_IPMI = inv.INV_IPV4_IPMI
         self.PPC64 = b'ppc64'
-        self.X86_64 = b'x86_64'
 
         inventory = inv.load(INV_FILE, self.log)
 
@@ -51,7 +50,7 @@ class Ipmi(object):
         for inv_key in node_inv:
             for i in range(0, len(node_inv[inv_key])):
                 ipmi_cmd = ipmi_command.Command(
-                    bmc=node_inv[inv_key][i][inv.INV_IPV4_ADDR],
+                    bmc=node_inv[inv_key][i][inv.INV_IPV4_IPMI],
                     userid=node_inv[inv_key][i][inv.INV_USERID_IPMI],
                     password=node_inv[inv_key][i][inv.INV_PASSWORD_IPMI])
                 fw = ipmi_cmd.get_inventory_of_component(
@@ -68,7 +67,7 @@ class Ipmi(object):
                                 inv.INV_ARCHITECTURE,
                                 self.PPC64)
                 except AttributeError:
-                    node_inv[inv_key][i][inv.INV_ARCHITECTURE] = self.X86_64
+                    pass
                 for ipmi_key, ipmi_value in ipmi_cmd.get_inventory():
                     self.log.debug('%s: %s' % (ipmi_key, ipmi_value))
                     if ipmi_key == IPMI_SYSTEM or ipmi_key == IPMI_NODE1:
@@ -107,7 +106,7 @@ class Ipmi(object):
             inv, inv_field, inv_value=None):
         if ipmi_field in ipmi_value:
             self.log.info(
-                inv[self.INV_IPV4_ADDR] +
+                inv[self.INV_IPV4_IPMI] +
                 ": '" +
                 ipmi_key + '[' + ipmi_field + ']' +
                 "' = " +
@@ -118,7 +117,7 @@ class Ipmi(object):
                 inv[inv_field] = str(ipmi_value[ipmi_field])
         else:
             self.log.info(
-                inv[self.INV_IPV4_ADDR] +
+                inv[self.INV_IPV4_IPMI] +
                 ": '" +
                 ipmi_key + '[' + ipmi_field + ']' +
                 "' not found")

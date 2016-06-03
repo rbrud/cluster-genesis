@@ -41,8 +41,8 @@ for (
             port = int(m.group(3))
             for key, value in inventory['nodes'].iteritems():
                 for i in range(0, len(inventory['nodes'][key])):
-                    if inventory['nodes'][key][i]['port'] == port:
-                        inventory['nodes'][key][i]['mac'] = mac
+                    if inventory['nodes'][key][i]['port-ipmi'] == port:
+                        inventory['nodes'][key][i]['mac-ipmi'] = mac
                         continue
 
 yaml.dump(
