@@ -8,7 +8,7 @@ from pyghmi.ipmi import command as ipmi_command
 from lib.inventory import Inventory
 from lib.logger import Logger
 
-NODES = 'nodes'
+NODES = b'nodes'
 HOSTNAME = b'hostname'
 
 FILE_PATH = os.path.dirname(os.path.abspath(__file__))
