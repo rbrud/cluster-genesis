@@ -17,20 +17,20 @@
 
     - name: "Add apt key for opensuse.org cobbler repository."
       apt_key:
-          url: http://download.opensuse.org/repositories/home:/libertas-ict:/cobbler26/xUbuntu_14.04/Release.key
+        url: http://download.opensuse.org/repositories/home:/libertas-ict:/cobbler26/xUbuntu_14.04/Release.key
       become: yes
       become_method: sudo
 
     - name: "Add opensuse.org cobbler repository."
       apt_repository:
-          repo: deb http://download.opensuse.org/repositories/home:/libertas-ict:/cobbler26/xUbuntu_14.04 /
+        repo: deb http://download.opensuse.org/repositories/home:/libertas-ict:/cobbler26/xUbuntu_14.04 /
       become: yes
       become_method: sudo
 
     - name: "Update apt cache & upgrade packages (safe)."
       apt:
-          update_cache: yes
-          upgrade: safe
+        update_cache: yes
+        upgrade: safe
       become: yes
       become_method: sudo
 
@@ -46,25 +46,25 @@
 
     - name: "Create tftp root directory."
       file:
-          path: /tftpboot
-          state: directory
-          mode: 0755
+        path: /tftpboot
+        state: directory
+        mode: 0755
       become: yes
       become_method: sudo
 
     - name: "Save original /etc/cobbler/dnsmasq.template file."
       copy:
-          remote_src: True
-          src: /etc/cobbler/dnsmasq.template
-          dest: /etc/cobbler/dnsmasq.template.orig
+        remote_src: True
+        src: /etc/cobbler/dnsmasq.template
+        dest: /etc/cobbler/dnsmasq.template.orig
       become: yes
       become_method: sudo
 
     - name: "Set IP address range to use for unrecognized DHCP clients."
       replace:
-          dest: /etc/cobbler/dnsmasq.template
-          regexp: "{{ item.regexp }}"
-          replace: "{{ item.replace }}"
+        dest: /etc/cobbler/dnsmasq.template
+        regexp: "{{ item.regexp }}"
+        replace: "{{ item.replace }}"
       become: yes
       become_method: sudo
       with_items:
@@ -74,8 +74,8 @@
 
     - name: "Configure dnsmasq to enable TFTP server."
       lineinfile:
-          dest: /etc/cobbler/dnsmasq.template
-          line: "{{ item }}"
+        dest: /etc/cobbler/dnsmasq.template
+        line: "{{ item }}"
       with_items:
       - enable-tftp
       - tftp-root=/tftpboot
@@ -85,17 +85,17 @@
 
     - name: "Save original /etc/cobbler/modules.conf file."
       copy:
-          remote_src: True
-          src: /etc/cobbler/modules.conf
-          dest: /etc/cobbler/modules.conf.orig
+        remote_src: True
+        src: /etc/cobbler/modules.conf
+        dest: /etc/cobbler/modules.conf.orig
       become: yes
       become_method: sudo
 
     - name: "Configure Cobbler to use dnsmasq for DHCP and DNS services."
       replace:
-          dest: /etc/cobbler/modules.conf
-          regexp: "{{ item.regexp }}"
-          replace: "{{ item.line }}"
+        dest: /etc/cobbler/modules.conf
+        regexp: "{{ item.regexp }}"
+        replace: "{{ item.line }}"
       with_items:
       - { regexp: 'module = manage_bind', line: 'module = manage_dnsmasq' }
       - { regexp: 'module = manage_isc', line: 'module = manage_dnsmasq' }
@@ -103,16 +103,16 @@
       become_method: sudo
 
     - copy:
-          remote_src: True
-          src: /etc/apache2/conf.d/cobbler.conf
-          dest: /etc/apache2/conf-available/cobbler.conf
+        remote_src: True
+        src: /etc/apache2/conf.d/cobbler.conf
+        dest: /etc/apache2/conf-available/cobbler.conf
       become: yes
       become_method: sudo
 
     - copy:
-          remote_src: True
-          src: /etc/apache2/conf.d/cobbler_web.conf
-          dest: /etc/apache2/conf-available/cobbler_web.conf
+        remote_src: True
+        src: /etc/apache2/conf.d/cobbler_web.conf
+        dest: /etc/apache2/conf-available/cobbler_web.conf
       become: yes
       become_method: sudo
 
@@ -130,9 +130,9 @@
 
     - name: "Save original /usr/share/cobbler/web/settings.py file."
       copy:
-          remote_src: True
-          src: /usr/share/cobbler/web/settings.py
-          dest: /usr/share/cobbler/web/settings.py.orig
+        remote_src: True
+        src: /usr/share/cobbler/web/settings.py
+        dest: /usr/share/cobbler/web/settings.py.orig
       become: yes
       become_method: sudo
 
@@ -142,33 +142,33 @@
 
     - name: "Set secret key in /usr/share/cobbler/web/settings.py"
       replace:
-          dest: /usr/share/cobbler/web/settings.py
-          regexp: "^SECRET_KEY = .*"
-          replace: "SECRET_KEY = '{{ SECRET_KEY.stdout }}'"
+        dest: /usr/share/cobbler/web/settings.py
+        regexp: "^SECRET_KEY = .*"
+        replace: "SECRET_KEY = '{{ SECRET_KEY.stdout }}'"
       become: yes
       become_method: sudo
 
     - name: "Save original /etc/apache2/conf-enabled/cobbler.conf file."
       copy:
-          remote_src: True
-          src: /etc/apache2/conf-enabled/cobbler.conf
-          dest: /etc/apache2/conf-enabled/cobbler.conf.orig
+        remote_src: True
+        src: /etc/apache2/conf-enabled/cobbler.conf
+        dest: /etc/apache2/conf-enabled/cobbler.conf.orig
       become: yes
       become_method: sudo
 
     - name: "Save original /etc/apache2/conf-enabled/cobbler_web.conf file."
       copy:
-          remote_src: True
-          src: /etc/apache2/conf-enabled/cobbler_web.conf
-          dest: /etc/apache2/conf-enabled/cobbler_web.conf.orig
+        remote_src: True
+        src: /etc/apache2/conf-enabled/cobbler_web.conf
+        dest: /etc/apache2/conf-enabled/cobbler_web.conf.orig
       become: yes
       become_method: sudo
 
     - name: "Apache2 config"
       lineinfile:
-          dest: "{{ item }}"
-          regexp: "Order allow,deny"
-          state: absent
+        dest: "{{ item }}"
+        regexp: "Order allow,deny"
+        state: absent
       with_items:
       - /etc/apache2/conf-enabled/cobbler.conf
       - /etc/apache2/conf-enabled/cobbler_web.conf
@@ -177,9 +177,9 @@
 
     - name: "Apache2 config"
       replace:
-          dest: "{{ item }}"
-          regexp: "Allow from all"
-          replace: "Require all granted"
+        dest: "{{ item }}"
+        regexp: "Allow from all"
+        replace: "Require all granted"
       with_items:
       - /etc/apache2/conf-enabled/cobbler.conf
       - /etc/apache2/conf-enabled/cobbler_web.conf
@@ -187,23 +187,23 @@
       become_method: sudo
 
     - file:
-          path: /var/lib/cobbler/webui_sessions
-          owner: www-data
+        path: /var/lib/cobbler/webui_sessions
+        owner: www-data
       become: yes
       become_method: sudo
 
     - name: "Save original /etc/cobbler/settings file."
       copy:
-          remote_src: True
-          src: /etc/cobbler/settings
-          dest: /etc/cobbler/settings.orig
+        remote_src: True
+        src: /etc/cobbler/settings
+        dest: /etc/cobbler/settings.orig
       become: yes
       become_method: sudo
 
     - replace:
-          dest: /etc/cobbler/settings
-          regexp: "{{ item.regexp }}"
-          replace: "{{ item.line }}"
+        dest: /etc/cobbler/settings
+        regexp: "{{ item.regexp }}"
+        replace: "{{ item.line }}"
       with_items:
       - { regexp: '127.0.0.1', line: "{{ ansible_default_ipv4.address }}" }
       - { regexp: 'manage_dhcp: 0', line: 'manage_dhcp: 1' }
@@ -214,9 +214,9 @@
 
     - name: "Save original /var/lib/cobbler/snippets/kickstart_done file."
       copy:
-          remote_src: True
-          src: /var/lib/cobbler/snippets/kickstart_done
-          dest: /var/lib/cobbler/snippets/kickstart_done.orig
+        remote_src: True
+        src: /var/lib/cobbler/snippets/kickstart_done
+        dest: /var/lib/cobbler/snippets/kickstart_done.orig
       become: yes
       become_method: sudo
     #### had to modify the snippet template
@@ -227,15 +227,15 @@
 
     - name: "Restart cobblerd service."
       service:
-          name: cobblerd
-          state: restarted
+        name: cobblerd
+        state: restarted
       become: yes
       become_method: sudo
 
     - name: "Restart apache2 service."
       service:
-          name: apache2
-          state: restarted
+        name: apache2
+        state: restarted
       become: yes
       become_method: sudo
 
@@ -256,39 +256,58 @@
 
     - name: "Restart cobblerd service (again)."
       service:
-          name: cobblerd
-          state: restarted
+        name: cobblerd
+        state: restarted
       become: yes
       become_method: sudo
 
     - name: "Restart apache2 service (again)."
       service:
-          name: apache2
-          state: restarted
+        name: apache2
+        state: restarted
       become: yes
       become_method: sudo
 
     - name: "Restart dnsmasq service."
       service:
-          name: dnsmasq
-          state: restarted
+        name: dnsmasq
+        state: restarted
       become: yes
       become_method: sudo
 
     # Does this make sense in a container context?
     - name: "Set cobblerd service to start on boot."
       service:
-          name: cobblerd
-          enabled: yes
+        name: cobblerd
+        enabled: yes
       become: yes
       become_method: sudo
 
     #### Copy os *.iso to local dir (e.g.: /home/ubuntu/install_isos/ubuntu/ubuntu-14.04.4-server-amd64.iso)
     #mkdir -p ~/ygg/image; scp ~/ygg/image
     #scp sm0:/home/ubuntu/install_isos/ubuntu/ubuntu-14.04.4-server-amd64.iso .
+    - name: "Copy OS installer images to container."
+      copy:
+        force: no
+        src: ~/os_images
+        dest: "{{ project_path }}"
 
     #### Mount iso and import (need to be root)
     #mount -t iso9660 -o loop,ro ubuntu-14.04.4-server-amd64.iso /mnt
+#    - name: "Mount OS installer image."
+#      command: mount -t iso9660 -o loop,ro ~/installation_images/ubuntu-14.04.4-server-amd64.iso /mnt
+#      become: yes
+#      become_method: sudo
+    - name: "Mount OS installer image."
+      mount:
+        name: /mnt
+        src: "{{ project_path }}/os_images/ubuntu-14.04.4-server-amd64.iso"
+        fstype: iso9660
+        opts: loop,ro
+        state: present
+      become: yes
+      become_method: sudo
+
     #cobbler import --name=ubuntu-14.04.4-server-amd64 --arch=x86_64 --path=/mnt
 
     #### Create System profiles?

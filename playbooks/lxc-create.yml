@@ -81,6 +81,13 @@
         backrefs: yes
       become: yes
       become_method: sudo
+    - lineinfile:
+        dest: /home/deployer/yggdrasil/playbooks/hosts
+        regexp: '^(deployer .+?)=\d+\.\d+\.\d+\.\d+$'
+        line: '\1={{ container_ip.stdout }}'
+        backrefs: yes
+      become: yes
+      become_method: sudo
     - command:
         iptables -t nat -F
       become: yes
