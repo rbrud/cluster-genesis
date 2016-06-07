@@ -2,6 +2,7 @@
 from __future__ import nested_scopes, generators, division, absolute_import, \
     with_statement, print_function, unicode_literals
 import sys
+import os.path
 import yaml
 from orderedattrdict.yamlutils import AttrDictYAMLLoader
 import xmlrpclib
@@ -37,9 +38,10 @@ class Ipmi(object):
         DOMAIN = 'aus.stglabs.ibm.com'
         
         YAML_CHASSIS_SERIAL_NUMBER = 'chassis-serial-number'
-        YAML_IPV4_IPMI             = 'ipv4_ipmi'
+        YAML_IPV4_IPMI             = 'ipv4-ipmi'
         YAML_USERID_IPMI           = 'userid-ipmi'
         YAML_PASSWORD_IPMI         = 'password-ipmi'
+        YAML_HOSTNAME              = 'hostname'
         
         inventory = yaml.load(open(sys.argv[1]), Loader=AttrDictYAMLLoader)
         
@@ -50,7 +52,7 @@ class Ipmi(object):
         
         for inv_key in node_inv:
             for i in range(0, len(node_inv[inv_key])):
-                NAME           = inv_key + "{0:0=2d}".format(i+1)
+                NAME           = node_inv[inv_key][i][YAML_HOSTNAME]
                 HOSTNAME       = NAME + "." + DOMAIN
                 SERIAL_NUMBER  = node_inv[inv_key][i][YAML_CHASSIS_SERIAL_NUMBER]
                 IPV4_ADDR_IPMI = node_inv[inv_key][i][YAML_IPV4_IPMI]
@@ -67,6 +69,10 @@ class Ipmi(object):
                         "dnsname-eth0"      : HOSTNAME,
                 }, token)
                 cobbler_server.modify_system(new_system_create,"profile",X86_PROFILE,token)
+                cobbler_server.modify_system(new_system_create,"power_address",IPV4_ADDR_IPMI,token)
+                cobbler_server.modify_system(new_system_create,"power_user",USERID_IPMI,token)
+                cobbler_server.modify_system(new_system_create,"power_pass",PASSWORD_IPMI,token)
+                cobbler_server.modify_system(new_system_create,"power_type","ipmilan",token)
         
                 cobbler_server.save_system(new_system_create, token)
         

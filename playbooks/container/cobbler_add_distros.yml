@@ -1,6 +1,6 @@
 - hosts: deployer
   vars:
-    log_level: "INFO"
+    log_level: ""
   tasks:
 
 #    - name: "Copy OS installer images to container."
