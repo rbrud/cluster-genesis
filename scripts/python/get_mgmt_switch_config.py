@@ -8,6 +8,7 @@ from pysnmp.hlapi import *
 SNMP_PORT = 161
 
 inventory = yaml.load(open(sys.argv[1]), Loader=AttrDictYAMLLoader)
+SWITCHES_MGMT_IPV4_ADDR = inventory['switches']['mgmt']['ipv4-addr']
 
 for (
     errorIndication,
@@ -16,7 +17,7 @@ for (
     varBinds) in nextCmd(
         SnmpEngine(),
         CommunityData('public'),
-        UdpTransportTarget((inventory['ipaddr_mgmt_switch'], SNMP_PORT)),
+        UdpTransportTarget((SWITCHES_MGMT_IPV4_ADDR, SNMP_PORT)),
         ContextData(),
         ObjectType(ObjectIdentity('BRIDGE-MIB', 'dot1dTpFdbPort')),
         lexicographicMode=False):
