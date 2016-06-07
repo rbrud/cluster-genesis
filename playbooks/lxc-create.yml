@@ -1,14 +1,12 @@
 ---
 - hosts: localhost
   vars:
-      project_path_local: "{{ ansible_env.PWD }} | regex_replace('^(.+/yggdrasil).+?$', '\\1')}}"
-      venv_path_local: "{{ project_path_local }}/deployenv"
+      project_path_local: "{{ ansible_env['PWD'] | regex_replace('^(.+/yggdrasil).+?$', '\\1')}}"
   tasks:
     - debug:
         msg: "{{ item }}"
       with_items:
       - "Project name: {{ project_path_local }}"
-      - "Virtual environment dir: {{ venv_path_local }}"
     - apt:
         name: aptitude
         update_cache: yes

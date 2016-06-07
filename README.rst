@@ -27,4 +27,5 @@ Container installation
 =====================
 ::
 
-$ ansible-playbook -i hosts install.yml
+$ ansible-playbook -i hosts lxc-create.yml
+$ ansible-playbook -i hosts lxc-update.yml

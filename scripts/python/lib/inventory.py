@@ -9,9 +9,10 @@ class Inventory():
     INV_CHASSIS_SERIAL_NUMBER = 'chassis-serial-number'
     INV_MODEL = 'model'
     INV_SERIAL_NUMBER = 'serial-number'
-    INV_IPV4_ADDR = 'ipv4_addr'
+    INV_IPV4_IPMI = 'ipv4-ipmi'
     INV_USERID_IPMI = 'userid-ipmi'
     INV_PASSWORD_IPMI = 'password-ipmi'
+    INV_ARCHITECTURE = 'architecture'
 
     def __init__(self):
         pass
