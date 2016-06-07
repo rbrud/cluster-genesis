@@ -1,5 +1,10 @@
-mgmt_network: 192.168.3.0/20
-ipaddr_mgmt_switch: 192.168.3.5
+switches:
+    mgmt:
+        ipv4-addr: 192.168.3.5
+    leaf:
+        ipv4-addr: 9.3.89.142
+        userid: admin
+        password: yggdrasil
 nodes:
     control:
     -   port-ipmi: 2
