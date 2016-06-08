@@ -36,7 +36,7 @@
     - command: >
         /bin/bash -c "
         source {{ venv_path }}/bin/activate &&
-        pip install --ignore-installed pyaml orderedattrdict pysnmp pyghmi &&
+        pip install --ignore-installed pyaml orderedattrdict pysnmp pyghmi paramiko &&
         deactivate"
     - copy:
         src: "{{ genesis_inventory_local }}"

@@ -15,6 +15,8 @@ class LeafSwitch(object):
     def __init__(self, argv):
         SWITCHES = b'switches'
         LEAF = b'leaf'
+        PORT = b'port'
+        VLAN = b'vlan'
         IPV4_ADDR = b'ipv4-addr'
         USERID = b'userid'
         PASSWORD = b'password'
@@ -24,6 +26,13 @@ class LeafSwitch(object):
         self.DEBUG = b'DEBUG'
         self.INFO = b'INFO'
         self.SSH_LOG = 'leaf-switch-ssh.log'
+
+        self.ENABLE_REMOTE_CONFIG = 'cli enable \"configure terminal\" %s'
+        SET_VLAN = '\"vlan %d\"'
+        INTERFACE_ETHERNET = '\"interface ethernet 1/%d\"'
+        SWITCHPORT_MODE_HYBRID = '\"switchport mode hybrid\"'
+        SWITCHPORT_HYBRID_ALLOWED_VLAN = \
+            '\"switchport hybrid allowed-vlan add %d\"'
 
         inv = Inventory()
         self.log = Logger(__file__)
@@ -51,21 +60,37 @@ class LeafSwitch(object):
         self.SWITCH_USERID = switch_inv[LEAF][USERID]
         self.SWITCH_PASSWORD = switch_inv[LEAF][PASSWORD]
 
+        vlans = []
         node_inv = inventory[NODES]
         for inv_key in node_inv:
             node_index = 0
             for i in range(0, len(node_inv[inv_key])):
-                if HOSTNAME in node_inv[inv_key][i]:
-                    if node_inv[inv_key][i][HOSTNAME] is None:
-                        node_index += 1
-                        node_inv[inv_key][i][HOSTNAME] = \
-                            inv_key + str(node_index)
-                else:
-                    node_index += 1
-                    node_inv[inv_key][i][HOSTNAME] = inv_key + str(node_index)
-
-        cmd = 'cli enable \"show users\"'
-        self.issue_cmd(cmd)
+                if LEAF in node_inv[inv_key][i]:
+                    if (PORT in node_inv[inv_key][i][LEAF] and
+                            VLAN in node_inv[inv_key][i][LEAF]):
+                        port = node_inv[inv_key][i][LEAF][PORT]
+                        cmd = (
+                            INTERFACE_ETHERNET % (port) +
+                            ' ' +
+                            SWITCHPORT_MODE_HYBRID)
+                        self.log.info(
+                            'Enable hybrid mode for port %d' % (port))
+                        self.issue_cmd(cmd)
+                        for vlan in node_inv[inv_key][i][LEAF][VLAN]:
+                            if vlan in vlans:
+                                self.log.info('Existing vlan %d' % (vlan))
+                            else:
+                                self.log.info('Create vlan %d' % (vlan))
+                                self.issue_cmd(SET_VLAN % (vlan))
+                                vlans.append(vlan)
+                            cmd = (
+                                INTERFACE_ETHERNET % (port) +
+                                ' ' +
+                                SWITCHPORT_HYBRID_ALLOWED_VLAN % (vlan))
+                            self.log.info(
+                                'In hybrid mode add vlan %d to port %d'
+                                % (vlan, port))
+                            self.issue_cmd(cmd)
 
     def issue_cmd(self, cmd):
         if self.LOG_LEVEL == self.DEBUG or self.LOG_LEVEL == self.INFO:
@@ -78,8 +103,9 @@ class LeafSwitch(object):
             self.SWITCH_PORT,
             self.SWITCH_USERID,
             self.SWITCH_PASSWORD)
-        stdin, stdout, stderr = s.exec_command(cmd)
-        print(stdout.read())
+        stdin, stdout, stderr = s.exec_command(
+            self.ENABLE_REMOTE_CONFIG % (cmd))
+        # print(stdout.read())
         s.close()
 
 
