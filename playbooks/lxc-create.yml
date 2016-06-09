@@ -57,9 +57,7 @@
             --release trusty
             --arch amd64
             --packages python,aptitude
-        container_config:
-            - "lxc.aa_profile=unconfined"
-            - "lxc.cgroup.devices.allow=a *:* rmw"
+        config: "{{ project_path_local }}/playbooks/lxc.conf"
         container_command: |
             cp -p /etc/sudoers /etc/sudoers.orig
             echo -e "{{ user }}\tALL=NOPASSWD: ALL" >> /etc/sudoers
@@ -71,95 +69,17 @@
       register: container_ip
       become: yes
       become_method: sudo
-    - debug: msg="Deployment container IP:port {{ container_ip.stdout }}:{{ container_port }}"
+    - debug:
+        msg: "Deployment container IP:port {{ container_ip.stdout_lines | first }}:{{ container_port }}"
     - lineinfile:
         dest: /home/deployer/yggdrasil/playbooks/hosts
         regexp: '^(installer .+?)=\d+\.\d+\.\d+\.\d+$'
-        line: '\1={{ container_ip.stdout }}'
-        backrefs: yes
-      become: yes
-      become_method: sudo
-    - lineinfile:
-        dest: /home/deployer/yggdrasil/playbooks/hosts
-        regexp: '^(deployer .+?)=\d+\.\d+\.\d+\.\d+$'
-        line: '\1={{ container_ip.stdout }}'
+        line: '\1={{ container_ip.stdout_lines | first }}'
         backrefs: yes
       become: yes
       become_method: sudo
     - command:
         iptables -t nat -F
-      become: yes
-      become_method: sudo
-    # Implement this with iptables module with Ansible 2.1
-    # SSH
-    - command:
-        iptables
-        -t nat
-        -A PREROUTING
-        -p tcp
-        --dport {{ container_port }}
-        -j DNAT
-        --to {{ container_ip.stdout }}:22
-      become: yes
-      become_method: sudo
-    # Implement this with iptables module with Ansible 2.1
-    # SSH
-    - command:
-        iptables
-        -t nat
-        -A OUTPUT
-        -p tcp
-        --dport {{ container_port }}
-        -j DNAT
-        --to {{ container_ip.stdout }}:22
-      become: yes
-      become_method: sudo
-    # Implement this with iptables module with Ansible 2.1
-    # HTTP
-    - command:
-        iptables
-        -t nat
-        -A PREROUTING
-        -p tcp
-        --dport {{ container_cobbler_web_port }}
-        -j DNAT
-        --to {{ container_ip.stdout }}:80
-      become: yes
-      become_method: sudo
-    # Implement this with iptables module with Ansible 2.1
-    # DNS
-    - command:
-        iptables
-        -t nat
-        -A PREROUTING
-        -p tcp
-        --dport 53
-        -j DNAT
-        --to {{ container_ip.stdout }}:53
-      become: yes
-      become_method: sudo
-    # Implement this with iptables module with Ansible 2.1
-    # DHCP Server
-    - command:
-        iptables
-        -t nat
-        -A PREROUTING
-        -p tcp
-        --dport 67
-        -j DNAT
-        --to {{ container_ip.stdout }}:67
-      become: yes
-      become_method: sudo
-    # Implement this with iptables module with Ansible 2.1
-    # TFTP
-    - command:
-        iptables
-        -t nat
-        -A PREROUTING
-        -p udp
-        --dport 69
-        -j DNAT
-        --to {{ container_ip.stdout }}:69
       become: yes
       become_method: sudo
     # Implement this with iptables module with Ansible 2.1
