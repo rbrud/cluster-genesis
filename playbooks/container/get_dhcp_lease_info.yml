@@ -1,0 +1,9 @@
+- hosts: deployer
+  vars:
+    log_level: ""
+    config_file: "/home/deployer/yggdrasil/config.yml"
+    leases_file: "/home/deployer/yggdrasil/var/lib/misc/dnsmasq.leases"
+  tasks:
+    - command: >
+        "{{ python_executable }}" "{{ scripts_path }}/python/get_dhcp_lease_info.py" "{{ config_file }}"
+        "{{ genesis_inventory }}" "{{ leases_file }}" "{{ log_level }}"

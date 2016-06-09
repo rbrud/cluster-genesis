@@ -1,0 +1,9 @@
+- hosts: deployer
+- include: lxc-update.yml
+- include: container/set_hostname.yml
+- include: container/get_mgmt_switch_config.yml
+- include: container/get_ipmi_config.yml
+- include: container/set_leaf_switch_config.yml
+- include: container/cobbler/cobbler_install.yml
+- include: container/cobbler/cobbler_add_distros.yml
+- include: container/cobbler/cobbler_add_systems.yml
