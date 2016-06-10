@@ -70,7 +70,7 @@
       become: yes
       become_method: sudo
     - debug:
-        msg: "Deployment container IP:port {{ container_ip.stdout_lines | first }}:{{ container_port }}"
+        msg: "Deployment container IP {{ container_ip.stdout_lines | first }}"
     - lineinfile:
         dest: "{{ project_path_local }}/playbooks/hosts"
         regexp: '^(installer .+?)=\d+\.\d+\.\d+\.\d+$'

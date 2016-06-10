@@ -6,4 +6,4 @@
   tasks:
     - command: >
         "{{ python_executable }}" "{{ scripts_path }}/python/get_dhcp_lease_info.py" "{{ config_file }}"
-        "{{ genesis_inventory }}" "{{ leases_file }}" "{{ log_level }}"
+        "{{ inventory }}" "{{ leases_file }}" "{{ log_level }}"
