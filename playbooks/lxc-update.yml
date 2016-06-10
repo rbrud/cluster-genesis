@@ -44,3 +44,7 @@
     - copy:
         src: "{{ scripts_path_local }}"
         dest: "{{ project_path }}"
+    - file:
+        path: "{{ project_path }}/log.txt"
+        state: touch
+        mode: 0755

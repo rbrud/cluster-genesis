@@ -45,6 +45,12 @@
         line: "{{ user }} veth lxcbr0 2"
       become: yes
       become_method: sudo
+    - lineinfile:
+        dest: "{{ project_path_local }}/playbooks/lxc.conf"
+        regexp: 'lxc.network.ipv4 = .*'
+        line: 'lxc.network.ipv4 = {{ container_mgmt_ipv4 }}/24'
+      become: yes
+      become_method: sudo
     - user:
         name: "{{ ansible_env.USER }}"
         generate_ssh_key: yes
@@ -70,11 +76,18 @@
       become: yes
       become_method: sudo
     - debug:
-        msg: "Deployment container IP:port {{ container_ip.stdout_lines | first }}:{{ container_port }}"
+        msg: "Deployment container IP:port {{ container_ip.stdout_lines | first }}"
     - lineinfile:
         dest: /home/deployer/yggdrasil/playbooks/hosts
         regexp: '^(installer .+?)=\d+\.\d+\.\d+\.\d+$'
         line: '\1={{ container_ip.stdout_lines | first }}'
+        backrefs: yes
+      become: yes
+      become_method: sudo
+    - lineinfile:
+        dest: /home/deployer/yggdrasil/playbooks/hosts
+        regexp: '^(deployer .+?)=\d+\.\d+\.\d+\.\d+$'
+        line: '\1={{ container_mgmt_ipv4 }}'
         backrefs: yes
       become: yes
       become_method: sudo

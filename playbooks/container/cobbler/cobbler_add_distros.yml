@@ -3,21 +3,27 @@
     log_level: ""
   tasks:
 
-#    - name: "Copy OS installer images to container."
-#      copy:
-#        force: no
-#        src: ~/os_images
-#        dest: "{{ project_path }}"
+    - name: "Create directory in container to store install images."
+      file:
+        path: "{{ project_path }}/distro_images"
+        state: directory
+        mode: 0755
 
-    - shell: "ls {{ project_path }}/os_images/*.iso"
+    - name: "Copy OS installer images to container."
+      copy:
+        src: "{{ item }}"
+        dest: "{{ project_path }}/distro_images/"
+        force: no
+      with_fileglob:
+        - ~/distro_images/*.iso
+
+    - shell: "ls {{ project_path }}/distro_images/*.iso | grep -v mini"
       register: iso_files
 
-    - debug: var=project_path
-    - debug:
-        msg: "PATH = /mnt/{{ item | basename | regex_replace('^(.*).iso$', '\\1') }} NAME = {{ item | basename | regex_replace('^(.*).iso$', '\\1') }} ARCH = {{ item | basename | regex_replace('^.*-(.*).iso$', '\\1') }}"
-      with_items: "{{ iso_files.stdout_lines }}"
+    - shell: "ls {{ project_path }}/distro_images/*.mini.iso"
+      register: mini_iso_files
 
-    - name: "Mount OS installer images."
+    - name: "Mount Disto installer images."
       mount:
         name: "/mnt/{{ item | basename | regex_replace('^(.*).iso$', '\\1') }}"
         src: "{{ item }}"
@@ -26,18 +32,25 @@
         state: mounted
       with_items:
         - "{{ iso_files.stdout_lines }}"
+        - "{{ mini_iso_files.stdout_lines }}"
       become: yes
       become_method: sudo
-    
-    - command: "{{ python_executable }} {{ scripts_path }}/python/cobbler_add_distro.py {{ genesis_inventory }} /mnt/{{ item | basename | regex_replace('^(.*).iso$', '\\1') }} {{ item | basename | regex_replace('^(.*).iso$', '\\1') }}  {{ item | basename | regex_replace('^.*-(.*).iso$', '\\1') }} {{ log_level }}"
+
+    - name: "Copy distro images to web repo directory." 
+      command: "rsync -a /mnt/{{ item | basename | regex_replace('^(.*).iso$', '\\1') }}/ /var/www/html/{{ item | basename | regex_replace('^(.*).iso$', '\\1') }}/"
       with_items:
         - "{{ iso_files.stdout_lines }}"
       become: yes
       become_method: sudo
-
-    - pause: seconds=10
-
-    - name: "Unmount OS installer images."
+ 
+    - name: "Copy \"mini\" netboot files to web repo directory." 
+      command: "rsync -a /mnt/{{ item | basename | regex_replace('^(.*).iso$', '\\1') }}/install/ /var/www/html/{{ item | basename | regex_replace('^(.*).mini.iso$', '\\1') }}/install/netboot/"
+      with_items:
+        - "{{ mini_iso_files.stdout_lines }}"
+      become: yes
+      become_method: sudo
+    
+    - name: "Unmount distro installer images."
       mount:
         name: "/mnt/{{ item | basename | regex_replace('^(.*).iso$', '\\1') }}"
         src: "{{ item }}"
@@ -45,6 +58,14 @@
         state: unmounted
       with_items:
         - "{{ iso_files.stdout_lines }}"
+        - "{{ mini_iso_files.stdout_lines }}"
       become: yes
       become_method: sudo
     
+    - name: "Call python \"cobbler_add_distro.py\" script to import distros and create profiles."
+      command: "{{ python_executable }} {{ scripts_path }}/python/cobbler_add_distro.py /var/www/html/{{ item | basename | regex_replace('^(.*).iso$', '\\1') }} {{ item | basename | regex_replace('^(.*).iso$', '\\1') }}  {{ item | basename | regex_replace('^.*-(.*).iso$', '\\1') }} {{ log_level }}"
+      with_items:
+        - "{{ iso_files.stdout_lines }}"
+      become: yes
+      become_method: sudo
+

@@ -1,5 +1,6 @@
 ---
 container_name: ubuntu_14.04_deployment
+container_mgmt_ipv4: 192.168.3.7
 container_port: 26
 container_cobbler_web_port: 8080
 private_subnet: "10.0.3.0/24"

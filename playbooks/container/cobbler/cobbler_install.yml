@@ -205,7 +205,7 @@
         regexp: "{{ item.regexp }}"
         replace: "{{ item.line }}"
       with_items:
-      - { regexp: '127.0.0.1', line: "{{ ansible_default_ipv4.address }}" }
+      - { regexp: '127.0.0.1', line: "{{ hostvars['localhost']['container_mgmt_ipv4'] }}" }
       - { regexp: 'manage_dhcp: 0', line: 'manage_dhcp: 1' }
       - { regexp: 'manage_dns: 0', line: 'manage_dns: 1' }
       - { regexp: 'pxe_just_once: 0', line: 'pxe_just_once: 1' }
@@ -283,31 +283,3 @@
       become: yes
       become_method: sudo
 
-    #### Copy os *.iso to local dir (e.g.: /home/ubuntu/install_isos/ubuntu/ubuntu-14.04.4-server-amd64.iso)
-    #mkdir -p ~/ygg/image; scp ~/ygg/image
-    #scp sm0:/home/ubuntu/install_isos/ubuntu/ubuntu-14.04.4-server-amd64.iso .
-    - name: "Copy OS installer images to container."
-      copy:
-        force: no
-        src: ~/os_images
-        dest: "{{ project_path }}"
-
-    #### Mount iso and import (need to be root)
-    #mount -t iso9660 -o loop,ro ubuntu-14.04.4-server-amd64.iso /mnt
-#    - name: "Mount OS installer image."
-#      command: mount -t iso9660 -o loop,ro ~/installation_images/ubuntu-14.04.4-server-amd64.iso /mnt
-#      become: yes
-#      become_method: sudo
-    - name: "Mount OS installer image."
-      mount:
-        name: /mnt
-        src: "{{ project_path }}/os_images/ubuntu-14.04.4-server-amd64.iso"
-        fstype: iso9660
-        opts: loop,ro
-        state: present
-      become: yes
-      become_method: sudo
-
-    #cobbler import --name=ubuntu-14.04.4-server-amd64 --arch=x86_64 --path=/mnt
-
-    #### Create System profiles?
