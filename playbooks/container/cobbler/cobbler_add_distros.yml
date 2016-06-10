@@ -29,7 +29,7 @@
       become: yes
       become_method: sudo
     
-    - command: "{{ python_executable }} {{ scripts_path }}/python/cobbler_add_distro.py {{ genesis_inventory }} /mnt/{{ item | basename | regex_replace('^(.*).iso$', '\\1') }} {{ item | basename | regex_replace('^(.*).iso$', '\\1') }}  {{ item | basename | regex_replace('^.*-(.*).iso$', '\\1') }} {{ log_level }}"
+    - command: "{{ python_executable }} {{ scripts_path }}/python/cobbler_add_distro.py {{ inventory }} /mnt/{{ item | basename | regex_replace('^(.*).iso$', '\\1') }} {{ item | basename | regex_replace('^(.*).iso$', '\\1') }}  {{ item | basename | regex_replace('^.*-(.*).iso$', '\\1') }} {{ log_level }}"
       with_items:
         - "{{ iso_files.stdout_lines }}"
       become: yes

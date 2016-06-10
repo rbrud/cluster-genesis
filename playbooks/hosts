@@ -1,5 +1,5 @@
 localhost ansible_connection=local
-installer ansible_user=deployer ansible_port=22 ansible_host=0.0.0.0
+installer ansible_user=deployer ansible_host=0.0.0.0
 
 [deployers]
-deployer ansible_user=deployer ansible_port=26 ansible_host=192.168.3.2
+deployer ansible_user=deployer ansible_host=192.168.3.2

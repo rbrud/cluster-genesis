@@ -2,6 +2,6 @@
 - hosts: deployer
   tasks:
     - fetch:
-        src: "{{ genesis_inventory }}"
+        src: "{{ inventory }}"
         dest: "{{ dest }}"
         flat: yes
