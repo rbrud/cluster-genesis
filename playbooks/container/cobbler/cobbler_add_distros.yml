@@ -1,3 +1,7 @@
+---
+- hosts: localhost
+  gather_facts: yes
+
 - hosts: deployer
   vars:
     log_level: ""
@@ -9,19 +13,27 @@
         state: directory
         mode: 0755
 
-    - name: "Copy OS installer images to container."
+    - name: "Copy OS installer images and configs to container."
       copy:
         src: "{{ item }}"
         dest: "{{ project_path }}/distro_images/"
         force: no
       with_fileglob:
         - ~/distro_images/*.iso
+        - ~/distro_images/*.cfg
+        - ~/distro_images/*.list
 
     - shell: "ls {{ project_path }}/distro_images/*.iso | grep -v mini"
       register: iso_files
 
     - shell: "ls {{ project_path }}/distro_images/*.mini.iso"
       register: mini_iso_files
+
+    - shell: "ls {{ project_path }}/distro_images/*.cfg"
+      register: cfg_files
+
+    - shell: "ls {{ project_path }}/distro_images/*.list"
+      register: list_files
 
     - name: "Mount Disto installer images."
       mount:
@@ -38,7 +50,6 @@
 
     - name: "Copy distro images to web repo directory." 
       command: "rsync -a /mnt/{{ item | basename | regex_replace('^(.*).iso$', '\\1') }}/ /var/www/html/{{ item | basename | regex_replace('^(.*).iso$', '\\1') }}/"
-    
       with_items:
         - "{{ iso_files.stdout_lines }}"
       become: yes
@@ -51,6 +62,46 @@
       become: yes
       become_method: sudo
     
+    - name: "Update preseed configurations with container IP."
+      replace:
+        dest: "{{ item }}"
+        regexp: "0.0.0.0"
+        replace: "{{ hostvars['localhost']['container_mgmt_ipv4'] }}"
+      with_items:
+        - "{{ cfg_files.stdout_lines }}"
+      become: yes
+      become_method: sudo
+ 
+    - name: "Copy preseed configurations to cobbler kickstart directory."
+      copy:
+        src: "{{ item }}"
+        remote_src: True
+        dest: /var/lib/cobbler/kickstarts/
+      with_items:
+        - "{{ cfg_files.stdout_lines }}"
+      become: yes
+      become_method: sudo
+
+    - name: "Update preseed configurations with container IP."
+      replace:
+        dest: "{{ item }}"
+        regexp: "0.0.0.0"
+        replace: "{{ hostvars['localhost']['container_mgmt_ipv4'] }}"
+      with_items:
+        - "{{ cfg_files.stdout_lines }}"
+      become: yes
+      become_method: sudo
+ 
+    - name: "Copy public apt source lists to web repo directory." 
+      copy:
+        src: "{{ item }}"
+        remote_src: True
+        dest: "/var/www/html/{{ item | basename | regex_replace('^(.*).sources.list$', '\\1') }}/sources.list"
+      with_items:
+        - "{{ list_files.stdout_lines }}"
+      become: yes
+      become_method: sudo
+
     - name: "Unmount distro installer images."
       mount:
         name: "/mnt/{{ item | basename | regex_replace('^(.*).iso$', '\\1') }}"

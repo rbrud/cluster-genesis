@@ -91,6 +91,11 @@ class CobblerAddDistro(object):
             "enable_menu",
             "True",
             token)
+        cobbler_server.modify_profile(
+            new_profile_create,
+            "kickstart",
+            "/var/lib/cobbler/kickstarts/" + NAME + ".cfg",
+            token)
         if ARCH == "ppc64el":
             cobbler_server.modify_profile(
                 new_profile_create,
