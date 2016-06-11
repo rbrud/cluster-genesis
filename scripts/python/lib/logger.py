@@ -34,7 +34,7 @@ class Logger():
             try:
                 raise Exception()
             except:
-                logger.error('Invalid log level: ' + log_level_str)
+                self.logger.error('Invalid log level: ' + log_level_str)
                 sys.exit(1)
 
         log_level = getattr(logging, log_level_str)
