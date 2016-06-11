@@ -38,6 +38,7 @@
 
     - name: "Copy distro images to web repo directory." 
       command: "rsync -a /mnt/{{ item | basename | regex_replace('^(.*).iso$', '\\1') }}/ /var/www/html/{{ item | basename | regex_replace('^(.*).iso$', '\\1') }}/"
+    
       with_items:
         - "{{ iso_files.stdout_lines }}"
       become: yes

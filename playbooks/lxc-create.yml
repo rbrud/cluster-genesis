@@ -76,9 +76,9 @@
       become: yes
       become_method: sudo
     - debug:
-        msg: "Deployment container IP:port {{ container_ip.stdout_lines | first }}"
+        msg: "Deployment container IP {{ container_ip.stdout_lines | first }}"
     - lineinfile:
-        dest: /home/deployer/yggdrasil/playbooks/hosts
+        dest: "{{ project_path_local }}/playbooks/hosts"
         regexp: '^(installer .+?)=\d+\.\d+\.\d+\.\d+$'
         line: '\1={{ container_ip.stdout_lines | first }}'
         backrefs: yes
