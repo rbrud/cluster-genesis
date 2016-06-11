@@ -1,0 +1,37 @@
+userid-default: admin
+password-default: yggdrasil
+redundant-network: false
+ipaddr-mgmt-network: 192.168.3.0/20
+ipaddr-mgmt-switch:
+-   rack1: 192.168.3.5
+userid-mgmt-switch: admin
+password-mgmt-switch: yggdrasil
+ipaddr-leaf-switch:
+-   rack1: 192.168.3.6
+userid-leaf-switch: joeleaf
+password-leaf-switch: joeleafpassword
+nodes_templates:
+-   controller1:
+        hostname: null
+        userid-ipmi: userid
+        password-ipmi: password
+        ipmi-ports:
+        -   rack1:
+            - 2
+            - 3
+            - 5
+        pxe-ports:
+        -   rack1:
+            - 20
+            - 21
+            - 23
+-   controller2:
+        hostname: power
+        userid-ipmi: userid
+        password-ipmi: password
+        ipmi-ports:
+        -   rack1:
+            - 6
+        pxe-ports:
+        -   rack1:
+            - 24
