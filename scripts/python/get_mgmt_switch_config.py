@@ -15,7 +15,10 @@ DOT_1D_TP_FDB_PORT = 'dot1dTpFdbPort'
 
 
 class GetMgmtSwitchConfig(object):
-    def __init__(self, switch_mgmt_ipv4_addr, log):
+    def __init__(self, log):
+        self.log = log
+
+    def get_port_mac(self, rack, switch_mgmt_ipv4):
         self.mac_port = []
         for (
             errorIndication,
@@ -24,16 +27,16 @@ class GetMgmtSwitchConfig(object):
             varBinds) in nextCmd(
                 SnmpEngine(),
                 CommunityData(PUBLIC),
-                UdpTransportTarget((switch_mgmt_ipv4_addr, SNMP_PORT)),
+                UdpTransportTarget((switch_mgmt_ipv4, SNMP_PORT)),
                 ContextData(),
                 ObjectType(ObjectIdentity(BRIDGE_MIB, DOT_1D_TP_FDB_PORT)),
                 lexicographicMode=False):
 
             if errorIndication:
-                log.error(errorIndication)
+                self.log.error(errorIndication)
                 sys.exit(1)
             elif errorStatus:
-                log.error('%s at %s' % (
+                self.log.error('%s at %s' % (
                     errorStatus.prettyPrint(),
                     errorIndex and varBinds[int(errorIndex)-1][0] or '?'))
                 sys.exit(1)
@@ -49,12 +52,10 @@ class GetMgmtSwitchConfig(object):
                         str(varBind))
                     mac = m.group(1)
                     port = int(m.group(3))
-                    _dict['mac'] = mac
-                    _dict['port'] = port
-                    log.info('MAC %s port %d' % (mac, port))
+                    _dict[port] = mac
+                    self.log.info(
+                        'Rack: %s - MAC: %s - port: %d' % (rack, mac, port))
                     self.mac_port.append(_dict)
-
-    def get_mac_port(self):
         return self.mac_port
 
 
@@ -68,15 +69,15 @@ def main(argv):
         try:
             raise Exception()
         except:
-            self.log.error('Invalid argument count')
+            log.error('Invalid argument count')
             exit(1)
 
-    switch_mgmt_ipv4_addr = argv[1]
+    switch_mgmt_ipv4 = argv[1]
     if len(argv) == ARGV_MAX:
         log_level = argv[2]
         log.set_level(log_level)
 
-    mac_port = GetMgmtSwitchConfig(switch_mgmt_ipv4_addr, log)
+    mac_port = GetMgmtSwitchConfig(switch_mgmt_ipv4, log)
 
 if __name__ == '__main__':
     main(sys.argv)
