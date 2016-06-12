@@ -12,22 +12,19 @@ class GetDhcpLeases(object):
             os.path.sep +
             os.path.basename(dhcp_leases_file))
 
-        self.mac_ip = []
         try:
             f = open(dhcp_leases_file, 'r')
         except:
             log.error('DHCP leases file not found: %s' % (dhcp_leases_file))
             sys.exit(1)
+        self.mac_ip = AttrDict()
         for line in f:
-            _dict = AttrDict()
             m = re.search(
                 '^\S+\s+(\S+)\s+(\S+)',
                 line)
             mac = m.group(1)
             ip = m.group(2)
-            _dict['mac'] = mac
-            _dict['ip'] = ip
-            self.mac_ip.append(_dict)
+            self.mac_ip[mac] = ip
             log.info('Lease found - MAC: %s - IP: %s' % (mac, ip))
 
     def get_mac_ip(self):
