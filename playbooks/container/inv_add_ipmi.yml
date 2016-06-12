@@ -1,0 +1,6 @@
+- hosts: deployer
+  vars:
+    log_level: ""
+    dhcp_leases_file: "/var/lib/misc/dnsmasq.leases"
+  tasks:
+    - command: "{{ python_executable }} {{ scripts_path }}/python/inv_add_ipmi.py {{ config }} {{ inventory }} {{ dhcp_leases_file }} {{ log_level }}"
