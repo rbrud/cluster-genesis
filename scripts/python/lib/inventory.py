@@ -16,6 +16,8 @@ CFG_PASSWORD_LEAF_SWITCH = 'password-leaf-switch'
 CFG_USERID_LEAF_SWITCH = 'userid-leaf-switch'
 CFG_PASSWORD_MGMT_SWITCH = 'password-mgmt-switch'
 CFG_RACK_ID = 'rack-id'
+CFG_NODES_TEMPLATES = 'nodes_templates'
+CFG_IPMI_PORTS = 'ipmi-ports'
 
 INV_SWITCHES = 'switches'
 INV_MGMT = 'mgmt'
@@ -24,6 +26,13 @@ INV_MGMTSWITCH = 'mgmtswitch'
 INV_LEAFSWITCH = 'leafswitch'
 INV_USERID = 'userid'
 INV_PASSWORD = 'password'
+INV_NODES = 'nodes'
+INV_HOSTNAME = 'hostname'
+INV_PORT_IPMI = 'port-ipmi'
+INV_IPV4_IPMI = 'ipv4-ipmi'
+INV_MAC_IPMI = 'mac-ipmi'
+INV_RACK_ID = 'rack-id'
+
 
 class Inventory():
     INV_CHASSIS_PART_NUMBER = 'chassis-part-number'
@@ -47,11 +56,11 @@ class Inventory():
             os.path.sep +
             os.path.basename(file))
 
-    def load(self):
+    def load(self, file):
         try:
-            return yaml.load(open(self.cfg_file), Loader=AttrDictYAMLLoader)
+            return yaml.load(open(file), Loader=AttrDictYAMLLoader)
         except:
-            self.log.error('Could not load inventory file: ' + self.cfg_file)
+            self.log.error('Could not load file: ' + file)
             sys.exit(1)
 
     def dump(self, inventory):
@@ -66,24 +75,24 @@ class Inventory():
             sys.exit(1)
 
     def add_switches(self):
-        cfg = self.load()
-        if (CFG_USERID_MGMT_SWITCH in cfg and
-            cfg[CFG_USERID_MGMT_SWITCH] is not None):
-                userid = cfg[CFG_USERID_MGMT_SWITCH]
+        self.cfg = self.load(self.cfg_file)
+        if (CFG_USERID_MGMT_SWITCH in self.cfg and
+                self.cfg[CFG_USERID_MGMT_SWITCH] is not None):
+                userid = self.cfg[CFG_USERID_MGMT_SWITCH]
         else:
-            userid = cfg[CFG_USERID_DEFAULT]
-        if (CFG_PASSWORD_MGMT_SWITCH in cfg and
-            cfg[CFG_PASSWORD_MGMT_SWITCH] is not None):
-               password = cfg[CFG_PASSWORD_MGMT_SWITCH]
+            userid = self.cfg[CFG_USERID_DEFAULT]
+        if (CFG_PASSWORD_MGMT_SWITCH in self.cfg and
+                self.cfg[CFG_PASSWORD_MGMT_SWITCH] is not None):
+                password = self.cfg[CFG_PASSWORD_MGMT_SWITCH]
         else:
-            password = cfg[CFG_PASSWORD_DEFAULT]
-        for key in cfg[CFG_IPADDR_MGMT_SWITCH]:
+            password = self.cfg[CFG_PASSWORD_DEFAULT]
+        for key in self.cfg[CFG_IPADDR_MGMT_SWITCH]:
             _dict = AttrDict()
             _list = []
             index = 0
             for _key, _value in key.items():
                 index += 1
-                _dict[CFG_HOSTNAME] = INV_MGMTSWITCH  + str(index)
+                _dict[CFG_HOSTNAME] = INV_MGMTSWITCH + str(index)
                 _dict[CFG_IPV4_ADDR] = _value
                 _dict[CFG_RACK_ID] = _key
                 _dict[INV_USERID] = userid
@@ -93,29 +102,67 @@ class Inventory():
         inv[INV_SWITCHES] = AttrDict({})
         inv[INV_SWITCHES][INV_MGMT] = _list
 
-        cfg = self.load()
-        if (CFG_USERID_LEAF_SWITCH in cfg and
-            cfg[CFG_USERID_LEAF_SWITCH] is not None):
-                userid = cfg[CFG_USERID_LEAF_SWITCH]
+        if (CFG_USERID_LEAF_SWITCH in self.cfg and
+                self.cfg[CFG_USERID_LEAF_SWITCH] is not None):
+                userid = self.cfg[CFG_USERID_LEAF_SWITCH]
         else:
-            userid = cfg[CFG_USERID_DEFAULT]
-        if (CFG_PASSWORD_LEAF_SWITCH in cfg and
-            cfg[CFG_PASSWORD_LEAF_SWITCH] is not None):
-               password = cfg[CFG_PASSWORD_LEAF_SWITCH]
+            userid = self.cfg[CFG_USERID_DEFAULT]
+        if (CFG_PASSWORD_LEAF_SWITCH in self.cfg and
+                self.cfg[CFG_PASSWORD_LEAF_SWITCH] is not None):
+                password = self.cfg[CFG_PASSWORD_LEAF_SWITCH]
         else:
-            password = cfg[CFG_PASSWORD_DEFAULT]
-        for key in cfg[CFG_IPADDR_LEAF_SWITCH]:
+            password = self.cfg[CFG_PASSWORD_DEFAULT]
+        for key in self.cfg[CFG_IPADDR_LEAF_SWITCH]:
             _dict = AttrDict()
             _list = []
             index = 0
             for _key, _value in key.items():
                 index += 1
-                _dict[CFG_HOSTNAME] = INV_LEAFSWITCH  + str(index)
+                _dict[CFG_HOSTNAME] = INV_LEAFSWITCH + str(index)
                 _dict[CFG_IPV4_ADDR] = _value
                 _dict[CFG_RACK_ID] = _key
                 _dict[INV_USERID] = userid
                 _dict[INV_PASSWORD] = password
                 _list.append(_dict)
         inv[INV_SWITCHES][INV_LEAF] = _list
+
+        self.dump(inv)
+
+    def yield_mgmt_rack_ipv4(self):
+        self.cfg = self.load(self.cfg_file)
+        for switch in self.cfg[CFG_IPADDR_MGMT_SWITCH]:
+            for key, value in switch.items():
+                yield key, value
+
+    def create_nodes(self, dhcp_mac_ip, mgmt_switch_config):
+        self.cfg = self.load(self.cfg_file)
+        inv = self.load(self.inv_file)
+        inv[INV_NODES] = None
+        _dict = AttrDict()
+        for key, value in self.cfg[CFG_NODES_TEMPLATES].items():
+            index = 0
+            for rack, ipmi_ports in value[CFG_IPMI_PORTS].items():
+                _list = []
+                for ipmi_port in ipmi_ports:
+                    for mgmt_port in mgmt_switch_config[rack]:
+                        if ipmi_port in mgmt_port.keys():
+                            if mgmt_port[ipmi_port] in dhcp_mac_ip:
+                                node_dict = AttrDict()
+                                if (CFG_HOSTNAME not in value or
+                                        value[CFG_HOSTNAME] is None):
+                                    node_dict[INV_HOSTNAME] = key
+                                else:
+                                    node_dict[INV_HOSTNAME] = \
+                                        value[CFG_HOSTNAME]
+                                index += 1
+                                node_dict[INV_HOSTNAME] += '-' + str(index)
+                                node_dict[INV_PORT_IPMI] = ipmi_port
+                                node_dict[INV_IPV4_IPMI] = \
+                                    dhcp_mac_ip[mgmt_port[ipmi_port]]
+                                node_dict[INV_MAC_IPMI] = mgmt_port[ipmi_port]
+                                node_dict[INV_RACK_ID] = rack
+                                _list.append(node_dict)
+                                _dict[key] = _list
+                                inv[INV_NODES] = _dict
 
         self.dump(inv)
