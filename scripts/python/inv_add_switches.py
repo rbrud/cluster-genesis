@@ -37,6 +37,7 @@ class InventoryAddSwitches(object):
         inv = Inventory(CFG_FILE, INV_FILE, self.log)
         inv.add_switches()
 
+
 def main(argv):
     ipmi_data = InventoryAddSwitches(argv)
 
