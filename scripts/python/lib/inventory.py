@@ -18,6 +18,9 @@ CFG_PASSWORD_MGMT_SWITCH = 'password-mgmt-switch'
 CFG_RACK_ID = 'rack-id'
 CFG_NODES_TEMPLATES = 'nodes_templates'
 CFG_IPMI_PORTS = 'ipmi-ports'
+CFG_PXE_PORTS = 'pxe-ports'
+CFG_ETH10_PORTS = 'eth10-ports'
+CFG_ETH11_PORTS = 'eth11-ports'
 
 INV_SWITCHES = 'switches'
 INV_MGMT = 'mgmt'
@@ -29,9 +32,12 @@ INV_PASSWORD = 'password'
 INV_NODES = 'nodes'
 INV_HOSTNAME = 'hostname'
 INV_PORT_IPMI = 'port-ipmi'
+INV_PORT_PXE = 'port-pxe'
 INV_IPV4_IPMI = 'ipv4-ipmi'
 INV_MAC_IPMI = 'mac-ipmi'
 INV_RACK_ID = 'rack-id'
+INV_PORT_ETH10 = 'port-eth10'
+INV_PORT_ETH11 = 'port-eth11'
 
 
 class Inventory():
@@ -143,7 +149,8 @@ class Inventory():
             index = 0
             for rack, ipmi_ports in value[CFG_IPMI_PORTS].items():
                 _list = []
-                for ipmi_port in ipmi_ports:
+                for port_index, ipmi_port in enumerate(ipmi_ports):
+                    print(port_index)
                     for mgmt_port in mgmt_switch_config[rack]:
                         if ipmi_port in mgmt_port.keys():
                             if mgmt_port[ipmi_port] in dhcp_mac_ip:
@@ -157,6 +164,12 @@ class Inventory():
                                 index += 1
                                 node_dict[INV_HOSTNAME] += '-' + str(index)
                                 node_dict[INV_PORT_IPMI] = ipmi_port
+                                node_dict[INV_PORT_PXE] = \
+                                    value[CFG_PXE_PORTS][rack][port_index]
+                                node_dict[INV_PORT_ETH10] = \
+                                    value[CFG_ETH10_PORTS][rack][port_index]
+                                node_dict[INV_PORT_ETH11] = \
+                                    value[CFG_ETH11_PORTS][rack][port_index]
                                 node_dict[INV_IPV4_IPMI] = \
                                     dhcp_mac_ip[mgmt_port[ipmi_port]]
                                 node_dict[INV_MAC_IPMI] = mgmt_port[ipmi_port]
