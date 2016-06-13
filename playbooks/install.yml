@@ -1,9 +1,13 @@
 - hosts: deployer
-- include: lxc-update.yml
-- include: container/set_hostname.yml
-- include: container/get_mgmt_switch_config.yml
-- include: container/get_ipmi_config.yml
-- include: container/set_leaf_switch_config.yml
-- include: container/cobbler/cobbler_install.yml
-- include: container/cobbler/cobbler_add_distros.yml
-- include: container/cobbler/cobbler_add_systems.yml
+  vars:
+    log_level: info
+#- include: lxc-update.yml
+- include: container/inv_add_switches.yml log_level=info
+- include: container/inv_add_ipmi_ports.yml log_level=info
+- include: container/inv_add_ipmi_data.yml log_level=info
+- include: container/inv_add_pxe_ports.yml log_level=info
+#- include: container/get_mgmt_switch_config.yml
+#- include: container/set_leaf_switch_config.yml
+#- include: container/cobbler/cobbler_install.yml
+#- include: container/cobbler/cobbler_add_distros.yml
+#- include: container/cobbler/cobbler_add_systems.yml

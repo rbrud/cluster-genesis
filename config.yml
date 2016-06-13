@@ -10,28 +10,54 @@ ipaddr-leaf-switch:
 -   rack1: 192.168.3.6
 userid-leaf-switch: joeleaf
 password-leaf-switch: joeleafpassword
+networks:
+    openstack-mgmt-network:
+        vlan: 10
+        eth-port: eth10
+    openstack-stg-network:
+        vlan: 20
+        bridge-ports: eth10
+    openstack-tenant-vxlan-network:
+        vlan: 30
+        eth-port: eth11
 nodes_templates:
--   controller1:
-        hostname: null
-        userid-ipmi: userid
-        password-ipmi: password
+    controller1:
+        hostname:
+        userid-ipmi: ADMIN
+        password-ipmi: ADMIN
         ipmi-ports:
-        -   rack1:
+            rack1:
             - 2
             - 3
             - 5
         pxe-ports:
-        -   rack1:
+            rack1:
             - 20
             - 21
             - 23
--   controller2:
+        eth10-ports:
+            rack1:
+            - 11
+            - 12
+            - 13
+        eth11-ports:
+            rack1:
+            - 41
+            - 42
+            - 43
+    controller2:
         hostname: power
-        userid-ipmi: userid
-        password-ipmi: password
+        userid-ipmi: ADMIN
+        password-ipmi: admin
         ipmi-ports:
-        -   rack1:
+            rack1:
             - 6
         pxe-ports:
-        -   rack1:
+            rack1:
             - 24
+        eth10-ports:
+            rack1:
+            - 14
+        eth11-ports:
+            rack1:
+            - 15
