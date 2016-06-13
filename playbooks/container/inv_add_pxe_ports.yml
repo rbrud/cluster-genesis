@@ -1,0 +1,8 @@
+- hosts: deployer
+  vars:
+    log_level: ""
+    dhcp_leases_file: "/var/lib/misc/dnsmasq.leases"
+  tasks:
+    - command: "fping -g 192.168.3.0/24"
+      ignore_errors: yes
+    - command: "{{ python_executable }} {{ scripts_path }}/python/inv_add_pxe.py {{ config }} {{ inventory }} {{ dhcp_leases_file }} {{ log_level }}"
