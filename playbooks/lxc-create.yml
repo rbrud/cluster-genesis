@@ -85,7 +85,7 @@
       become: yes
       become_method: sudo
     - lineinfile:
-        dest: /home/deployer/yggdrasil/playbooks/hosts
+        dest: "{{ project_path_local }}/playbooks/hosts"
         regexp: '^(deployer .+?)=\d+\.\d+\.\d+\.\d+$'
         line: '\1={{ container_mgmt_ipv4 }}'
         backrefs: yes
