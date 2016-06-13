@@ -219,11 +219,18 @@
         dest: /var/lib/cobbler/snippets/kickstart_done.orig
       become: yes
       become_method: sudo
-    #### had to modify the snippet template
-    #root@sm4:~# sdiff -s /var/lib/cobbler/snippets/kickstart_done.orig /var/lib/cobbler/snippets/kickstart_done
-    #            #set nopxe = "\nwget \"http://%s/cblr/svc/op/nopx |             #set nopxe = "\\\nwget \"http://%s/cblr/svc/op/no
-    #            #set saveks = "\nwget \"http://%s/cblr/svc/op/ks/ |             #set saveks = "\\\nwget \"http://%s/cblr/svc/op/k
-    #            #set runpost = "\nwget \"http://%s/cblr/svc/op/tr |             #set runpost = "\\\nwget \"http://%s/cblr/svc/op/
+
+    - name: "Fix line break escape in kickstart_done snippet."
+      replace:
+        dest: /var/lib/cobbler/snippets/kickstart_done
+        regexp: "{{ item.regexp }}"
+        replace: "{{ item.line }}"
+      with_items:
+      - { regexp: 'set nopxe = \"\\nwget', line: 'set nopxe = "\\\\\\nwget' }
+      - { regexp: 'set saveks = \"\\nwget', line: 'set saveks = "\\\\\\nwget' }
+      - { regexp: 'set runpost = \"\\nwget', line: 'set runpost = "\\\\\\nwget' }
+      become: yes
+      become_method: sudo
 
     - name: "Restart cobblerd service."
       service:
