@@ -23,6 +23,7 @@
       - libffi-dev
       - libssl-dev
       - python-pysnmp4
+      - ipmitool
       become: yes
       become_method: sudo
     - pip: name="{{ item }}"
