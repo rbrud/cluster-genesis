@@ -3,13 +3,14 @@
   gather_facts: yes
 - hosts: installer
   vars:
-      project_path_local: "{{ hostvars['localhost']['ansible_env']['PWD'] | regex_replace('^(.+/yggdrasil).+?$', '\\1')}}"
-      scripts_path_local: "{{ project_path_local }}/scripts"
+    scripts_path_local: "{{ hostvars['localhost']['scripts_path_local'] }}"
+    config_local: "{{ hostvars['localhost']['config_local'] }}"
   tasks:
     - debug:
         msg: "{{ item }}"
       with_items:
-      - "Config file: {{ config }}"
+      - "Local Scripts Path: {{ scripts_path_local }}"
+      - "Local Config file: {{ config_local }}"
     - apt:
         update_cache: yes
         upgrade: safe
@@ -42,7 +43,7 @@
         pip install --ignore-installed pyaml orderedattrdict pysnmp pyghmi paramiko &&
         deactivate"
     - copy:
-        src: "{{ config }}"
+        src: "{{ config_local }}"
         dest: "{{ project_path }}"
     - copy:
         src: "{{ scripts_path_local }}"
