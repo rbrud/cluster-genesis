@@ -24,6 +24,7 @@
       - libssl-dev
       - python-pysnmp4
       - ipmitool
+      - fping
       become: yes
       become_method: sudo
     - pip: name="{{ item }}"
