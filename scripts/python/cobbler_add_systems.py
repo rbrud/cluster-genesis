@@ -38,11 +38,13 @@ class CobblerAddSystems(object):
         YAML_IPV4_IPMI = 'ipv4-ipmi'
         YAML_USERID_IPMI = 'userid-ipmi'
         YAML_PASSWORD_IPMI = 'password-ipmi'
-        YAML_COBBLER_PROFILE = 'cobbler-profile'
         YAML_IPV4_PXE = 'ipv4-pxe'
         YAML_MAC_PXE = 'mac-pxe'
 
-        #X86_KS = "/var/lib/cobbler/kickstarts/ubuntu_1404_x86_64_sda.cfg"
+        YAML_COBBLER_PROFILE = 'cobbler-profile'
+        YAML_ARCH = 'architecture'
+        COBBLER_PROFILE_X86_64 = 'ubuntu-14.04.4-server-amd64'
+        COBBLER_PROFILE_PPC64 = 'ubuntu-14.04.4-server-ppc64el'
 
         inventory = yaml.load(open(sys.argv[1]), Loader=AttrDictYAMLLoader)
 
@@ -58,9 +60,24 @@ class CobblerAddSystems(object):
                 IPV4_IPMI = node_inv[inv_key][i][YAML_IPV4_IPMI]
                 USERID_IPMI = node_inv[inv_key][i][YAML_USERID_IPMI]
                 PASSWORD_IPMI = node_inv[inv_key][i][YAML_PASSWORD_IPMI]
-                COBBLER_PROFILE = node_inv[inv_key][i][YAML_COBBLER_PROFILE]
                 IPV4_PXE = node_inv[inv_key][i][YAML_IPV4_PXE]
                 MAC_PXE = node_inv[inv_key][i][YAML_MAC_PXE]
+
+                if YAML_COBBLER_PROFILE in node_inv[inv_key][i]:
+                    COBBLER_PROFILE = \
+                        node_inv[inv_key][i][YAML_COBBLER_PROFILE]
+                elif (YAML_ARCH in node_inv[inv_key][i] and
+                        node_inv[inv_key][i][YAML_ARCH] is not None):
+                    if node_inv[inv_key][i][YAML_ARCH].lower() == 'x86_64':
+                        COBBLER_PROFILE = COBBLER_PROFILE_X86_64
+                    elif node_inv[inv_key][i][YAML_ARCH].lower() == 'ppc64':
+                        COBBLER_PROFILE = COBBLER_PROFILE_PPC64
+                    else:
+                        self.log.log_error(
+                            'Inventory: Invalid architecture set for ' +
+                            HOSTNAME)
+                else:
+                    COBBLER_PROFILE = COBBLER_PROFILE_X86_64
 
                 new_system_create = cobbler_server.new_system(token)
 
