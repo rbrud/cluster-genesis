@@ -229,6 +229,9 @@
       - { regexp: 'set nopxe = \"\\nwget', line: 'set nopxe = "\\\\\\nwget' }
       - { regexp: 'set saveks = \"\\nwget', line: 'set saveks = "\\\\\\nwget' }
       - { regexp: 'set runpost = \"\\nwget', line: 'set runpost = "\\\\\\nwget' }
+      - { regexp: 'null', line: 'null;' }
+      - { regexp: 'cobbler.ks', line: 'cobbler.ks;' }
+      - { regexp: 'cobbler.seed', line: 'cobbler.seed;' }
       become: yes
       become_method: sudo
 
