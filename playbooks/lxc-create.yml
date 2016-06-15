@@ -52,12 +52,13 @@
     - user:
         name: "{{ ansible_env.USER }}"
         generate_ssh_key: yes
+        ssh_key_file: .ssh/id_rsa_yggdrasil
     - lxc_container:
         name: "{{ container_name }}"
         template: ubuntu
         template_options:
             --user {{ user }}
-            --auth-key {{ ansible_env.HOME }}/.ssh/id_rsa.pub
+            --auth-key {{ ansible_env.HOME }}/.ssh/id_rsa_yggdrasil.pub
             --release trusty
             --arch amd64
             --packages python,aptitude

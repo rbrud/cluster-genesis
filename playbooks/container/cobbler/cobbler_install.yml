@@ -232,6 +232,14 @@
       become: yes
       become_method: sudo
 
+    - name: "Copy authorized_keys ssh key file to web repo directory."
+      copy:
+        src: "/home/deployer/.ssh/authorized_keys"
+        remote_src: True
+        dest: "/var/www/html/authorized_keys"
+      become: yes
+      become_method: sudo
+
     - name: "Restart cobblerd service."
       service:
         name: cobblerd
