@@ -1,0 +1,67 @@
+# This file describes the network interfaces available on your system
+# and how to activate them. For more information, see interfaces(5).
+
+# The loopback network interface
+auto lo
+iface lo inet loopback
+
+auto eth0
+iface eth0 inet dhcp
+{% for network in hostvars[inventory_hostname]['host_networks'] %}
+{% if 'bridge' not in networks[network] %}
+# {{ networks[network]['description'] }}
+auto {{ networks[network]['eth-port'] }}
+iface {{ networks[network]['eth-port'] }} inet {{ networks[network]['method'] }}
+{% if 'addr' in hostvars[inventory_hostname]['host_networks'][network] %}
+    address {{ hostvars[inventory_hostname]['host_networks'][network]['addr'] }}
+{% endif %}
+{% if 'netmask' in networks[network] %}
+    netmask {{ networks[network]['netmask'] }}
+{% endif %}
+{% if 'gateway' in networks[network] %}
+    gateway {{ networks[network]['gateway'] }}
+{% endif %}
+{% if 'network' in networks[network] %}
+    network {{ networks[network]['network'] }}
+{% endif %}
+{% if 'broadcast' in networks[network] %}
+    broadcast {{ networks[network]['broadcast'] }}
+{% endif %}
+{% if 'dns-search' in networks[network] %}
+    dns-search {{ networks[network]['dns-search'] }}
+{% endif %}
+{% if 'dns-nameservers' in networks[network] %}
+    dns-nameservers {{ networks[network]['dns-nameservers'] }}
+{% endif %}
+{% endif %}
+
+{% endfor %}
+
+{% for network in hostvars[inventory_hostname]['host_networks'] %}
+{% if 'bridge' in networks[network] %}
+# {{ networks[network]['description'] }}
+{% if 'vlan' in networks[network] %}
+iface {{ networks[network]['eth-port'] }}.{{ networks[network]['vlan'] }} inet manual
+    vlan-raw-device {{ networks[network]['eth-port'] }}
+
+{% endif %}
+auto {{ networks[network]['bridge'] }}
+iface {{ networks[network]['bridge'] }} inet {{ networks[network]['method'] }}
+    bridge_stp off
+    bridge_waitport 0
+    bridge_fd 0
+{% if 'vlan' in networks[network] %}
+    bridge_ports {{ networks[network]['eth-port'] }}.{{ networks[network]['vlan'] }}
+{% else %}
+    bridge_ports {{ networks[network]['eth-port'] }}
+{% endif %}
+    address {{ hostvars[inventory_hostname]['host_networks'][network]['addr'] }}
+{% if 'netmask' in networks[network] %}
+    netmask {{ networks[network]['netmask'] }}
+{% endif %}
+{% if 'tcp_segmentation_offload' in networks[network] %}
+    offload-sg {{ networks[network]['tcp_segmentation_offload'] }}
+{% endif %}
+
+{% endif %}
+{% endfor %}
