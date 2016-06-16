@@ -50,6 +50,7 @@
         regexp: '^(container_mgmt_subnet:).*$'
         line: '\1 {{ ipaddr_mgmt_network.stdout }}'
         backrefs: yes
+      when: ipaddr_mgmt_network.stdout != ""
       become: yes
       become_method: sudo
     - lineinfile:
