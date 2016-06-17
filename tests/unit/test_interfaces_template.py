@@ -24,24 +24,20 @@ class TestInterfacesTemplate(unittest.TestCase):
 
     def test_template(self):
         inv_hn = 'localhost'
-        hostvars = {
-            "localhost": {
-                "host_networks": {
-                    "mgmt-net": {
-                        "addr": "172.244.5.10"
-                    },
-                    "stg-net": {
-                        "addr": "172.270.200.10"
-                    },
-                    "br-vlan": {
-                        "addr": "0.0.0.0"
-                    },
-                    "external1": {
-                        "addr": "10.5.1.7"
-                    },
-                    "external2": {}
-                }
-            }
+        host_networks = {
+            "mgmt-net": {
+                "addr": "172.244.5.10"
+            },
+            "stg-net": {
+                "addr": "172.270.200.10"
+            },
+            "br-vlan": {
+                "addr": "0.0.0.0"
+            },
+            "external1": {
+                "addr": "10.5.1.7"
+            },
+            "external2": {}
         }
         networks = {
             "stg-net": {
@@ -91,8 +87,7 @@ class TestInterfacesTemplate(unittest.TestCase):
                                  trim_blocks=True)
         template = env.get_template(template_file)
         rendered_file = template.render({'networks': networks,
-                                         'inventory_hostname': inv_hn,
-                                         'hostvars': hostvars})
+                                         'host_networks': host_networks})
 
         # For debugging convenience, we do a line by line compare if the
         # output does not match the expected
