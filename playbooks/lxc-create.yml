@@ -62,13 +62,13 @@
     - user:
         name: "{{ ansible_env.USER }}"
         generate_ssh_key: yes
-        ssh_key_file: .ssh/id_rsa_yggdrasil
+        ssh_key_file: "{{ ssh_key_private }}"
     - lxc_container:
         name: "{{ container_name }}"
         template: ubuntu
         template_options:
             --user {{ user }}
-            --auth-key {{ ansible_env.HOME }}/.ssh/id_rsa_yggdrasil.pub
+            --auth-key {{ ssh_key_public }}
             --release trusty
             --arch amd64
             --packages python,aptitude
@@ -84,22 +84,45 @@
       register: container_ip
       become: yes
       become_method: sudo
+
     - debug:
-        msg: "Deployment container IP {{ container_ip.stdout_lines | first }}"
-    - lineinfile:
+        msg: "{{ item }}"
+      with_items:
+      - 'Deployment container internal IP: {{ container_ip.stdout_lines | first }}'
+      - 'Deployment container management network IP: {{ container_mgmt_ipv4 | ipaddr("address") }}'
+
+    - name: "Update \"installer\" host with ssh private key."
+      replace:
+        dest: "{{ project_path_local }}/playbooks/hosts"
+        regexp: '^(installer .+?ansible_ssh_private_key_file=).+?[ ]'
+        replace: '\1{{ ssh_key_private }} '
+      become: yes
+      become_method: sudo
+
+    - name: "Update \"installer\" host with container internal IP address."
+      replace:
         dest: "{{ project_path_local }}/playbooks/hosts"
         regexp: '^(installer .+?)=\d+\.\d+\.\d+\.\d+$'
-        line: '\1={{ container_ip.stdout_lines | first }}'
-        backrefs: yes
+        replace: '\1={{ container_ip.stdout_lines | first }}'
       become: yes
       become_method: sudo
-    - lineinfile:
+
+    - name: "Update \"deployer\" host with ssh private key."
+      replace:
+        dest: "{{ project_path_local }}/playbooks/hosts"
+        regexp: '^(deployer .+?ansible_ssh_private_key_file=).+?[ ]'
+        replace: '\1{{ ssh_key_private }} '
+      become: yes
+      become_method: sudo
+
+    - name: "Update \"deployer\" host with container management network IP address."
+      replace:
         dest: "{{ project_path_local }}/playbooks/hosts"
         regexp: '^(deployer .+?)=\d+\.\d+\.\d+\.\d+$'
-        line: '\1={{ container_mgmt_ipv4 | ipaddr("address") }}'
-        backrefs: yes
+        replace: '\1={{ container_mgmt_ipv4 | ipaddr("address") }}'
       become: yes
       become_method: sudo
+
     - command:
         iptables -t nat -F
       become: yes
