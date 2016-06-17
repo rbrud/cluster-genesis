@@ -1,5 +1,5 @@
 ---
-container_name: ubuntu_1404_deployment
+container_name: ubuntu-14-04-deployer
 private_subnet: "10.0.3.0/24"
 project_path_local: "{{ ansible_env['PWD'] | regex_replace('^(.+/yggdrasil).+?$', '\\1')}}"
 scripts_path_local: "{{ project_path_local }}/scripts"
