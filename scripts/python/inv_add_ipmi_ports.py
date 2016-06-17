@@ -15,6 +15,8 @@ from lib.logger import Logger
 class InventoryAddIpmi(object):
     def __init__(self, dhcp_leases_file, log_level, inv_file, cfg_file):
         log = Logger(__file__)
+        if log_level is not None:
+            log.set_level(log_level)
 
         dhcp_leases = GetDhcpLeases(dhcp_leases_file, log_level)
         dhcp_mac_ip = dhcp_leases.get_mac_ip()
@@ -26,6 +28,9 @@ class InventoryAddIpmi(object):
             mgmt_sw_cfg[rack] = mgmt_switch_config.get_port_mac(rack, ipv4)
 
         inv.create_nodes(dhcp_mac_ip, mgmt_sw_cfg)
+
+        for rack, mac, ip in inv.yield_node_ipmi():
+            log.info('IPMI node detected - Rack: %s - MAC: %s - IP: %s' % (rack, mac, ip))
 
 if __name__ == '__main__':
     """

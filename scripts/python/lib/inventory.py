@@ -222,6 +222,24 @@ class Inventory():
             for index, node in enumerate(value):
                 yield inv, INV_NODES, key, index, node
 
+    def yield_node_ipmi(self):
+        inv = self.inv
+        for key, value in inv[INV_NODES].items():
+            for node in value:
+                yield (
+                    node[INV_RACK_ID],
+                    node[INV_MAC_IPMI],
+                    node[INV_IPV4_IPMI])
+
+    def yield_node_pxe(self):
+        inv = self.inv
+        for key, value in inv[INV_NODES].items():
+            for node in value:
+                yield (
+                    node[INV_RACK_ID],
+                    node[INV_MAC_PXE],
+                    node[INV_IPV4_PXE])
+
     def yield_ipmi_access_info(self):
         inv = self.inv
         for key, value in inv[INV_NODES].items():
