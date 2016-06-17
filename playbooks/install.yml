@@ -2,12 +2,26 @@
   vars:
     log_level: info
 #- include: lxc-update.yml
+#- include: container/cobbler/cobbler_install.yml
 - include: container/inv_add_switches.yml log_level=info
 - include: container/inv_add_ipmi_ports.yml log_level=info
+- include: container/ipmi_power_on.yml log_level=info
+- hosts: deployer
+  vars:
+    pause_field: minutes
+    pause_value: 3
+  tasks:
+    - debug:
+        msg: "{{ item }}"
+      with_items:
+      - "field: {{ pause_field }}"
+      - "value: {{ pause_value }}"
+    - pause: minutes=8
+      name: Pause 8 minutes during power-on
+    #- pause: "{{ pause_field }}={{ pause_value }}"
+      #name: Pause "{{ pause_value }}" "{{ pause_field }}" during power-on
 - include: container/inv_add_ipmi_data.yml log_level=info
 - include: container/inv_add_pxe_ports.yml log_level=info
-#- include: container/get_mgmt_switch_config.yml
-#- include: container/set_leaf_switch_config.yml
-#- include: container/cobbler/cobbler_install.yml
-#- include: container/cobbler/cobbler_add_distros.yml
-#- include: container/cobbler/cobbler_add_systems.yml
+- include: container/ipmi_power_off.yml log_level=info
+# - include: container/cobbler/cobbler_add_distros.yml
+# - include: container/cobbler/cobbler_add_systems.yml
