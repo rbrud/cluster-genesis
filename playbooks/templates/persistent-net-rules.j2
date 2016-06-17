@@ -1,0 +1,3 @@
+{% for interface, mac in name_interfaces.iteritems() %}
+SUBSYSTEM=="net", ACTION=="add", ATTR{address}=="{{ mac }}", NAME="{{ interface }}"
+{% endfor %}
