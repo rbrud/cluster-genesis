@@ -4,6 +4,7 @@ import yaml
 from orderedattrdict.yamlutils import AttrDictYAMLLoader
 from orderedattrdict import AttrDict
 
+from lib.logger import Logger
 
 CFG_IPADDR_MGMT_SWITCH = 'ipaddr-mgmt-switch'
 CFG_IPADDR_LEAF_SWITCH = 'ipaddr-leaf-switch'
@@ -56,21 +57,21 @@ class Inventory():
     INV_PASSWORD_IPMI = 'password-ipmi'
     INV_ARCHITECTURE = 'architecture'
 
-    def __init__(self, cfg_file, inv_file, log):
-        self.log = log
-        self.cfg_file = self._get_abs_path(cfg_file)
-        self.inv_file = self._get_abs_path(inv_file)
-        try:
-            self.inv = self.load(self.inv_file)
-        except:
-            pass
-
     @staticmethod
     def _get_abs_path(file):
         return os.path.abspath(
             os.path.dirname(os.path.abspath(file)) +
             os.path.sep +
             os.path.basename(file))
+
+    def __init__(self, log, inv_file, cfg_file=None):
+        self.log = Logger(__file__)
+        if cfg_file:
+            self.cfg_file = self._get_abs_path(cfg_file)
+
+        self.inv_file = self._get_abs_path(inv_file)
+        if os.path.isfile(inv_file):
+            self.inv = self.load(self.inv_file)
 
     def load(self, file):
         try:
@@ -89,7 +90,7 @@ class Inventory():
                 indent=4,
                 default_flow_style=False)
         except:
-            self.log.error('Could not dump inventory file: ' + self.inv_file)
+            self.log.error('Could not dump inventory to file: ' + self.inv_file)
             sys.exit(1)
 
     def add_switches(self):
@@ -207,11 +208,11 @@ class Inventory():
                     for mgmt_port in mgmt_switch_config[rack]:
                         if pxe_port in mgmt_port.keys():
                             if mgmt_port[pxe_port] in dhcp_mac_ip:
-                                 port = inv[INV_NODES][key][port_index][INV_PORT_PXE]
-                                 inv[INV_NODES][key][port_index][INV_MAC_PXE] = \
-                                     mgmt_port[pxe_port]
-                                 inv[INV_NODES][key][port_index][INV_IPV4_PXE] = \
-                                     dhcp_mac_ip[mgmt_port[pxe_port]]
+                                port = inv[INV_NODES][key][port_index][INV_PORT_PXE]
+                                inv[INV_NODES][key][port_index][INV_MAC_PXE] = \
+                                    mgmt_port[pxe_port]
+                                inv[INV_NODES][key][port_index][INV_IPV4_PXE] = \
+                                    dhcp_mac_ip[mgmt_port[pxe_port]]
 
         self.dump(inv)
 
@@ -220,6 +221,16 @@ class Inventory():
         for key, value in inv[INV_NODES].items():
             for index, node in enumerate(value):
                 yield inv, INV_NODES, key, index, node
+
+    def yield_ipmi_access_info(self):
+        inv = self.inv
+        for key, value in inv[INV_NODES].items():
+            for node in value:
+                yield (
+                    node[INV_RACK_ID],
+                    node[INV_IPV4_IPMI],
+                    node[INV_USERID_IPMI],
+                    node[INV_PASSWORD_IPMI])
 
     def add_to_node(self, key, index, field, value):
         inv = self.inv
