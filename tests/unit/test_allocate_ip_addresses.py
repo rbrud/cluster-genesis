@@ -90,7 +90,7 @@ class TestAllocateIPAddresses(unittest.TestCase):
                               {'template': 'ceph-osd'},
                               {'template': 'ceph-osd'}]}
         inv['nodes'] = nodes
-        inv['node_templates'] = templates
+        inv['node-templates'] = templates
 
         networks = allocate_ip_addresses.get_networks(inv)
         allocate_ip_addresses.allocate_ips_to_nodes(inv, networks)
@@ -157,7 +157,7 @@ class TestAllocateIPAddresses(unittest.TestCase):
                                   'net5-addr': '10.2.1.16'},
                                  {'template': 'controller'}]}
         inv['nodes'] = nodes
-        inv['node_templates'] = templates
+        inv['node-templates'] = templates
 
         networks = allocate_ip_addresses.get_networks(inv)
         allocate_ip_addresses.allocate_ips_to_nodes(inv, networks)
