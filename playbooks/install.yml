@@ -3,6 +3,7 @@
     log_level: info
 #- include: lxc-update.yml
 #- include: container/cobbler/cobbler_install.yml
+- include: container/set_data_switch_config.yml log_level=info
 - include: container/inv_add_switches.yml log_level=info
 - include: container/inv_add_ipmi_ports.yml log_level=info
 - include: container/ipmi_power_on.yml log_level=info
