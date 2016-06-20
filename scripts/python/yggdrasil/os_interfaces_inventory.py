@@ -65,13 +65,6 @@
 #                     "method": "static",
 #                     "eth-port": "eth11"
 #                 }
-#             },
-#             'node_templates': {
-#                 'compute': {
-#                     'rename-interfaces':
-#                         [{'eth0': 'eth20'},
-#                         {'eth2': 'eth30'}]
-#                     }
 #             }
 #         }
 #     },
@@ -93,7 +86,10 @@
 #                     },
 #                     "external2": {}
 #                 },
-#                 'template': 'compute'
+#                 'template': 'compute',
+#                 'name_interfaces': {'eth0': 'mac1',
+#                                     'eth1': 'mac2',
+#                                     'eth3': 'mac3'}
 #             }
 #         }
 #     }
@@ -183,11 +179,15 @@ def populate_host_networks(inventory, net_list, ip_to_node):
                 hostvars[ip]['host_networks'][net] = net_addr
 
 
-def populate_rename_interfaces(inventory, inventory_source, ip_to_node):
-    av = inventory['all']['vars']
-    av['node_templates'] = inventory_source['node_templates']
+def populate_name_interfaces(inventory, inventory_source, ip_to_node):
     for ip, node in ip_to_node.iteritems():
-        inventory['_meta']['hostvars'][ip]['template'] = node['template']
+        template = inventory_source['node-templates'][node['template']]
+        if_name_to_mac = {}
+        for mac_key, if_name in template['name-interfaces'].iteritems():
+            if_mac = node[mac_key]
+            if_name_to_mac[if_name] = if_mac
+
+        inventory['_meta']['hostvars'][ip]['name_interfaces'] = if_name_to_mac
 
 
 def generate_dynamic_inventory():
@@ -203,7 +203,7 @@ def generate_dynamic_inventory():
     populate_network_variables(inventory, inventory_source)
     populate_host_networks(inventory, inventory_source['networks'].keys(),
                            ip_to_node)
-    populate_rename_interfaces(inventory, inventory_source, ip_to_node)
+    populate_name_interfaces(inventory, inventory_source, ip_to_node)
     return inventory
 
 

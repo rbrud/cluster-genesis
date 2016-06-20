@@ -23,7 +23,6 @@ TEMPLATE_FILE = 'playbooks'+os.path.sep+'templates'+os.path.sep+'interfaces.j2'
 class TestInterfacesTemplate(unittest.TestCase):
 
     def test_template(self):
-        inv_hn = 'localhost'
         host_networks = {
             "mgmt-net": {
                 "addr": "172.244.5.10"

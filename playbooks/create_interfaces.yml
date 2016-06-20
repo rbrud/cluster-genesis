@@ -20,13 +20,14 @@
     reboot_wait_interval: 600
     reboot_delay_time: 60
   tasks:
-    # - name: Configure udev persistent net rules
-      # lineinfile:
-        # dest: /etc/udev/rules.d/70-persistent-net-generator.rules
-        # line: SUBSYSTEM=="net", ACTION=="add", ATTR{address}=="{{ hostvars[inventory_hostname]['ansible_' + item.items()[0][0]]['macaddress'] }}",  NAME="{{ item.items()[0][1] }}"
-        # create: yes
-      # with_items: "{{ node_templates[hostvars[inventory_hostname].template]['rename-interfaces'] }}"
-      # register: wrote_netrules
+    - name: 'Generate udev persistent net rules'
+      template:
+        src: "{{ playbook_dir }}/templates/persistent-net-rules.j2"
+        dest: /etc/udev/rules.d/99-persistent-net.rules
+        owner: "root"
+        group: "root"
+        mode: "0644"
+      register: wrote_netrules
     
     - name: 'Generate interfaces file'
       template:

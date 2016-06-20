@@ -19,6 +19,7 @@ import unittest
 
 TEST_PKG_MOD = 'yggdrasil.os_interfaces_inventory'
 
+
 class TestOSInterfacesInventory(unittest.TestCase):
 
     def test_get_host_ip_to_node(self):
@@ -136,7 +137,7 @@ class TestOSInterfacesInventory(unittest.TestCase):
         #print 'Expected_output %s' % json.dumps(expected_output, indent=4)
         self.assertDictEqual(inventory, expected_output)
 
-    @mock.patch(TEST_PKG_MOD+'.populate_rename_interfaces')
+    @mock.patch(TEST_PKG_MOD+'.populate_name_interfaces')
     @mock.patch(TEST_PKG_MOD+'.populate_host_networks')
     @mock.patch(TEST_PKG_MOD+'.populate_network_variables')
     @mock.patch(TEST_PKG_MOD+'.populate_hosts')
@@ -146,7 +147,7 @@ class TestOSInterfacesInventory(unittest.TestCase):
                                         populate_hosts,
                                         populate_network_variables,
                                         populate_host_networks,
-                                        populate_rename_interfaces):
+                                        populate_name_interfaces):
         ret = test_mod.generate_dynamic_inventory()
         load.assert_any_call()
         get_host_ip_to_node.assert_called_once_with(load.return_value)
@@ -154,7 +155,7 @@ class TestOSInterfacesInventory(unittest.TestCase):
                                                mock.ANY)
         populate_network_variables.assert_called_once_with(mock.ANY,
                                                            load.return_value)
-        populate_rename_interfaces.assert_called_once_with(
+        populate_name_interfaces.assert_called_once_with(
             mock.ANY, load.return_value, get_host_ip_to_node.return_value)
         self.assertTrue(populate_host_networks.called)
         expected_output = {'all': {'hosts': [],
@@ -163,7 +164,7 @@ class TestOSInterfacesInventory(unittest.TestCase):
                            '_meta': {'hostvars': {}}}
         self.assertDictEqual(ret, expected_output)
 
-    def test_populate_rename_interfaces(self):
+    def test_populate_name_interfaces(self):
         inventory = {'all': {'hosts': ['nodeIP0', 'nodeIP1', 'nodeIP2'],
                              'vars': {}
                              },
@@ -171,32 +172,42 @@ class TestOSInterfacesInventory(unittest.TestCase):
                                             'nodeIP1': {},
                                             'nodeIP2': {}}}
                      }
-        source = {'node_templates': {
+        source = {'node-templates': {
             'compute': {
-                'rename-interfaces': [
-                    {'p1p1': 'eth10'},
-                    {'p1p2': 'eth20'}]},
+                'name-interfaces': {'mac-key1': 'eth10',
+                                    'mac-key2': 'eth20'}},
             'controller': {
-                'rename-interfaces': [
-                    {'p3p1': 'eth10'},
-                    {'p4p2': 'eth20'}]},
+                'name-interfaces': {'mac-key1': 'eth30',
+                                    'mac-key2': 'eth40'}},
             'osd': {
-                'rename-interfaces': [
-                    {'p1p7': 'eth10'},
-                    {'p1p8': 'eth20'}]}}}
+                'name-interfaces': {'mac-key1': 'eth50',
+                                    'mac-key2': 'eth60'}}}}
 
-        ip_to_node = {'nodeIP0': {'template': 'compute'},
-                      'nodeIP1': {'template': 'controller'},
-                      'nodeIP2': {'template': 'osd'}}
+        ip_to_node = {'nodeIP0': {'mac-key1': 'key1val0',
+                                  'mac-key2': 'key2val0',
+                                  'template': 'compute'},
+                      'nodeIP1': {'mac-key1': 'key1val1',
+                                  'mac-key2': 'key2val1',
+                                  'template': 'controller'},
+                      'nodeIP2': {'mac-key1': 'key1val2',
+                                  'mac-key2': 'key2val2',
+                                  'template': 'osd'}}
 
-        test_mod.populate_rename_interfaces(inventory,
-                                            source, ip_to_node)
-        self.assertEqual(inventory['all']['vars']['node_templates'],
-                         source['node_templates'])
+        test_mod.populate_name_interfaces(inventory,
+                                          source, ip_to_node)
         hv = inventory['_meta']['hostvars']
-        self.assertEqual(hv['nodeIP0']['template'], 'compute')
-        self.assertEqual(hv['nodeIP1']['template'], 'controller')
-        self.assertEqual(hv['nodeIP2']['template'], 'osd')
+        # Verify nodeIP0 vars
+        ifs = {'eth10': 'key1val0',
+               'eth20': 'key2val0'}
+        self.assertEqual(hv['nodeIP0']['name_interfaces'], ifs)
+        # Verify nodeIP1 vars
+        ifs = {'eth30': 'key1val1',
+               'eth40': 'key2val1'}
+        self.assertEqual(hv['nodeIP1']['name_interfaces'], ifs)
+        # Verify nodeIP2 vars
+        ifs = {'eth50': 'key1val2',
+               'eth60': 'key2val2'}
+        self.assertEqual(hv['nodeIP2']['name_interfaces'], ifs)
 
 
 if __name__ == "__main__":
