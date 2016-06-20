@@ -67,7 +67,7 @@ def allocate_ips_to_nodes(inventory, networks):
     nodes = [node for sublist in inventory['nodes'].values() for node
              in sublist]
 
-    templates = inventory['node_templates']
+    templates = inventory['node-templates']
 
     for node in nodes:
         template = templates[node['template']]
