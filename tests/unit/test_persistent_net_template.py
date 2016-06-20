@@ -55,9 +55,24 @@ class TestPersistentNetTemplate(unittest.TestCase):
 
 
 expected_output_1 = """\
-SUBSYSTEM=="net", ACTION=="add", ATTR{address}=="eth11mac", NAME="eth11"
-SUBSYSTEM=="net", ACTION=="add", ATTR{address}=="eth10mac", NAME="eth10"
-SUBSYSTEM=="net", ACTION=="add", ATTR{address}=="eth0mac", NAME="eth0"
+# Rule "eth11"
+SUBSYSTEM=="net", ACTION=="add", DRIVERS=="?*", ATTR{address}=="eth11mac",\
+ ATTR{dev_id}=="0x0", ATTR{type}=="1", KERNEL=="eth*", NAME="eth11"
+SUBSYSTEM=="net", ACTION=="add", DRIVERS=="?*", ATTR{address}=="eth11mac", \
+ATTR{dev_id}=="0x0", ATTR{type}=="1", KERNEL=="p*", NAME="eth11"
+
+# Rule "eth10"
+SUBSYSTEM=="net", ACTION=="add", DRIVERS=="?*", ATTR{address}=="eth10mac", \
+ATTR{dev_id}=="0x0", ATTR{type}=="1", KERNEL=="eth*", NAME="eth10"
+SUBSYSTEM=="net", ACTION=="add", DRIVERS=="?*", ATTR{address}=="eth10mac", \
+ATTR{dev_id}=="0x0", ATTR{type}=="1", KERNEL=="p*", NAME="eth10"
+
+# Rule "eth0"
+SUBSYSTEM=="net", ACTION=="add", DRIVERS=="?*", ATTR{address}=="eth0mac", \
+ATTR{dev_id}=="0x0", ATTR{type}=="1", KERNEL=="eth*", NAME="eth0"
+SUBSYSTEM=="net", ACTION=="add", DRIVERS=="?*", ATTR{address}=="eth0mac", \
+ATTR{dev_id}=="0x0", ATTR{type}=="1", KERNEL=="p*", NAME="eth0"
+
 """
 
 if __name__ == "__main__":
