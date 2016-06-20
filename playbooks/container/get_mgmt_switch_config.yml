@@ -1,6 +1,0 @@
----
-- hosts: deployer
-  vars:
-      log_level: ""
-  tasks:
-    - command: "{{ python_executable }} {{ scripts_path }}/python/get_mgmt_switch_config.py {{ inventory }} {{ log_level }}"

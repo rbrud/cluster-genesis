@@ -7,6 +7,7 @@ from orderedattrdict import AttrDict
 from pysnmp.hlapi import *
 
 from lib.utilities import *
+from lib.logger import Logger
 
 SNMP_PORT = 161
 PUBLIC = 'public'
@@ -15,8 +16,10 @@ DOT_1D_TP_FDB_PORT = 'dot1dTpFdbPort'
 
 
 class GetMgmtSwitchConfig(object):
-    def __init__(self, log):
-        self.log = log
+    def __init__(self, log_level):
+        self.log = Logger(__file__)
+        if log_level is not None:
+            self.log.set_level(log_level)
 
     def get_port_mac(self, rack, switch_mgmt_ipv4):
         self.mac_port = []
@@ -57,27 +60,3 @@ class GetMgmtSwitchConfig(object):
                         'Rack: %s - MAC: %s - port: %d' % (rack, mac, port))
                     self.mac_port.append(_dict)
         return self.mac_port
-
-
-def main(argv):
-    from lib.logger import Logger
-    log = Logger(__file__)
-
-    ARGV_MAX = 3
-    argv_count = len(argv)
-    if argv_count > ARGV_MAX:
-        try:
-            raise Exception()
-        except:
-            log.error('Invalid argument count')
-            exit(1)
-
-    switch_mgmt_ipv4 = argv[1]
-    if len(argv) == ARGV_MAX:
-        log_level = argv[2]
-        log.set_level(log_level)
-
-    mac_port = GetMgmtSwitchConfig(switch_mgmt_ipv4, log)
-
-if __name__ == '__main__':
-    main(sys.argv)

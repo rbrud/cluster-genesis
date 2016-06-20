@@ -1,9 +1,0 @@
-- hosts: deployer
-  vars:
-    log_level: ""
-    config_file: "{{ project_path_local }}/config.yml"
-    leases_file: "{{ project_path_local }}/var/lib/misc/dnsmasq.leases"
-  tasks:
-    - command: >
-        "{{ python_executable }}" "{{ scripts_path }}/python/get_dhcp_lease_info.py" "{{ config_file }}"
-        "{{ inventory }}" "{{ leases_file }}" "{{ log_level }}"
