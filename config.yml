@@ -1,15 +1,15 @@
 userid-default: admin
 password-default: yggdrasil
 redundant-network: false
-ipaddr-mgmt-network: 192.168.3.0/20
+ipaddr-mgmt-network: 192.168.3.0/24
 ipaddr-mgmt-switch:
--   rack1: 192.168.3.5
+    rack1: 192.168.3.5
 userid-mgmt-switch: admin
 password-mgmt-switch: yggdrasil
-ipaddr-leaf-switch:
--   rack1: 192.168.3.6
-userid-leaf-switch: joeleaf
-password-leaf-switch: joeleafpassword
+ipaddr-data-switch:
+    rack1: 192.168.3.6
+userid-data-switch: admin
+password-data-switch: yggdrasil
 networks:
     openstack-mgmt-network:
         vlan: 10
@@ -25,39 +25,41 @@ nodes_templates:
         hostname:
         userid-ipmi: ADMIN
         password-ipmi: ADMIN
-        ipmi-ports:
-            rack1:
-            - 2
-            - 3
-            - 5
-        pxe-ports:
-            rack1:
-            - 20
-            - 21
-            - 23
-        eth10-ports:
-            rack1:
-            - 11
-            - 12
-            - 13
-        eth11-ports:
-            rack1:
-            - 41
-            - 42
-            - 43
+        ports:
+            ipmi:
+                rack1:
+                - 2
+                - 3
+                - 5
+            pxe:
+                rack1:
+                - 20
+                - 21
+                - 23
+            eth10:
+                rack1:
+                - 11
+                - 12
+                - 13
+            eth11:
+                rack1:
+                - 41
+                - 42
+                - 43
     controller2:
         hostname: power
         userid-ipmi: ADMIN
         password-ipmi: admin
-        ipmi-ports:
-            rack1:
-            - 6
-        pxe-ports:
-            rack1:
-            - 24
-        eth10-ports:
-            rack1:
-            - 14
-        eth11-ports:
-            rack1:
-            - 15
+        ports:
+            ipmi:
+                rack1:
+                - 6
+            pxe:
+                rack1:
+                - 24
+            eth10:
+                rack1:
+                - 14
+            eth11:
+                rack1:
+                - 15
