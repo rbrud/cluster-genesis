@@ -116,8 +116,8 @@ expected_output_1 = """\
 auto lo
 iface lo inet loopback
 
-auto eth0
-iface eth0 inet dhcp
+auto eth15
+iface eth15 inet dhcp
 
 # Site network description
 auto eth10
