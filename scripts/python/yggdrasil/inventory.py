@@ -181,6 +181,8 @@ def populate_host_networks(inventory, net_list, ip_to_node):
                 # interface, and bridges have the IPs.
                 if not net_addr['addr']:
                     net_addr = {}
+                if 'host_networks' not in hostvars[ip]:
+                    hostvars[ip]['host_networks'] = {}
                 hostvars[ip]['host_networks'][net] = net_addr
 
 

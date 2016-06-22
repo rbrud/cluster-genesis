@@ -116,7 +116,7 @@ class TestOSInterfacesInventory(unittest.TestCase):
         net_list = ['net1', 'net2', 'net3', 'net4']
         ihv = inventory['_meta']['hostvars']
         for x in range(5):
-            ihv['nodeIP%s' % x] = {'host_networks': {}}
+            ihv['nodeIP%s' % x] = {}
         ip_to_node = {'nodeIP0': {'net1-addr': '1.1.1.1',
                                   'net2-addr': '2.2.2.1',
                                   'net4-addr': '4.4.4.1'},
