@@ -13,11 +13,11 @@
 # limitations under the License.
 
 import copy
-from yggdrasil import os_interfaces_inventory as test_mod
+from yggdrasil import inventory as test_mod
 import mock
 import unittest
 
-TEST_PKG_MOD = 'yggdrasil.os_interfaces_inventory'
+TEST_PKG_MOD = 'yggdrasil.inventory'
 
 
 class TestOSInterfacesInventory(unittest.TestCase):
@@ -58,26 +58,40 @@ class TestOSInterfacesInventory(unittest.TestCase):
         #self.maxDiff = None
         self.assertDictEqual(ret, expected)
 
-    def test_populate_hosts(self):
-        inventory = {'all': {'hosts': [],
-                             'vars': {}
-                             },
+    def test_populate_hosts_and_groups(self):
+        inventory = {'all': {'vars': {}},
                      '_meta': {'hostvars': {}}
                      }
-        hosts = ['a', 'b', 'c']
-        test_mod.populate_hosts(inventory, hosts)
-        expected = {'all': {'hosts': ['a', 'b', 'c'],
-                            'vars': {}
+
+        def gen_group(node_count):
+            name = 'g%s' % node_count
+            nodes = []
+            for x in range(node_count):
+                node_ip = 'n%s%s' % (name, x)
+                nodes.append({test_mod.HOST_IP_KEY: node_ip})
+            return {name: nodes}
+
+        inventory_source = {'nodes': {}}
+        inventory_source['nodes'].update(gen_group(3))
+        inventory_source['nodes'].update(gen_group(5))
+        inventory_source['nodes'].update(gen_group(1))
+
+        test_mod.populate_hosts_and_groups(inventory, inventory_source)
+        children = inventory['all'].pop('children')
+        self.assertItemsEqual(['g1', 'g3', 'g5'], children)
+        expected = {'all': {'vars': {}
                             },
-                    '_meta': {'hostvars': {'a': {'host_networks': {}},
-                                           'b': {'host_networks': {}},
-                                           'c': {'host_networks': {}}}}}
+                    'g3': ['ng30', 'ng31', 'ng32'],
+                    'g5': ['ng50', 'ng51', 'ng52', 'ng53', 'ng54'],
+                    'g1': ['ng10'],
+                    '_meta': {'hostvars': {'ng30': {}, 'ng31': {}, 'ng32': {},
+                                           'ng50': {}, 'ng51': {}, 'ng53': {},
+                                           'ng54': {}, 'ng10': {}, 'ng52': {}}}
+                    }
         self.assertDictEqual(inventory, expected)
 
     def test_populate_network_variables(self):
-        inventory = {'all': {'hosts': [],
-                             'vars': {}
-                             },
+        inventory = {'all': {'vars': {}},
                      '_meta': {'hostvars': {}}
                      }
         expected_output = copy.deepcopy(inventory)
@@ -137,10 +151,18 @@ class TestOSInterfacesInventory(unittest.TestCase):
         #print 'Expected_output %s' % json.dumps(expected_output, indent=4)
         self.assertDictEqual(inventory, expected_output)
 
+        # Now test again with nodes not having any IP addresses on networks
+        inventory = {'_meta': {'hostvars': {}}}
+        ip_to_node = {'nodeIP0': {},
+                      'nodeIP1': {},
+                      'nodeIP2': {}}
+        test_mod.populate_host_networks(inventory, net_list, ip_to_node)
+        self.assertDictEqual(inventory, {'_meta': {'hostvars': {}}})
+
     @mock.patch(TEST_PKG_MOD+'.populate_name_interfaces')
     @mock.patch(TEST_PKG_MOD+'.populate_host_networks')
     @mock.patch(TEST_PKG_MOD+'.populate_network_variables')
-    @mock.patch(TEST_PKG_MOD+'.populate_hosts')
+    @mock.patch(TEST_PKG_MOD+'.populate_hosts_and_groups')
     @mock.patch(TEST_PKG_MOD+'.get_host_ip_to_node')
     @mock.patch(TEST_PKG_MOD+'.load_input_file')
     def test_generate_dynamic_inventory(self, load, get_host_ip_to_node,
@@ -152,26 +174,40 @@ class TestOSInterfacesInventory(unittest.TestCase):
         load.assert_any_call()
         get_host_ip_to_node.assert_called_once_with(load.return_value)
         populate_hosts.assert_called_once_with(mock.ANY,
-                                               mock.ANY)
+                                               load.return_value)
         populate_network_variables.assert_called_once_with(mock.ANY,
                                                            load.return_value)
         populate_name_interfaces.assert_called_once_with(
             mock.ANY, load.return_value, get_host_ip_to_node.return_value)
         self.assertTrue(populate_host_networks.called)
-        expected_output = {'all': {'hosts': [],
-                                   'vars': {}
-                                   },
+        expected_output = {'all': {'vars': {}},
                            '_meta': {'hostvars': {}}}
         self.assertDictEqual(ret, expected_output)
 
     def test_populate_name_interfaces(self):
-        inventory = {'all': {'hosts': ['nodeIP0', 'nodeIP1', 'nodeIP2'],
-                             'vars': {}
-                             },
-                     '_meta': {'hostvars': {'nodeIP0': {},
-                                            'nodeIP1': {},
-                                            'nodeIP2': {}}}
-                     }
+        original_inventory = {'_meta': {'hostvars': {'nodeIP0': {},
+                                                     'nodeIP1': {},
+                                                     'nodeIP2': {}}}
+                              }
+
+        # Test when the templates do not have interfaces to name
+        ip_to_node = {'nodeIP0': {'template': 'compute'},
+                      'nodeIP1': {'template': 'controller'},
+                      'nodeIP2': {'template': 'osd'}}
+
+        source = {'node-templates': {
+            'compute': {},
+            'controller': {},
+            'osd': {}}}
+        inventory = copy.deepcopy(original_inventory)
+        test_mod.populate_name_interfaces(inventory,
+                                          source, ip_to_node)
+        hv = inventory['_meta']['hostvars']
+        self.assertDictEqual(hv, {'nodeIP0': {},
+                                  'nodeIP1': {},
+                                  'nodeIP2': {}})
+
+        # Test when the MACs are not on the hosts yet
         source = {'node-templates': {
             'compute': {
                 'name-interfaces': {'mac-key1': 'eth10',
@@ -183,6 +219,15 @@ class TestOSInterfacesInventory(unittest.TestCase):
                 'name-interfaces': {'mac-key1': 'eth50',
                                     'mac-key2': 'eth60'}}}}
 
+        inventory = copy.deepcopy(original_inventory)
+        test_mod.populate_name_interfaces(inventory,
+                                          source, ip_to_node)
+        hv = inventory['_meta']['hostvars']
+        self.assertDictEqual(hv, {'nodeIP0': {},
+                                  'nodeIP1': {},
+                                  'nodeIP2': {}})
+
+        # Test once the mac have been added to the inventory
         ip_to_node = {'nodeIP0': {'mac-key1': 'key1val0',
                                   'mac-key2': 'key2val0',
                                   'template': 'compute'},
@@ -192,7 +237,7 @@ class TestOSInterfacesInventory(unittest.TestCase):
                       'nodeIP2': {'mac-key1': 'key1val2',
                                   'mac-key2': 'key2val2',
                                   'template': 'osd'}}
-
+        inventory = copy.deepcopy(original_inventory)
         test_mod.populate_name_interfaces(inventory,
                                           source, ip_to_node)
         hv = inventory['_meta']['hostvars']
@@ -208,7 +253,6 @@ class TestOSInterfacesInventory(unittest.TestCase):
         ifs = {'eth50': 'key1val2',
                'eth60': 'key2val2'}
         self.assertEqual(hv['nodeIP2']['name_interfaces'], ifs)
-
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']

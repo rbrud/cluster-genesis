@@ -135,13 +135,18 @@ def get_host_ip_to_node(inventory_source):
     return ip_to_node
 
 
-def populate_hosts(inventory, hosts):
-    # Add the hosts to the all group and add empty dictionaries for host vars
-    # host networks
-    inventory['all']['hosts'] = hosts
-    host_vars = inventory['_meta']['hostvars']
-    for host in hosts:
-        host_vars[host] = {'host_networks': {}}
+def populate_hosts_and_groups(inventory, inventory_source):
+    # Create the 'all' group and children groups based on the
+    # node groupings in the source inventory.
+    groups = []
+    for node_group, nodes in inventory_source['nodes'].iteritems():
+        groups.append(node_group)
+        inventory[node_group] = [node[HOST_IP_KEY] for node in nodes]
+        # Add empty hostvars
+        for node in inventory[node_group]:
+            inventory['_meta']['hostvars'][node] = {}
+
+    inventory['all']['children'] = groups
 
 
 def populate_network_variables(inventory, inventory_source):
@@ -182,12 +187,16 @@ def populate_host_networks(inventory, net_list, ip_to_node):
 def populate_name_interfaces(inventory, inventory_source, ip_to_node):
     for ip, node in ip_to_node.iteritems():
         template = inventory_source['node-templates'][node['template']]
+        if 'name-interfaces' not in template:
+            continue
         if_name_to_mac = {}
         for mac_key, if_name in template['name-interfaces'].iteritems():
-            if_mac = node[mac_key]
-            if_name_to_mac[if_name] = if_mac
-
-        inventory['_meta']['hostvars'][ip]['name_interfaces'] = if_name_to_mac
+            if mac_key in node:
+                if_mac = node[mac_key]
+                if_name_to_mac[if_name] = if_mac
+        if if_name_to_mac:
+            hv = inventory['_meta']['hostvars']
+            hv[ip]['name_interfaces'] = if_name_to_mac
 
 
 def generate_dynamic_inventory():
@@ -195,11 +204,9 @@ def generate_dynamic_inventory():
     inventory_source = load_input_file()
     ip_to_node = get_host_ip_to_node(inventory_source)
     # initialize the empty inventory
-    inventory = {'all': {'hosts': [],
-                         'vars': {}
-                         },
+    inventory = {'all': {'vars': {}},
                  '_meta': {'hostvars': {}}}
-    populate_hosts(inventory, ip_to_node.keys())
+    populate_hosts_and_groups(inventory, inventory_source)
     populate_network_variables(inventory, inventory_source)
     populate_host_networks(inventory, inventory_source['networks'].keys(),
                            ip_to_node)
