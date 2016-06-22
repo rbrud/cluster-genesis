@@ -1,51 +1,72 @@
 ---
-- hosts: localhost
+- name: lxc-create.yml
+  hosts: localhost
   tasks:
     - debug:
         msg: "{{ item }}"
       with_items:
       - "Project name: {{ project_path_local }}"
-    - apt:
+
+    - name: "Install aptitude"
+      apt:
         name: aptitude
         update_cache: yes
       become: yes
       become_method: sudo
-    - apt:
+
+    - name: "Update apt cache and upgrade (safe)"
+      apt:
         update_cache: yes
         upgrade: safe
       become: yes
       become_method: sudo
-    - apt: name=lxc
+
+    - name: "Install LXC"
+      apt: name=lxc
       become: yes
       become_method: sudo
-    - apt: name=liblxc1
+
+    - name: "Install liblxc1"
+      apt: name=liblxc1
       become: yes
       become_method: sudo
       when: ansible_distribution_version == "14.04"
-    - apt: name=python-lxc
+
+    - name: "Install python-lxc"
+      apt: name=python-lxc
       become: yes
       become_method: sudo
       when: ansible_distribution_version == "16.04"
-    - lineinfile:
+
+    - name: "Update ~/.config/lxc/default.conf"
+      lineinfile:
         dest: ~/.config/lxc/default.conf
         line: "{{ item }}"
         create: yes
       with_items:
       - lxc.id_map = u 0 100000 65536
       - lxc.id_map = g 0 100000 65536
-    - copy:
+
+    - name: "Make backup of /etc/lxc/lxc-usernet"
+      copy:
         src: /etc/lxc/lxc-usernet
         dest: /etc/lxc/lxc-usernet.orig
       become: yes
       become_method: sudo
-    - lineinfile:
+
+    - name: "Update /etc/lxc/lxc-usernet"
+      lineinfile:
         dest: /etc/lxc/lxc-usernet
         line: "{{ user }} veth lxcbr0 2"
       become: yes
       become_method: sudo
-    - shell: "grep ipaddr-mgmt-network {{ project_path_local }}/config.yml | awk '{print $2}'"
+
+    - name: "Register management network subnet address"
+      shell: "grep ipaddr-mgmt-network {{ project_path_local }}/config.yml | awk '{print $2}'"
       register: ipaddr_mgmt_network
-    - lineinfile:
+
+    - name: "Update group_vars/all container_mgmt_subnet"
+      lineinfile:
         dest: "{{ project_path_local }}/playbooks/group_vars/all"
         regexp: '^(container_mgmt_subnet:).*$'
         line: '\1 {{ ipaddr_mgmt_network.stdout }}'
@@ -53,17 +74,23 @@
       when: ipaddr_mgmt_network.stdout != ""
       become: yes
       become_method: sudo
-    - lineinfile:
+
+    - name: "Update lxc.conf container mgmt ipv4 address"
+      lineinfile:
         dest: "{{ project_path_local }}/playbooks/lxc.conf"
         regexp: 'lxc.network.ipv4 = .*'
         line: 'lxc.network.ipv4 = {{ container_mgmt_ipv4 }}'
       become: yes
       become_method: sudo
-    - user:
+
+    - name: "Create private/public ssh key pair"
+      user:
         name: "{{ ansible_env.USER }}"
         generate_ssh_key: yes
         ssh_key_file: "{{ ssh_key_private }}"
-    - lxc_container:
+
+    - name: "Create LXC deployment container"
+      lxc_container:
         name: "{{ container_name }}"
         template: ubuntu
         template_options:
@@ -79,8 +106,12 @@
       register: container_info
       become: yes
       become_method: sudo
-    - pause: seconds=5
-    - command: lxc-info -n {{ container_name }} -iH
+
+    - name: "Pause 5 seconds"
+      pause: seconds=5
+
+    - name: "Register container internal ip address"
+      command: lxc-info -n {{ container_name }} -iH
       register: container_ip
       become: yes
       become_method: sudo
@@ -123,12 +154,15 @@
       become: yes
       become_method: sudo
 
-    - command:
+    - name: "Flush nat iptables"
+      command:
         iptables -t nat -F
       become: yes
       become_method: sudo
     # Implement this with iptables module with Ansible 2.1
-    - command:
+
+    - name: "Create nat iptables masquerade rule for internal LXC subnet"
+      command:
         iptables
         -t nat
         -A POSTROUTING

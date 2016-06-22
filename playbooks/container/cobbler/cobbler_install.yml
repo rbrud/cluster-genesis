@@ -2,7 +2,8 @@
 - hosts: localhost
   gather_facts: yes
 
-- hosts: installer
+- name: container/cobbler/cobbler_install.yml
+  hosts: installer
   tasks:
 
     - name: "Install vim - used for debug."

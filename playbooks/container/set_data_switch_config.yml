@@ -1,4 +1,6 @@
-- hosts: deployer
+---
+- name: container/set_data_switch_config.yml
+  hosts: deployer
   vars:
     log_level: ""
   tasks:

@@ -1,6 +1,8 @@
 ---
-- hosts: localhost
+- name: lxc-update.yml
+  hosts: localhost
   gather_facts: yes
+
 - hosts: installer
   vars:
     scripts_path_local: "{{ hostvars['localhost']['scripts_path_local'] }}"
@@ -11,12 +13,16 @@
       with_items:
       - "Local Scripts Path: {{ scripts_path_local }}"
       - "Local Config file: {{ config_local }}"
-    - apt:
+
+    - name: "Update apt cache and upgrade (safe)"
+      apt:
         update_cache: yes
         upgrade: safe
       become: yes
       become_method: sudo
-    - apt: name="{{ item }}"
+
+    - name: "Install distro packages"
+      apt: name="{{ item }}"
       with_items:
       - python-pip 
       - python-dev
@@ -27,7 +33,9 @@
       - fping
       become: yes
       become_method: sudo
-    - pip: name="{{ item }}"
+
+    - name: "Install python pip packages"
+      pip: name="{{ item }}"
       with_items:
       - pip
       - setuptools
@@ -35,22 +43,34 @@
       - virtualenv
       become: yes
       become_method: sudo
-    - file:
+
+    - name: "Create project root directory"
+      file:
         path: "{{ project_path }}"
         state: directory
-    - command: virtualenv --no-wheel --system-site-packages {{ venv_path }}
-    - command: >
+
+    - name: "Create python virtual environment"
+      command: virtualenv --no-wheel --system-site-packages {{ venv_path }}
+
+    - name: "Activate python venv and install pip packages"
+      command: >
         /bin/bash -c "
         source {{ venv_path }}/bin/activate &&
         pip install --ignore-installed pyaml orderedattrdict pysnmp pyghmi paramiko &&
         deactivate"
-    - copy:
+
+    - name: "Copy config file into deployment container"
+      copy:
         src: "{{ config_local }}"
         dest: "{{ project_path }}"
-    - copy:
+
+    - name: "Copy scripts into deployment container"
+      copy:
         src: "{{ scripts_path_local }}"
         dest: "{{ project_path }}"
-    - file:
+
+    - name: "Create log file"
+      file:
         path: "{{ project_path }}/log.txt"
         state: touch
         mode: 0755

@@ -2,7 +2,8 @@
 - hosts: localhost
   gather_facts: yes
 
-- hosts: deployer
+- name: container/cobbler/cobbler_add_distros.yml
+  hosts: deployer
   vars:
     log_level: ""
   tasks:

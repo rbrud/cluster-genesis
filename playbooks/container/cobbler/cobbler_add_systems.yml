@@ -1,4 +1,6 @@
-- hosts: deployer
+---
+- name: container/cobbler/cobbler_add_systems.yml
+  hosts: deployer
   vars:
     log_level: ""
   tasks:

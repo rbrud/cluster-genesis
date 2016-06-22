@@ -1,4 +1,6 @@
-- hosts: deployer
+---
+- name: container/inv_add_switches.yml
+  hosts: deployer
   vars:
     log_level: ""
   tasks:

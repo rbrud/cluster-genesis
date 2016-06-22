@@ -1,4 +1,6 @@
-- hosts: deployer
+---
+- name: container/ipmi_power_on.yml
+  hosts: deployer
   vars:
     log_level: ""
   tasks:
