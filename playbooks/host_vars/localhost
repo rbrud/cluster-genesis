@@ -1,7 +1,8 @@
 ---
-container_name: ubuntu_14.04_deployment
-container_mgmt_ipv4: 192.168.3.2
+container_name: ubuntu-14-04-deployer
 private_subnet: "10.0.3.0/24"
 project_path_local: "{{ ansible_env['PWD'] | regex_replace('^(.+/yggdrasil).+?$', '\\1')}}"
 scripts_path_local: "{{ project_path_local }}/scripts"
 config_local: "{{ project_path_local }}/config.yml"
+ssh_key_private: "{{ ansible_env.HOME }}/.ssh/id_rsa_ansible-generated"
+ssh_key_public: "{{ ssh_key_private }}.pub"

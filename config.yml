@@ -16,8 +16,8 @@ networks:
         eth-port: eth10
     openstack-stg-network:
         vlan: 20
-        bridge-ports: eth10
-    openstack-tenant-vxlan-network:
+        eth-port: eth10
+    openstack-tenant-network:
         vlan: 30
         eth-port: eth11
 nodes_templates:
@@ -46,6 +46,9 @@ nodes_templates:
                 - 41
                 - 42
                 - 43
+        networks:
+            - openstack-mgmt-network
+            - openstack-stg-network
     controller2:
         hostname: power
         userid-ipmi: ADMIN
@@ -63,3 +66,5 @@ nodes_templates:
             eth11:
                 rack1:
                 - 15
+        networks:
+            - openstack-tenant-network

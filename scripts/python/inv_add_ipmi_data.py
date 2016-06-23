@@ -8,27 +8,12 @@ from pyghmi.ipmi import command as ipmi_command
 from lib.inventory import Inventory
 from lib.logger import Logger
 
-FILE_PATH = os.path.dirname(os.path.abspath(__file__))
 
-
-class Ipmi(object):
-    def __init__(self, argv):
+class IpmiData(object):
+    def __init__(self, log_level, inv_file, cfg_file):
         self.log = Logger(__file__)
-
-        ARGV_MAX = 4
-        argv_count = len(argv)
-        if argv_count > ARGV_MAX:
-            try:
-                raise Exception()
-            except:
-                self.log.log_error('Invalid argument count')
-                exit(1)
-
-        CFG_FILE = argv[1]
-        INV_FILE = argv[2]
-        if len(argv) == ARGV_MAX:
-            LOG_LEVEL = argv[3]
-            self.log.set_level(LOG_LEVEL)
+        if log_level is not None:
+            self.log.set_level(log_level)
 
         SNMP_PORT = 161
 
@@ -43,7 +28,7 @@ class Ipmi(object):
         self.IPMI_OPENPOWER_FW = b'OpenPOWER Firmware'
         self.PPC64 = b'ppc64'
 
-        self.inv_obj = Inventory(CFG_FILE, INV_FILE, self.log)
+        self.inv_obj = Inventory(log_level, inv_file, cfg_file)
 
         for inv, key, _key, index, self.node in self.inv_obj.yield_nodes():
             ipmi_cmd = ipmi_command.Command(
@@ -56,7 +41,6 @@ class Ipmi(object):
                 if self.IPMI_PRODUCT_NAME in fw.keys():
                     if (fw[self.IPMI_PRODUCT_NAME] ==
                             self.IPMI_OPENPOWER_FW):
-                        pass
                         value = self.get_ipmi(
                             self.IPMI_SYSTEM_FIRMWARE,
                             self.IPMI_PRODUCT_NAME,
@@ -140,9 +124,23 @@ class Ipmi(object):
                 "' not found")
             return None
 
-
-def main(argv):
-    ipmi_data = Ipmi(argv)
-
 if __name__ == '__main__':
-    main(sys.argv)
+    log = Logger(__file__)
+
+    ARGV_MAX = 4
+    argv_count = len(sys.argv)
+    if argv_count > ARGV_MAX:
+        try:
+            raise Exception()
+        except:
+            log.error('Invalid argument count')
+            exit(1)
+
+    cfg_file = sys.argv[1]
+    inv_file = sys.argv[2]
+    if argv_count == ARGV_MAX:
+        log_level = sys.argv[3]
+    else:
+        log_level = None
+
+    ipmi_data = IpmiData(log_level, inv_file, cfg_file)

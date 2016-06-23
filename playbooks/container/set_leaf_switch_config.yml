@@ -1,5 +1,0 @@
-- hosts: deployer
-  vars:
-    log_level: ""
-  tasks:
-    - command: "{{ python_executable }} {{ scripts_path }}/python/set_leaf_switch_config.py {{ inventory }} {{ log_level }}"

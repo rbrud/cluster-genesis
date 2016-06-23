@@ -2,7 +2,8 @@
 - hosts: localhost
   gather_facts: yes
 
-- hosts: deployer
+- name: container/cobbler/cobbler_add_distros.yml
+  hosts: deployer
   vars:
     log_level: ""
   tasks:
@@ -66,7 +67,7 @@
       replace:
         dest: "{{ item }}"
         regexp: "0.0.0.0"
-        replace: "{{ hostvars['localhost']['container_mgmt_ipv4'] }}"
+        replace: "{{ container_mgmt_ipv4 | ipaddr('address') }}"
       with_items:
         - "{{ cfg_files.stdout_lines }}"
       become: yes
@@ -82,16 +83,6 @@
       become: yes
       become_method: sudo
 
-    - name: "Update preseed configurations with container IP."
-      replace:
-        dest: "{{ item }}"
-        regexp: "0.0.0.0"
-        replace: "{{ hostvars['localhost']['container_mgmt_ipv4'] }}"
-      with_items:
-        - "{{ cfg_files.stdout_lines }}"
-      become: yes
-      become_method: sudo
- 
     - name: "Copy public apt source lists to web repo directory." 
       copy:
         src: "{{ item }}"

@@ -1,0 +1,7 @@
+---
+- name: container/ipmi_power_off.yml 
+  hosts: deployer
+  vars:
+    log_level: ""
+  tasks:
+    - command: "{{ python_executable }} {{ scripts_path }}/python/ipmi_power_off.py {{ inventory }} {{ log_level }}"

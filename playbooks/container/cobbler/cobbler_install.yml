@@ -2,7 +2,8 @@
 - hosts: localhost
   gather_facts: yes
 
-- hosts: installer
+- name: container/cobbler/cobbler_install.yml
+  hosts: installer
   tasks:
 
     - name: "Install vim - used for debug."
@@ -69,8 +70,10 @@
       become_method: sudo
       with_items:
       - { regexp: '#domain-needed', replace: 'domain-needed' }
-      - { regexp: '192.168.1.5,192.168.1.200',
-          replace: '192.168.3.150,192.168.3.200' }
+      - { regexp: "192.168.1.5",
+          replace: "{{container_mgmt_subnet | ipaddr('150') | ipaddr('address') }}" }
+      - { regexp: "192.168.1.200",
+          replace: "{{container_mgmt_subnet | ipaddr('200') | ipaddr('address') }}" }
 
     - name: "Configure dnsmasq to enable TFTP server."
       lineinfile:
@@ -205,7 +208,7 @@
         regexp: "{{ item.regexp }}"
         replace: "{{ item.line }}"
       with_items:
-      - { regexp: '127.0.0.1', line: "{{ hostvars['localhost']['container_mgmt_ipv4'] }}" }
+      - { regexp: '127.0.0.1', line: "{{ container_mgmt_ipv4 | ipaddr('address') }}" }
       - { regexp: 'manage_dhcp: 0', line: 'manage_dhcp: 1' }
       - { regexp: 'manage_dns: 0', line: 'manage_dns: 1' }
       - { regexp: 'pxe_just_once: 0', line: 'pxe_just_once: 1' }
