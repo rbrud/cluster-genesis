@@ -8,6 +8,14 @@
     log_level: ""
   tasks:
 
+    - name: "Restore original /etc/cobbler/pxe/pxedefault.template file."
+      copy:
+        remote_src: True
+        src: /etc/cobbler/pxe/pxedefault.template.orig
+        dest: /etc/cobbler/pxe/pxedefault.template
+      become: yes
+      become_method: sudo
+
     - name: "Create directory in container to store install images."
       file:
         path: "{{ project_path }}/distro_images"

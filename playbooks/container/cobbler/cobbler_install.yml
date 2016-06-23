@@ -215,6 +215,25 @@
       become: yes
       become_method: sudo
 
+    - name: "Save original /etc/cobbler/pxe/pxedefault.template file."
+      copy:
+        remote_src: True
+        src: /etc/cobbler/pxe/pxedefault.template
+        dest: /etc/cobbler/pxe/pxedefault.template.orig
+      become: yes
+      become_method: sudo
+
+    - name: "Set PXE timeout to maximum."
+      replace:
+        dest: /etc/cobbler/pxe/pxedefault.template
+        regexp: "{{ item.regexp }}"
+        replace: "{{ item.replace }}"
+      with_items:
+      - { regexp: 'TIMEOUT \d+', replace: 'TIMEOUT 35996' }
+      - { regexp: 'TOTALTIMEOUT \d+', replace: 'TOTALTIMEOUT 35996' }
+      become: yes
+      become_method: sudo
+
     - name: "Save original /var/lib/cobbler/snippets/kickstart_done file."
       copy:
         remote_src: True

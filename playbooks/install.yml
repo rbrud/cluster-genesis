@@ -6,14 +6,17 @@
 - include: container/set_data_switch_config.yml log_level=info
 - include: container/inv_add_switches.yml log_level=info
 - include: container/inv_add_ipmi_ports.yml log_level=info
+- include: container/ipmi_set_bootdev.yml log_level=info bootdev=pxe persistent=False
 - include: container/ipmi_power_on.yml log_level=info
+# todo: investigate resetting the mgmt switch to renew dhcp leases in container
 - hosts: localhost
   tasks:
-    - pause: minutes=8
-      name: Pause 8 minutes during power-on
+    - pause: minutes=5
+      name: Pause 5 minutes during power-on
 - include: container/inv_add_ipmi_data.yml log_level=info
 - include: container/inv_add_pxe_ports.yml log_level=info
 - include: container/ipmi_power_off.yml log_level=info
 - include: container/cobbler/cobbler_add_distros.yml
 - include: container/cobbler/cobbler_add_systems.yml
+- include: container/ipmi_set_bootdev.yml log_level=info bootdev=pxe persistent=False
 - include: container/ipmi_power_on.yml log_level=info
