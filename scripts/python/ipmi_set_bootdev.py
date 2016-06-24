@@ -3,6 +3,7 @@ from __future__ import nested_scopes, generators, division, absolute_import, \
     with_statement, print_function, unicode_literals
 import sys
 import os.path
+import time
 from pyghmi.ipmi import command as ipmi_command
 from pyghmi import exceptions as pyghmi_exception
 
@@ -27,11 +28,20 @@ class IpmiSetBootdev(object):
                 rc = ipmi_cmd.set_bootdev(bootdev, persist)
             except pyghmi_exception.IpmiException as error:
                 log.error(
-                    'set_bootdev failed (device=%s , persist=%s) - Rack: %s - IP: %s, %s' %
+                    'set_bootdev failed (device=%s persist=%s) - Rack: %s - IP: %s, %s' %
                     (bootdev, persist, rack_id, ipv4, str(error)))
                 sys.exit(1)
+            if 'error' in rc:
+                log.error(
+                    'set_bootdev failed (device=%s persist=%s) - Rack: %s - IP: %s, %s' %
+                    (bootdev, persist, rack_id, ipv4, str(rc['error'])))
+                sys.exit(1)
 
-            log.info('bootdev set to %s persist=%s - Rack: %s - IP: %s' % (bootdev, persist, rack_id, ipv4))
+            log.info(
+                    'bootdev set to (device=%s persist=%s) - Rack: %s - IP: %s' %
+                    (bootdev, persist, rack_id, ipv4))
+            time.sleep(30)
+
 
 if __name__ == '__main__':
     log = Logger(__file__)
