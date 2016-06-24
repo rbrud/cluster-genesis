@@ -12,12 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-<<<<<<< HEAD
 
-=======
-ssh_key_private: "{{ ansible_env.HOME }}/.ssh/id_rsa_ansible-generated"
-ssh_key_public: "{{ ssh_key_private }}.pub"  
->>>>>>> 0e9a2536a2c038cb2ec895acef1e26dab531eeb4
 - name: Transferring private key
   copy:
     src: "{{ ansible_env.HOME }}/.ssh/id_rsa_ansible-generated"
