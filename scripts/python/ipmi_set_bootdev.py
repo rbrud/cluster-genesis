@@ -28,19 +28,22 @@ class IpmiSetBootdev(object):
                 rc = ipmi_cmd.set_bootdev(bootdev, persist)
             except pyghmi_exception.IpmiException as error:
                 log.error(
-                    'set_bootdev failed (device=%s persist=%s) - Rack: %s - IP: %s, %s' %
+                    'set_bootdev failed (device=%s persist=%s) - '
+                    'Rack: %s - IP: %s, %s' %
                     (bootdev, persist, rack_id, ipv4, str(error)))
                 sys.exit(1)
             if 'error' in rc:
                 log.error(
-                    'set_bootdev failed (device=%s persist=%s) - Rack: %s - IP: %s, %s' %
+                    'set_bootdev failed (device=%s persist=%s) - '
+                    'Rack: %s - IP: %s, %s' %
                     (bootdev, persist, rack_id, ipv4, str(rc['error'])))
                 sys.exit(1)
 
             log.info(
-                    'bootdev set to (device=%s persist=%s) - Rack: %s - IP: %s' %
+                    'bootdev set to (device=%s persist=%s) - '
+                    'Rack: %s - IP: %s' %
                     (bootdev, persist, rack_id, ipv4))
-            time.sleep(30)
+        time.sleep(30)
 
 
 if __name__ == '__main__':
