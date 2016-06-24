@@ -1,0 +1,25 @@
+---
+- hosts: localhost
+  vars:
+    seconds: ""
+    minutes: ""
+    message: ""
+
+  tasks:
+    - when: seconds != ""
+      name: "Pause (seconds)"
+      pause:
+        prompt: "Pause {{ seconds }} seconds: {{ message }}"
+        seconds: "{{ seconds }}"
+
+    - when: minutes != ""
+      name: "Pause (minutes)"
+      pause:
+        prompt: "Pause {{ minutes }} minutes: {{ message }}"
+        minutes: "{{ minutes }}"
+
+    - when: seconds == "" and minutes == ""
+      name: "Pause (wait for key press)"
+      pause:
+        prompt: "Pause: {{ message }} - Press <enter> to continue"
+
