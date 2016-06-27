@@ -4,7 +4,7 @@
 - include: container/set_data_switch_config.yml log_level=info
 - include: container/inv_add_switches.yml log_level=info
 - include: container/inv_add_ipmi_ports.yml log_level=info
-- include: container/ipmi_set_bootdev.yml log_level=info bootdev=pxe persistent=False
+- include: container/ipmi_set_bootdev.yml log_level=info bootdev=network persistent=False
 - include: container/ipmi_power_on.yml log_level=info
 # todo: investigate resetting the mgmt switch to renew dhcp leases in container
 - include: pause.yml minutes=5 message="Power-on Nodes"
@@ -13,7 +13,7 @@
 - include: container/ipmi_power_off.yml log_level=info
 - include: container/cobbler/cobbler_add_distros.yml
 - include: container/cobbler/cobbler_add_systems.yml
-- include: container/ipmi_set_bootdev.yml log_level=info bootdev=pxe persistent=False
+- include: container/ipmi_set_bootdev.yml log_level=info bootdev=network persistent=False
 - include: container/ipmi_power_on.yml log_level=info
 - include: pause.yml minutes=5 message="Power-on Nodes"
 - include: container/ipmi_set_bootdev.yml log_level=info bootdev=default persistent=True
