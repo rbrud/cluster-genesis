@@ -33,6 +33,7 @@ CFG_USERID_IPMI = 'userid-ipmi'
 CFG_PASSWORD_IPMI = 'password-ipmi'
 CFG_NETWORKS = 'networks'
 CFG_VLAN = 'vlan'
+CFG_MANAGEMENT_PORTS = ('ipmi', 'pxe')
 
 INV_SWITCHES = 'switches'
 INV_MGMT = 'mgmt'
@@ -43,10 +44,12 @@ INV_USERID = 'userid'
 INV_PASSWORD = 'password'
 INV_NODES = 'nodes'
 INV_HOSTNAME = 'hostname'
+INV_PORT_PATTERN = 'port-%s'
 INV_PORT_IPMI = 'port-ipmi'
 INV_PORT_PXE = 'port-pxe'
 INV_IPV4_IPMI = 'ipv4-ipmi'
 INV_IPV4_PXE = 'ipv4-pxe'
+INV_MAC_PATTERN = 'mac-%s'
 INV_MAC_IPMI = 'mac-ipmi'
 INV_MAC_PXE = 'mac-pxe'
 INV_RACK_ID = 'rack-id'
@@ -55,7 +58,6 @@ INV_PORT_ETH11 = 'port-eth11'
 INV_USERID_IPMI = 'userid-ipmi'
 INV_PASSWORD_IPMI = 'password-ipmi'
 INV_TEMPLATE = 'template'
-
 
 class Inventory():
     INV_CHASSIS_PART_NUMBER = 'chassis-part-number'
@@ -207,6 +209,17 @@ class Inventory():
                 value[CFG_PASSWORD_DATA_SWITCH],
                 value['port_vlan'])
 
+    def get_data_switches(self):
+        # This methods a dict of switch IP to a dict with user
+        # userid and password
+        userid = self.cfg[CFG_USERID_DATA_SWITCH]
+        password = self.cfg[CFG_PASSWORD_DATA_SWITCH]
+        return_value = {}
+        for rack_ip in self.cfg[CFG_IPADDR_DATA_SWITCH].values():
+            return_value[rack_ip] = {'user': userid,
+                                     'password': password}
+        return return_value
+
     def yield_mgmt_rack_ipv4(self):
         self.cfg = self.load(self.cfg_file)
         for key, value in self.cfg[CFG_IPADDR_MGMT_SWITCH].items():
@@ -253,7 +266,6 @@ class Inventory():
                                 _list.append(node_dict)
                                 _dict[key] = _list
                                 inv[INV_NODES] = _dict
-
         self.dump(inv)
 
     def add_pxe(self, dhcp_mac_ip, mgmt_switch_config):
@@ -313,3 +325,39 @@ class Inventory():
     def add_to_node(self, key, index, field, value):
         inv = self.inv
         inv[INV_NODES][key][index][field] = value
+
+    def add_data_switch_port_macs(self, switch_to_port_to_macs):
+        # Get map of rack IP to rack ID.
+        ip_to_rack_id = {}
+        for rack_id, rack_ip in self.inv[CFG_IPADDR_DATA_SWITCH].iteritems():
+            ip_to_rack_id[rack_ip] = rack_id
+
+        # Get list of all nodes
+        nodes = [node for sublist in self.inv['nodes'].values() for node
+                 in sublist]
+        success = True
+        for ip, switch_ports_to_MACs in switch_to_port_to_macs.iteritems():
+            rack_id = ip_to_rack_id[ip]
+            for node in nodes:
+                if node['rack-id'] != rack_id:
+                    continue
+                node_template = self.inv[CFG_NODES_TEMPLATES][node[INV_TEMPLATE]]
+                for port_name in node_template['ports'].keys():
+                    if port_name not in CFG_MANAGEMENT_PORTS:
+                        node_port_on_rack = str(node.get(INV_PORT_PATTERN % port_name, ''))
+                        macs = switch_ports_to_MACs.get(node_port_on_rack, [])
+                        if macs:
+                            mac_key = INV_MAC_PATTERN  % port_name
+                            node[mac_key] = macs[0]
+                        else:
+                            msg = ('Unable to find a MAC address for %(port_name)s'
+                                   ' of host %(host)s plugged into port %(node_port_on_rack)s'
+                                   ' of switch %(switch)s')
+                            msg_vars = {'port_name': port_name,
+                                        'host': node.get(INV_IPV4_PXE),
+                                        'node_port_on_rack': node_port_on_rack,
+                                        'switch': ip}
+                            print msg % msg_vars
+                            success = False
+        self.dump()
+        return success
