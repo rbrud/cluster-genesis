@@ -17,7 +17,7 @@ CFG_PASSWORD_MGMT_SWITCH = 'password-mgmt-switch'
 CFG_USERID_DATA_SWITCH = 'userid-data-switch'
 CFG_PASSWORD_DATA_SWITCH = 'password-data-switch'
 CFG_RACK_ID = 'rack-id'
-CFG_NODES_TEMPLATES = 'nodes_templates'
+CFG_NODES_TEMPLATES = 'node-templates'
 CFG_PORTS = 'ports'
 CFG_ETH10 = 'eth10'
 CFG_ETH11 = 'eth11'
@@ -54,6 +54,7 @@ INV_PORT_ETH10 = 'port-eth10'
 INV_PORT_ETH11 = 'port-eth11'
 INV_USERID_IPMI = 'userid-ipmi'
 INV_PASSWORD_IPMI = 'password-ipmi'
+INV_TEMPLATE = 'template'
 
 
 class Inventory():
@@ -248,6 +249,7 @@ class Inventory():
                                 node_dict[INV_IPV4_IPMI] = \
                                     dhcp_mac_ip[mgmt_port[ipmi_port]]
                                 node_dict[INV_RACK_ID] = rack
+                                node_dict[INV_TEMPLATE] = key
                                 _list.append(node_dict)
                                 _dict[key] = _list
                                 inv[INV_NODES] = _dict
