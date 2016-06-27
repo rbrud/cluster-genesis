@@ -20,7 +20,7 @@ networks:
     openstack-tenant-network:
         vlan: 30
         eth-port: eth11
-nodes_templates:
+node-templates:
     controller1:
         hostname:
         userid-ipmi: ADMIN
