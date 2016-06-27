@@ -73,4 +73,4 @@
       file:
         path: "{{ project_path }}/log.txt"
         state: touch
-        mode: 0755
+        mode: 0644
