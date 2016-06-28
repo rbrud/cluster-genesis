@@ -62,7 +62,7 @@
       become_method: sudo
 
     - name: "Register management network subnet address"
-      shell: "grep ipaddr-mgmt-network {{ project_path_local }}/config.yml | awk '{print $2}'"
+      shell: "grep ipaddr-mgmt-network {{ config_local }} | awk '{print $2}'"
       register: ipaddr_mgmt_network
 
     - name: "Update group_vars/all container_mgmt_subnet"
