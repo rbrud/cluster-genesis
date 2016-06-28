@@ -313,3 +313,5 @@ class Inventory():
     def add_to_node(self, key, index, field, value):
         inv = self.inv
         inv[INV_NODES][key][index][field] = value
+
+        self.dump(inv)

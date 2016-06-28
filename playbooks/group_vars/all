@@ -6,6 +6,7 @@ venv_path: "{{ project_path }}/deployenv"
 python_executable: "{{ venv_path }}/bin/python"
 container_mgmt_subnet: 192.168.3.0/24
 container_mgmt_ipv4: "{{ container_mgmt_subnet | ipaddr('2') }}"
+node_mgmt_ipv4_start: "{{ container_mgmt_subnet | ipaddr('101') }}"
 
 # Reboot time variables
 # How long to wait for a server to reboot
