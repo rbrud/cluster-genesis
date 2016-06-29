@@ -325,6 +325,7 @@ class Inventory():
     def add_to_node(self, key, index, field, value):
         inv = self.inv
         inv[INV_NODES][key][index][field] = value
+        self.dump(inv)
 
     def add_data_switch_port_macs(self, switch_to_port_to_macs):
         # Get map of rack IP to rack ID.

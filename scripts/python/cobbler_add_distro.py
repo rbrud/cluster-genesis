@@ -74,6 +74,11 @@ class CobblerAddDistro(object):
             "breed",
             "ubuntu",
             token)
+        cobbler_server.modify_distro(
+            new_distro_create,
+            "os_version",
+            "trusty",
+            token)
         cobbler_server.save_distro(new_distro_create, token)
         new_profile_create = cobbler_server.new_profile(token)
         cobbler_server.modify_profile(

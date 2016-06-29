@@ -8,13 +8,21 @@
     log_level: ""
   tasks:
 
-    - name: "Create directory in container to store install images."
+    - name: "Restore original /etc/cobbler/pxe/pxedefault.template file"
+      copy:
+        remote_src: True
+        src: /etc/cobbler/pxe/pxedefault.template.orig
+        dest: /etc/cobbler/pxe/pxedefault.template
+      become: yes
+      become_method: sudo
+
+    - name: "Create directory in container to store install images"
       file:
         path: "{{ project_path }}/distro_images"
         state: directory
         mode: 0755
 
-    - name: "Copy OS installer images and configs to container."
+    - name: "Copy OS installer images and configs to container"
       copy:
         src: "{{ item }}"
         dest: "{{ project_path }}/distro_images/"
@@ -24,19 +32,23 @@
         - ~/distro_images/*.cfg
         - ~/distro_images/*.list
 
-    - shell: "ls {{ project_path }}/distro_images/*.iso | grep -v mini"
+    - name: "Register list of *.iso files"
+      shell: "ls {{ project_path }}/distro_images/*.iso | grep -v mini"
       register: iso_files
 
-    - shell: "ls {{ project_path }}/distro_images/*.mini.iso"
+    - name: "Register list of *.mini.iso files"
+      shell: "ls {{ project_path }}/distro_images/*.mini.iso"
       register: mini_iso_files
 
-    - shell: "ls {{ project_path }}/distro_images/*.cfg"
+    - name: "Register list of *.cfg files"
+      shell: "ls {{ project_path }}/distro_images/*.cfg"
       register: cfg_files
 
-    - shell: "ls {{ project_path }}/distro_images/*.list"
+    - name: "Register list of *.list files"
+      shell: "ls {{ project_path }}/distro_images/*.list"
       register: list_files
 
-    - name: "Mount Disto installer images."
+    - name: "Mount Disto installer images"
       mount:
         name: "/mnt/{{ item | basename | regex_replace('^(.*).iso$', '\\1') }}"
         src: "{{ item }}"
@@ -49,21 +61,21 @@
       become: yes
       become_method: sudo
 
-    - name: "Copy distro images to web repo directory." 
+    - name: "Copy distro images to web repo directory" 
       command: "rsync -a /mnt/{{ item | basename | regex_replace('^(.*).iso$', '\\1') }}/ /var/www/html/{{ item | basename | regex_replace('^(.*).iso$', '\\1') }}/"
       with_items:
         - "{{ iso_files.stdout_lines }}"
       become: yes
       become_method: sudo
  
-    - name: "Copy \"mini\" netboot files to web repo directory." 
+    - name: "Copy \"mini\" netboot files to web repo directory" 
       command: "rsync -a /mnt/{{ item | basename | regex_replace('^(.*).iso$', '\\1') }}/install/ /var/www/html/{{ item | basename | regex_replace('^(.*).mini.iso$', '\\1') }}/install/netboot/"
       with_items:
         - "{{ mini_iso_files.stdout_lines }}"
       become: yes
       become_method: sudo
     
-    - name: "Update preseed configurations with container IP."
+    - name: "Update preseed configurations with container IP"
       replace:
         dest: "{{ item }}"
         regexp: "0.0.0.0"
@@ -73,7 +85,7 @@
       become: yes
       become_method: sudo
  
-    - name: "Copy preseed configurations to cobbler kickstart directory."
+    - name: "Copy preseed configurations to cobbler kickstart directory"
       copy:
         src: "{{ item }}"
         remote_src: True
@@ -83,7 +95,7 @@
       become: yes
       become_method: sudo
 
-    - name: "Copy public apt source lists to web repo directory." 
+    - name: "Copy public apt source lists to web repo directory" 
       copy:
         src: "{{ item }}"
         remote_src: True
@@ -93,7 +105,7 @@
       become: yes
       become_method: sudo
 
-    - name: "Unmount distro installer images."
+    - name: "Unmount distro installer images"
       mount:
         name: "/mnt/{{ item | basename | regex_replace('^(.*).iso$', '\\1') }}"
         src: "{{ item }}"
@@ -105,7 +117,7 @@
       become: yes
       become_method: sudo
     
-    - name: "Call python \"cobbler_add_distro.py\" script to import distros and create profiles."
+    - name: "Call python \"cobbler_add_distro.py\" script to import distros and create profiles"
       command: "{{ python_executable }} {{ scripts_path }}/python/cobbler_add_distro.py /var/www/html/{{ item | basename | regex_replace('^(.*).iso$', '\\1') }} {{ item | basename | regex_replace('^(.*).iso$', '\\1') }}  {{ item | basename | regex_replace('^.*-(.*).iso$', '\\1') }} {{ log_level }}"
       with_items:
         - "{{ iso_files.stdout_lines }}"

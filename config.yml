@@ -28,14 +28,14 @@ node-templates:
         ports:
             ipmi:
                 rack1:
+                - 1
                 - 2
                 - 3
-                - 5
             pxe:
                 rack1:
+                - 19
                 - 20
                 - 21
-                - 23
             eth10:
                 rack1:
                 - 11

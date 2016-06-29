@@ -1,19 +1,19 @@
 - include: lxc-update.yml
 - include: container/cobbler/cobbler_install.yml
-- hosts: localhost
-  tasks:
-    - pause: prompt="Please reset BMC interfaces to obtain DHCP leases. Press <enter> to continue"
+- include: pause.yml message="Please reset BMC interfaces to obtain DHCP leases. Press <enter> to continue"
 - include: container/set_data_switch_config.yml log_level=info
 - include: container/inv_add_switches.yml log_level=info
 - include: container/inv_add_ipmi_ports.yml log_level=info
+- include: container/ipmi_set_bootdev.yml log_level=info bootdev=network persistent=False
 - include: container/ipmi_power_on.yml log_level=info
-- hosts: localhost
-  tasks:
-    - pause: minutes=8
-      name: Pause 8 minutes during power-on
+- include: pause.yml minutes=5 message="Power-on Nodes"
 - include: container/inv_add_ipmi_data.yml log_level=info
 - include: container/inv_add_pxe_ports.yml log_level=info
 - include: container/ipmi_power_off.yml log_level=info
+- include: container/inv_modify_pxe_ports_ip.yml log_level=info
 - include: container/cobbler/cobbler_add_distros.yml
 - include: container/cobbler/cobbler_add_systems.yml
+- include: container/ipmi_set_bootdev.yml log_level=info bootdev=network persistent=False
 - include: container/ipmi_power_on.yml log_level=info
+- include: pause.yml minutes=5 message="Power-on Nodes"
+- include: container/ipmi_set_bootdev.yml log_level=info bootdev=default persistent=True
