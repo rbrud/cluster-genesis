@@ -21,7 +21,7 @@ class ConfigureDataSwitch(object):
 
         self.ENABLE_REMOTE_CONFIG = 'cli enable \"configure terminal\" %s'
         SET_VLAN = '\"vlan %d\"'
-        INTERFACE_ETHERNET = '\"interface ethernet 1/%d\"'
+        INTERFACE_ETHERNET = '\"interface ethernet 1/%s\"'
         SWITCHPORT_MODE_HYBRID = '\"switchport mode hybrid\"'
         SWITCHPORT_HYBRID_ALLOWED_VLAN = \
             '\"switchport hybrid allowed-vlan add %d\"'
@@ -36,21 +36,21 @@ class ConfigureDataSwitch(object):
         for self.ipv4, self.userid, self.password, vlans \
                 in inv.yield_data_vlans():
             for vlan in vlans:
-                self.log.info('Create vlan %d' % (vlan))
+                self.log.info('Create vlan %s' % (vlan))
                 self.issue_cmd(SET_VLAN % (vlan))
 
         for self.ipv4, self.userid, self.password, ports \
                 in inv.yield_data_switch_ports():
             for port, vlans in ports.items():
                 self.log.info(
-                    'Enable hybrid mode for port %d' % (port))
+                    'Enable hybrid mode for port %s' % (port))
                 self.issue_cmd(
                     INTERFACE_ETHERNET % (port) +
                     ' ' +
                     SWITCHPORT_MODE_HYBRID)
                 for vlan in vlans:
                     self.log.info(
-                        'In hybrid mode add vlan %d to port %d' %
+                        'In hybrid mode add vlan %s to port %s' %
                         (vlan, port))
                     self.issue_cmd(
                         INTERFACE_ETHERNET % (port) +
