@@ -196,9 +196,10 @@ class Inventory():
                                 for port in ports:
                                     _list = []
                                     for networks in value[CFG_NETWORKS]:
-                                        vlan = self.cfg[CFG_NETWORKS][networks][CFG_VLAN]
-                                        _list.append(vlan)
-                                        _dict[port] = _list
+                                        if CFG_VLAN in self.cfg[CFG_NETWORKS][networks]:
+                                            vlan = self.cfg[CFG_NETWORKS][networks][CFG_VLAN]
+                                            _list.append(vlan)
+                                            _dict[port] = _list
                                 __dict[CFG_USERID_DATA_SWITCH] = userid
                                 __dict[CFG_PASSWORD_DATA_SWITCH] = password
                                 __dict['port_vlan'] = _dict
