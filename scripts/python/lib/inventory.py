@@ -167,13 +167,13 @@ class Inventory():
                         if ports_key == CFG_ETH10 or ports_key == CFG_ETH11:
                             for rack in ports_value:
                                 for networks in value[CFG_NETWORKS]:
-                                    _dict[CFG_USERID_DATA_SWITCH] = userid
-                                    _dict[CFG_PASSWORD_DATA_SWITCH] = password
-                                    if (CFG_VLAN in self.cfg[CFG_NETWORKS][networks] and 
-                                        self.cfg[CFG_NETWORKS][networks][CFG_VLAN] not in _list):
-                                        _list.append(self.cfg[CFG_NETWORKS][networks][CFG_VLAN])
-                                        _dict['vlan'] = _list
-                                        __dict[self.cfg[CFG_IPADDR_DATA_SWITCH][rack]] = _dict
+                                    if CFG_VLAN in self.cfg[CFG_NETWORKS][networks]:
+                                        _dict[CFG_USERID_DATA_SWITCH] = userid
+                                        _dict[CFG_PASSWORD_DATA_SWITCH] = password
+                                        if self.cfg[CFG_NETWORKS][networks][CFG_VLAN] not in _list:
+                                            _list.append(self.cfg[CFG_NETWORKS][networks][CFG_VLAN])
+                                            _dict['vlan'] = _list
+                                            __dict[self.cfg[CFG_IPADDR_DATA_SWITCH][rack]] = _dict
         for key, value in __dict.items():
             yield (
                 key,
@@ -198,10 +198,8 @@ class Inventory():
                                     for networks in value[CFG_NETWORKS]:
                                         if CFG_VLAN in self.cfg[CFG_NETWORKS][networks]:
                                             vlan = self.cfg[CFG_NETWORKS][networks][CFG_VLAN]
-                                        else:
-                                            vlan = 1
-                                        _list.append(vlan)
-                                        _dict[port] = _list
+                                            _list.append(vlan)
+                                            _dict[port] = _list
                                 __dict[CFG_USERID_DATA_SWITCH] = userid
                                 __dict[CFG_PASSWORD_DATA_SWITCH] = password
                                 __dict['port_vlan'] = _dict
