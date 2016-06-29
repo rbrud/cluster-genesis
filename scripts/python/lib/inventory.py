@@ -169,7 +169,8 @@ class Inventory():
                                 for networks in value[CFG_NETWORKS]:
                                     _dict[CFG_USERID_DATA_SWITCH] = userid
                                     _dict[CFG_PASSWORD_DATA_SWITCH] = password
-                                    if self.cfg[CFG_NETWORKS][networks][CFG_VLAN] not in _list:
+                                    if (CFG_VLAN in self.cfg[CFG_NETWORKS][networks] and 
+                                        self.cfg[CFG_NETWORKS][networks][CFG_VLAN] not in _list:
                                         _list.append(self.cfg[CFG_NETWORKS][networks][CFG_VLAN])
                                         _dict['vlan'] = _list
                                         __dict[self.cfg[CFG_IPADDR_DATA_SWITCH][rack]] = _dict
