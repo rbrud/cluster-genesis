@@ -14,11 +14,10 @@
 # limitations under the License.
 
 - name: Clear switch MAC address table
-  hosts: all
+  hosts: localhost
   tasks:
     - name: Clear switch MAC address table switch and write them to the inventory file
-      local_action: command "{{ python_executable }} {{ scripts_path }}/python/clear_port_macs.py /var/oprc/inventory.yml {{ log_level }}"
-      run_once: true
+      command: "{{ python_executable }} {{ scripts_path }}/python/clear_port_macs.py /var/oprc/inventory.yml {{ log_level }}"
 
 - name: Bring up all non-ansible comm interfaces on IPv6
   hosts: all
@@ -49,15 +48,13 @@
       with_items: "{{ ansible_interfaces }}"
 
 - name: Get MACs into the inventory file
-  hosts: all
+  hosts: localhost
   tasks:
     - name: Wait for interfaces to communicate with the switch
       pause:
         seconds: 30
-      run_once: true
     - name: Obtain interface MACs from the switch and write them to the inventory file
-      local_action: command "{{ python_executable }} {{ scripts_path }}/python/set_port_macs.py /var/oprc/inventory.yml {{ log_level }}"
-      run_once: true
+      command: "{{ python_executable }} {{ scripts_path }}/python/set_port_macs.py /var/oprc/inventory.yml {{ log_level }}"
       ignore_errors: yes
 
 - name: Restore system interfaces
