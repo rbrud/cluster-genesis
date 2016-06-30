@@ -145,7 +145,7 @@
       replace:
         dest: "{{ project_path_local }}/playbooks/hosts"
         regexp: '^(deployer .+?)=\d+\.\d+\.\d+\.\d+$'
-        replace: '\1={{ container_mgmt_ipv4 | ipaddr("address") }}'
+        replace: '\1={{ ipaddr_mgmt_network.stdout | ipaddr("2") | ipaddr("address") }}'
       become: yes
       become_method: sudo
 
