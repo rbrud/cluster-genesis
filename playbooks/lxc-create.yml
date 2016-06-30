@@ -76,7 +76,7 @@
       replace:
         dest: "{{ project_path_local }}/playbooks/lxc.conf"
         regexp: '^(lxc.network.ipv4 =).*$'
-        replace: '\1 {{ container_mgmt_subnet | ipaddr("2") }}'
+        replace: '\1 {{ ipaddr_mgmt_network.stdout | ipaddr("2") }}'
 
     - name: "Create private/public ssh key pair"
       user:
