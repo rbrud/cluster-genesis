@@ -17,7 +17,7 @@
   hosts: localhost
   tasks:
     - name: Clear switch MAC address table switch and write them to the inventory file
-      command: "{{ python_executable }} {{ scripts_path }}/python/clear_port_macs.py /var/oprc/inventory.yml {{ log_level }}"
+      command: "{{ python_executable_local }} {{ scripts_path_local }}/python/clear_port_macs.py /var/oprc/inventory.yml {{ log_level }}"
 
 - name: Bring up all non-ansible comm interfaces on IPv6
   hosts: all
@@ -54,7 +54,7 @@
       pause:
         seconds: 30
     - name: Obtain interface MACs from the switch and write them to the inventory file
-      command: "{{ python_executable }} {{ scripts_path }}/python/set_port_macs.py /var/oprc/inventory.yml {{ log_level }}"
+      command: "{{ python_executable_local }} {{ scripts_path_local }}/python/set_port_macs.py /var/oprc/inventory.yml {{ log_level }}"
       ignore_errors: yes
 
 - name: Restore system interfaces
