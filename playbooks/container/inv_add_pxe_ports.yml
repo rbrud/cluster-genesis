@@ -5,6 +5,6 @@
     log_level: ""
     dhcp_leases_file: "/var/lib/misc/dnsmasq.leases"
   tasks:
-    - command: "fping -g {{ container_mgmt_subnet }}"
+    - command: "awk '{system(\"ping -c 5 \"$3)}' {{ dhcp_leases_file }}"
       ignore_errors: yes
     - command: "{{ python_executable }} {{ scripts_path }}/python/inv_add_pxe_ports.py {{ config }} {{ inventory }} {{ dhcp_leases_file }} {{ log_level }}"
