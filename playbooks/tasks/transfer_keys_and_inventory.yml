@@ -15,7 +15,7 @@
 
 - name: Transferring private key
   copy:
-    src: "{{ ansible_env.HOME }}/.ssh/id_rsa_ansible-generated"
+    src: "{{ hostvars['localhost']['ssh_key_private'] }}"
     dest: /root/.ssh/id_rsa
     owner: root
     group: root
@@ -23,7 +23,7 @@
 
 - name: Transferring public key
   copy:
-    src: "{{ ansible_env.HOME }}/.ssh/id_rsa_ansible-generated.pub"
+    src: "{{ hostvars['localhost']['ssh_key_public'] }}"
     dest: /root/.ssh/id_rsa.pub
     owner: root
     group: root
