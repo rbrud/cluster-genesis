@@ -2,4 +2,5 @@
 - name: container/inv_add_config_file.yml
   hosts: deployer
   tasks:
-    - shell: "cat {{ config }} >> {{ inventory }}"
+    - name: "Append config.yml to inventory.yml"
+      shell: "cat {{ config }} >> {{ inventory }}"

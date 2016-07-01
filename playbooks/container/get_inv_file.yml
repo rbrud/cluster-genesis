@@ -1,7 +1,9 @@
 ---
-- hosts: deployer
+- name: container/get_inv_file.yml
+  hosts: deployer
   tasks:
-    - fetch:
+    - name: "Fetch inventory file from deployer"
+      fetch:
         src: "{{ inventory }}"
         dest: "{{ dest }}"
         flat: yes
