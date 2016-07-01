@@ -1,0 +1,5 @@
+---
+- name: container/allocate_ip_addresses.yml
+  hosts: deployer
+  tasks:
+    - command: "{{ python_executable }} {{ scripts_path }}/python/yggdrasil/allocate_ip_addresses.py --inventory {{ inventory }}"

@@ -1,0 +1,5 @@
+---
+- name: container/inv_add_config_file.yml
+  hosts: deployer
+  tasks:
+    - command: "cat {{ config }} >> {{ inventory }}"

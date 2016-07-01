@@ -13,6 +13,9 @@
 - include: container/inv_modify_pxe_ports_ip.yml log_level=info
 - include: container/cobbler/cobbler_add_distros.yml
 - include: container/cobbler/cobbler_add_systems.yml
+- include: container/inv_add_config_file.yml
+- include: container/allocate_ip_addresses.yml
+- include: container/get_inv_file.yml dest=/var/oprc
 - include: container/ipmi_set_bootdev.yml log_level=info bootdev=network persistent=False
 - include: container/ipmi_power_on.yml log_level=info
 - include: pause.yml minutes=5 message="Power-on Nodes"
