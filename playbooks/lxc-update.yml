@@ -22,7 +22,8 @@
       become_method: sudo
 
     - name: "Install distro packages"
-      apt: name="{{ item }}"
+      apt:
+        name: "{{ item }}"
       with_items:
       - python-pip 
       - python-dev
@@ -35,7 +36,8 @@
       become_method: sudo
 
     - name: "Install python pip packages"
-      pip: name="{{ item }}"
+      pip:
+        name: "{{ item }}"
       with_items:
       - pip
       - setuptools
