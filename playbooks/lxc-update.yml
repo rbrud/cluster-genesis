@@ -64,10 +64,7 @@
     - name: "Copy config file into deployment container"
       copy:
         src: "{{ config_local }}"
-        dest: "{{ item }}"
-      with_items:
-      - "{{ project_path }}"
-      - "{{ project_path }}/inventory.yml"
+        dest: "{{ project_path }}"
 
     - name: "Copy scripts into deployment container"
       copy:
