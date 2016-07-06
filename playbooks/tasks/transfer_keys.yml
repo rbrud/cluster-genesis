@@ -13,25 +13,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-- hosts: localhost
-  gather_facts: yes
+- name: Transferring private key
+  copy:
+    src: "{{ hostvars['localhost']['ssh_key_private'] }}"
+    dest: /root/.ssh/id_rsa
+    owner: root
+    group: root
+    mode: "0600"
 
-- name: Configure interfaces
-  hosts: all
-  tasks:
-    - include: tasks/create_interfaces.yml
-
-- name: Transfer keys
-  hosts: controllers:compute
-  tasks:
-    - include: tasks/transfer_keys.yml
-
-- name: Transfer inventory file
-  hosts: controllers
-  tasks:
-    - include: tasks/transfer_inventory.yml
-
-- name: Prepare Cluster Configuration Software
-  hosts: controllers[0]
-  tasks:
-    - include: tasks/os_services_install.yml
+- name: Transferring public key
+  copy:
+    src: "{{ hostvars['localhost']['ssh_key_public'] }}"
+    dest: /root/.ssh/id_rsa.pub
+    owner: root
+    group: root
+    mode: "0644"
+...
