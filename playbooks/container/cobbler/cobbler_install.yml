@@ -36,7 +36,9 @@
       become_method: sudo
 
     - name: "Install software packages"
-      apt: name={{ item }}
+      apt:
+        name: "{{ item }}"
+        force: yes
       with_items:
       - cobbler
       - dnsmasq
