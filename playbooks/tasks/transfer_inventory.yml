@@ -13,22 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-- name: Transferring private key
-  copy:
-    src: "{{ hostvars['localhost']['ssh_key_private'] }}"
-    dest: /root/.ssh/id_rsa
-    owner: root
-    group: root
-    mode: "0600"
-
-- name: Transferring public key
-  copy:
-    src: "{{ hostvars['localhost']['ssh_key_public'] }}"
-    dest: /root/.ssh/id_rsa.pub
-    owner: root
-    group: root
-    mode: "0644"
-
 - name: Create inventory file target directory
   file:
     path: /var/oprc
