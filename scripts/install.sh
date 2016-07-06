@@ -12,5 +12,5 @@ fi
 sudo -H pip install virtualenv
 virtualenv --no-wheel --system-site-packages deployenv
 source deployenv/bin/activate
-pip install --ignore-installed ansible
+pip install --ignore-installed ansible orderedattrdict
 deactivate
