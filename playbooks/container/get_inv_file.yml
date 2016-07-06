@@ -1,5 +1,15 @@
 ---
-- name: container/get_inv_file.yml
+- name: container/get_inv_file.yml (localhost)
+  hosts: localhost
+  tasks:
+    - name: "Ensure {{ dest }} directory exists"
+      file:
+        path: "{{ dest }}"
+        state: directory
+        owner: "{{ansible_user_id}}"
+      become: yes
+      become_method: sudo
+- name: container/get_inv_file.yml (deployer)
   hosts: deployer
   tasks:
     - name: "Fetch inventory file from deployer"
