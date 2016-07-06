@@ -84,7 +84,37 @@
         - "{{ cfg_files.stdout_lines }}"
       become: yes
       become_method: sudo
- 
+
+    - name: "Register default user id"
+      shell: "grep userid-default {{ config }} | awk '{print $2}'"
+      register: userid_default
+
+    - name: "Update preseed configurations with default user id"
+      replace:
+        dest: "{{ item }}"
+        regexp: "defaultuser"
+        replace: "{{ userid_default.stdout }}"
+      with_items:
+        - "{{ cfg_files.stdout_lines }}"
+      when: userid_default.stdout != ""
+      become: yes
+      become_method: sudo
+
+    - name: "Register default password"
+      shell: "grep password-default {{ config }} | awk '{print $2}'"
+      register: password_default
+
+    - name: "Update preseed configurations with default user password"
+      replace:
+        dest: "{{ item }}"
+        regexp: "passw0rd"
+        replace: "{{ password_default.stdout }}"
+      with_items:
+        - "{{ cfg_files.stdout_lines }}"
+      when: password_default.stdout != ""
+      become: yes
+      become_method: sudo
+
     - name: "Copy preseed configurations to cobbler kickstart directory"
       copy:
         src: "{{ item }}"
