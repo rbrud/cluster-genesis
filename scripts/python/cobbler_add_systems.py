@@ -22,7 +22,10 @@ YAML_CHASSIS_PART_NUMBER = 'chassis-part-number'
 YAML_CHASSIS_SERIAL_NUMBER = 'chassis-serial-number'
 YAML_MODEL = 'model'
 YAML_SERIAL_NUMBER = 'serial-number'
+INV_TEMPLATE = 'template'
 
+CFG_NODES_TEMPLATES = 'node-templates'
+CFG_COBBLER_PROFILE = 'cobbler-profile'
 YAML_COBBLER_PROFILE = 'cobbler-profile'
 YAML_ARCH = 'architecture'
 COBBLER_PROFILE_X86_64 = 'ubuntu-14.04.4-server-amd64'
@@ -51,6 +54,9 @@ class CobblerAddSystems(object):
             if YAML_COBBLER_PROFILE in node:
                 COBBLER_PROFILE = \
                     node[YAML_COBBLER_PROFILE]
+            elif CFG_COBBLER_PROFILE in inv.cfg[CFG_NODES_TEMPLATES][node[INV_TEMPLATE]]:
+                COBBLER_PROFILE = \
+                    inv.cfg[CFG_NODES_TEMPLATES][node[INV_TEMPLATE]][YAML_COBBLER_PROFILE]
             elif (YAML_ARCH in node and
                     node[YAML_ARCH] is not None):
                 if node[YAML_ARCH].lower() == 'x86_64':
