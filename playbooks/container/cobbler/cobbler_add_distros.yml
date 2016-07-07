@@ -31,6 +31,7 @@
         - ~/distro_images/*.iso
         - ~/distro_images/*.cfg
         - ~/distro_images/*.list
+        - ~/distro_images/*.kopts
 
     - name: "Register list of *.iso files"
       shell: "ls {{ project_path }}/distro_images/*.iso | grep -v mini"
@@ -147,8 +148,8 @@
       become: yes
       become_method: sudo
     
-    - name: "Call python \"cobbler_add_distros.py\" script to import distros and create profiles"
-      command: "{{ python_executable }} {{ scripts_path }}/python/cobbler_add_distros.py /var/www/html/{{ item | basename | regex_replace('^(.*).iso$', '\\1') }} {{ item | basename | regex_replace('^(.*).iso$', '\\1') }}  {{ item | basename | regex_replace('^.*-(.*).iso$', '\\1') }} {{ log_level }}"
+    - name: "Call python \"cobbler_add_distros.py\" script to import distros and create default profiles"
+      command: "{{ python_executable }} {{ scripts_path }}/python/cobbler_add_distros.py /var/www/html/{{ item | basename | regex_replace('^(.*)[.]iso$', '\\1') }} {{ item | basename | regex_replace('^(.*)[.]iso$', '\\1') }}  {{ item | basename | regex_replace('^.*-(.*)[.]iso$', '\\1') }} {{ log_level }}"
       with_items:
         - "{{ iso_files.stdout_lines }}"
       become: yes

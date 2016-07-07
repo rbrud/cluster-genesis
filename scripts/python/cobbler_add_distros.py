@@ -69,6 +69,11 @@ class CobblerAddDistros(object):
             "os_version",
             "trusty",
             token)
+        cobbler_server.modify_distro(
+            new_distro_create,
+            "kernel_options",
+            "console=netcfg/dhcp_timeout=1024 netcfg/choose_interface=auto ipv6.disable=1",
+            token)
         cobbler_server.save_distro(new_distro_create, token)
         new_profile_create = cobbler_server.new_profile(token)
         cobbler_server.modify_profile(
@@ -91,18 +96,6 @@ class CobblerAddDistros(object):
             "kickstart",
             "/var/lib/cobbler/kickstarts/" + name + ".cfg",
             token)
-        if arch == "ppc64el":
-            cobbler_server.modify_profile(
-                new_profile_create,
-                "kernel_options",
-                "console=netcfg/dhcp_timeout=1024 netcfg/choose_interface=auto ipv6.disable=1",
-                token)
-        elif arch == "amd64":
-            cobbler_server.modify_profile(
-                new_profile_create,
-                "kernel_options",
-                "console=tty2 console=ttyS2,115200n8 netcfg/dhcp_timeout=1024 netcfg/choose_interface=auto ipv6.disable=1",
-                token)
         cobbler_server.save_profile(new_profile_create, token)
         cobbler_server.sync(token)
         log.info("Running Cobbler sync")
