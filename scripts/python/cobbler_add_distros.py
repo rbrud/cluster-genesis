@@ -72,7 +72,7 @@ class CobblerAddDistros(object):
         cobbler_server.modify_distro(
             new_distro_create,
             "kernel_options",
-            "console=netcfg/dhcp_timeout=1024 netcfg/choose_interface=auto ipv6.disable=1",
+            "netcfg/dhcp_timeout=1024 netcfg/choose_interface=auto ipv6.disable=1",
             token)
         cobbler_server.save_distro(new_distro_create, token)
         new_profile_create = cobbler_server.new_profile(token)
