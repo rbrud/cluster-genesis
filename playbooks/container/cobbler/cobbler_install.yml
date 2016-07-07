@@ -6,25 +6,8 @@
   hosts: installer
   tasks:
 
-    - name: "Install vim"
-      apt: name=vim
-      become: yes
-      become_method: sudo
-
     - name: "Install aptitude to enable apt upgrade safe "
       apt: name=aptitude
-      become: yes
-      become_method: sudo
-
-    - name: "Add apt key for opensuse.org cobbler repository"
-      apt_key:
-        url: http://download.opensuse.org/repositories/home:/libertas-ict:/cobbler26/xUbuntu_14.04/Release.key
-      become: yes
-      become_method: sudo
-
-    - name: "Add opensuse.org cobbler repository"
-      apt_repository:
-        repo: deb http://download.opensuse.org/repositories/home:/libertas-ict:/cobbler26/xUbuntu_14.04 /
       become: yes
       become_method: sudo
 
@@ -38,12 +21,42 @@
     - name: "Install software packages"
       apt:
         name: "{{ item }}"
-        force: yes
       with_items:
-      - cobbler
+      - createrepo
+      - apache2
+      - mkisofs
+      - libapache2-mod-wsgi
+      - python-cheetah
+      - python-netaddr
+      - python-simplejson
+      - python-yaml
+      - python-pycurl
+      - syslinux
+      - yum-utils
+      - python-django
       - dnsmasq
       - fence-agents
       - wget
+      - vim
+      become: yes
+      become_method: sudo
+
+    - name: "Clone Cobbler github repo"
+      git:
+        repo: git://github.com/cobbler/cobbler.git
+        dest: "/home/{{ user }}/cobbler"
+        version: release26
+
+    - name: "Run Cobbler make install"
+      command: make install chdir="/home/{{ user }}/cobbler"
+      become: yes
+      become_method: sudo
+
+    - name: "Create cobbler symlink"
+      file:
+        src: /usr/local/lib/python2.7/dist-packages/cobbler
+        path: /usr/lib/python2.7/dist-packages/cobbler
+        state: link
       become: yes
       become_method: sudo
 
@@ -110,7 +123,7 @@
     - name: "Copy cobbler.conf into apache2/conf-available"
       copy:
         remote_src: True
-        src: /etc/apache2/conf.d/cobbler.conf
+        src: /etc/cobbler/cobbler.conf
         dest: /etc/apache2/conf-available/cobbler.conf
       become: yes
       become_method: sudo
@@ -118,7 +131,7 @@
     - name: "Copy cobbler_web.conf into apache2/conf-available"
       copy:
         remote_src: True
-        src: /etc/apache2/conf.d/cobbler_web.conf
+        src: /etc/cobbler/cobbler_web.conf
         dest: /etc/apache2/conf-available/cobbler_web.conf
       become: yes
       become_method: sudo
@@ -138,21 +151,21 @@
       become: yes
       become_method: sudo
 
-    - name: "Save original /usr/share/cobbler/web/settings.py file"
+    - name: "Save original /usr/local/share/cobbler/web/settings.py file"
       copy:
         remote_src: True
-        src: /usr/share/cobbler/web/settings.py
-        dest: /usr/share/cobbler/web/settings.py.orig
+        src: /usr/local/share/cobbler/web/settings.py
+        dest: /usr/local/share/cobbler/web/settings.py.orig
       become: yes
       become_method: sudo
 
-    - name: "Generate 100 random characters to use as secret key in /usr/share/cobbler/web/settings.py"
+    - name: "Generate 100 random characters to use as secret key in /usr/local/share/cobbler/web/settings.py"
       command: python -c 'import re;from random import choice; import sys; sys.stdout.write(re.escape("".join([choice("abcdefghijklmnopqrstuvwxyz0123456789^&*(-_=+)") for i in range(100)])))'
       register: SECRET_KEY
 
-    - name: "Set secret key in /usr/share/cobbler/web/settings.py"
+    - name: "Set secret key in /usr/local/share/cobbler/web/settings.py"
       replace:
-        dest: /usr/share/cobbler/web/settings.py
+        dest: /usr/local/share/cobbler/web/settings.py
         regexp: "^SECRET_KEY = .*"
         replace: "SECRET_KEY = '{{ SECRET_KEY.stdout }}'"
       become: yes
@@ -287,17 +300,17 @@
       become_method: sudo
 
     - name: "Update boot-loader files"
-      command: /usr/bin/cobbler get-loaders
+      command: /usr/local/bin/cobbler get-loaders
       become: yes
       become_method: sudo
 
     - name: "Update cobbler list of OS signatures"
-      command: /usr/bin/cobbler signature update
+      command: /usr/local/bin/cobbler signature update
       become: yes
       become_method: sudo
 
     - name: "Run cobbler sync"
-      command: /usr/bin/cobbler sync
+      command: /usr/local/bin/cobbler sync
       become: yes
       become_method: sudo
 

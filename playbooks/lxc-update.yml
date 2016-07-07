@@ -31,7 +31,7 @@
       - libssl-dev
       - python-pysnmp4
       - ipmitool
-      - fping
+      - git
       become: yes
       become_method: sudo
 

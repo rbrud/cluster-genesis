@@ -8,30 +8,15 @@ import xmlrpclib
 
 from lib.logger import Logger
 
+COBBLER_USER = 'cobbler'
+COBBLER_PASS = 'cobbler'
 
-class CobblerAddDistro(object):
-    def __init__(self, argv):
-        self.log = Logger(__file__)
 
-        ARGV_MAX = 5
-        argv_count = len(sys.argv)
-        if argv_count > ARGV_MAX:
-            try:
-                raise Exception()
-            except:
-                self.log.error('Invalid argument count')
-                exit(1)
-
-        PATH = sys.argv[1]
-        NAME = sys.argv[2]
-        ARCH = sys.argv[3]
-
-        if len(sys.argv) == ARGV_MAX:
-            LOG_LEVEL = sys.argv[4]
-            self.log.set_level(LOG_LEVEL)
-
-        COBBLER_USER = 'cobbler'
-        COBBLER_PASS = 'cobbler'
+class CobblerAddDistros(object):
+    def __init__(self, log_level, path, name, arch):
+        log = Logger(__file__)
+        if log_level is not None:
+            log.set_level(log_level)
 
         cobbler_server = xmlrpclib.Server("http://127.0.0.1/cobbler_api")
         token = cobbler_server.login(COBBLER_USER, COBBLER_PASS)
@@ -40,35 +25,40 @@ class CobblerAddDistro(object):
         cobbler_server.modify_distro(
             new_distro_create,
             "name",
-            NAME,
+            name,
             token)
-        if ARCH == "ppc64el":
+        if arch == "ppc64el":
             cobbler_server.modify_distro(
                 new_distro_create,
                 "kernel",
-                PATH + "/install/netboot/vmlinux",
+                path + "/install/netboot/vmlinux",
                 token)
             cobbler_server.modify_distro(
                 new_distro_create,
                 "initrd",
-                PATH + "/install/netboot/initrd.gz",
+                path + "/install/netboot/initrd.gz",
                 token)
-        elif ARCH == "amd64":
+            cobbler_server.modify_distro(
+                new_distro_create,
+                "arch",
+                "ppc64le",
+                token)
+        elif arch == "amd64":
             cobbler_server.modify_distro(
                 new_distro_create,
                 "kernel",
-                PATH + "/install/netboot/ubuntu-installer/amd64/linux",
+                path + "/install/netboot/ubuntu-installer/amd64/linux",
                 token)
             cobbler_server.modify_distro(
                 new_distro_create,
                 "initrd",
-                PATH + "/install/netboot/ubuntu-installer/amd64/initrd.gz",
+                path + "/install/netboot/ubuntu-installer/amd64/initrd.gz",
                 token)
-        cobbler_server.modify_distro(
-            new_distro_create,
-            "arch",
-            "x86_64",
-            token)
+            cobbler_server.modify_distro(
+                new_distro_create,
+                "arch",
+                "x86_64",
+                token)
         cobbler_server.modify_distro(
             new_distro_create,
             "breed",
@@ -84,12 +74,12 @@ class CobblerAddDistro(object):
         cobbler_server.modify_profile(
             new_profile_create,
             "name",
-            NAME,
+            name,
             token)
         cobbler_server.modify_profile(
             new_profile_create,
             "distro",
-            NAME,
+            name,
             token)
         cobbler_server.modify_profile(
             new_profile_create,
@@ -99,15 +89,15 @@ class CobblerAddDistro(object):
         cobbler_server.modify_profile(
             new_profile_create,
             "kickstart",
-            "/var/lib/cobbler/kickstarts/" + NAME + ".cfg",
+            "/var/lib/cobbler/kickstarts/" + name + ".cfg",
             token)
-        if ARCH == "ppc64el":
+        if arch == "ppc64el":
             cobbler_server.modify_profile(
                 new_profile_create,
                 "kernel_options",
                 "console=netcfg/dhcp_timeout=1024 netcfg/choose_interface=auto ipv6.disable=1",
                 token)
-        elif ARCH == "amd64":
+        elif arch == "amd64":
             cobbler_server.modify_profile(
                 new_profile_create,
                 "kernel_options",
@@ -115,11 +105,33 @@ class CobblerAddDistro(object):
                 token)
         cobbler_server.save_profile(new_profile_create, token)
         cobbler_server.sync(token)
-        self.log.info("Running Cobbler sync")
+        log.info("Running Cobbler sync")
 
-
-def main(argv):
-    cobbler_output = CobblerAddDistro(argv)
 
 if __name__ == '__main__':
-    main(sys.argv)
+    """
+    Arg1: path to install files
+    Arg2: distro name
+    Arg3: distro architecture
+    Arg4: log level
+    """
+    log = Logger(__file__)
+
+    ARGV_MAX = 5
+    argv_count = len(sys.argv)
+    if argv_count > ARGV_MAX:
+        try:
+            raise Exception()
+        except:
+            log.error('Invalid argument count')
+            exit(1)
+
+    path = sys.argv[1]
+    name = sys.argv[2]
+    arch = sys.argv[3]
+    if argv_count == ARGV_MAX:
+        log_level = sys.argv[4]
+    else:
+        log_level = None
+
+    cobbler_output = CobblerAddDistros(log_level, path, name, arch)

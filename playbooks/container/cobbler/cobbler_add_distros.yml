@@ -125,7 +125,7 @@
       become: yes
       become_method: sudo
 
-    - name: "Copy public apt source lists to web repo directory" 
+    - name: "Copy apt source lists to web repo directory" 
       copy:
         src: "{{ item }}"
         remote_src: True
@@ -147,8 +147,8 @@
       become: yes
       become_method: sudo
     
-    - name: "Call python \"cobbler_add_distro.py\" script to import distros and create profiles"
-      command: "{{ python_executable }} {{ scripts_path }}/python/cobbler_add_distro.py /var/www/html/{{ item | basename | regex_replace('^(.*).iso$', '\\1') }} {{ item | basename | regex_replace('^(.*).iso$', '\\1') }}  {{ item | basename | regex_replace('^.*-(.*).iso$', '\\1') }} {{ log_level }}"
+    - name: "Call python \"cobbler_add_distros.py\" script to import distros and create profiles"
+      command: "{{ python_executable }} {{ scripts_path }}/python/cobbler_add_distros.py /var/www/html/{{ item | basename | regex_replace('^(.*).iso$', '\\1') }} {{ item | basename | regex_replace('^(.*).iso$', '\\1') }}  {{ item | basename | regex_replace('^.*-(.*).iso$', '\\1') }} {{ log_level }}"
       with_items:
         - "{{ iso_files.stdout_lines }}"
       become: yes
