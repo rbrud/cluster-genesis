@@ -48,10 +48,15 @@ class IpmiPowerOn(object):
                     (rack_id, ipv4, str(error)))
                 sys.exit(1)
 
-            if rc.get(POWERSTATE) != ON:
+            if 'error' in rc:
                 log.error(
-                    'Power on did not occur - Rack: %s - IP: %s' %
-                    (rack_id, ipv4))
+                    'Power on failed - Rack: %s - IP: %s, %s' %
+                    (rack_id, ipv4, rc))
+                sys.exit(1)
+            elif rc.get(POWERSTATE) != ON:
+                log.error(
+                    'Power on did not occur - Rack: %s - IP: %s, state=%s' %
+                    (rack_id, ipv4, rc.get(POWERSTATE)))
                 sys.exit(1)
 
             log.info('Power on - Rack: %s - IP: %s' % (rack_id, ipv4))
