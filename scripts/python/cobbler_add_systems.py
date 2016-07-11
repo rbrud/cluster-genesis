@@ -27,6 +27,7 @@ INV_TEMPLATE = 'template'
 CFG_NODES_TEMPLATES = 'node-templates'
 CFG_COBBLER_PROFILE = 'cobbler-profile'
 YAML_COBBLER_PROFILE = 'cobbler-profile'
+CFG_OS_DISK = 'os-disk'
 YAML_ARCH = 'architecture'
 COBBLER_PROFILE_X86_64 = 'ubuntu-14.04.4-server-amd64'
 COBBLER_PROFILE_PPC64 = 'ubuntu-14.04.4-server-ppc64el'
@@ -56,7 +57,7 @@ class CobblerAddSystems(object):
                     node[YAML_COBBLER_PROFILE]
             elif CFG_COBBLER_PROFILE in inv.cfg[CFG_NODES_TEMPLATES][node[INV_TEMPLATE]]:
                 COBBLER_PROFILE = \
-                    inv.cfg[CFG_NODES_TEMPLATES][node[INV_TEMPLATE]][YAML_COBBLER_PROFILE]
+                    inv.cfg[CFG_NODES_TEMPLATES][node[INV_TEMPLATE]][CFG_COBBLER_PROFILE]
             elif (YAML_ARCH in node and
                     node[YAML_ARCH] is not None):
                 if node[YAML_ARCH].lower() == 'x86_64':
@@ -115,6 +116,15 @@ class CobblerAddSystems(object):
                     "ipaddress-eth0": ipv4_pxe,
                     "dnsname-eth0": hostname},
                 token)
+            if CFG_OS_DISK in inv.cfg[CFG_NODES_TEMPLATES][node[INV_TEMPLATE]]:
+                KS_META = (
+                    'install_disk=%s' %
+                    inv.cfg[CFG_NODES_TEMPLATES][node[INV_TEMPLATE]][CFG_OS_DISK])
+                cobbler_server.modify_system(
+                    new_system_create,
+                    "ks_meta",
+                    KS_META,
+                    token)
             comment = ""
             if YAML_CHASSIS_PART_NUMBER in node:
                 comment += (
