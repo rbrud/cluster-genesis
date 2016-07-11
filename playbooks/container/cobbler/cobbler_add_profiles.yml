@@ -8,21 +8,12 @@
     log_level: ""
   tasks:
 
-#    - name: "Copy additional profiles and kopts to container"
-#      copy:
-#        src: "{{ item }}"
-#        dest: "{{ project_path }}/distro_images"
-#        force: no
-#      with_fileglob:
-#        - ~/distro_images/profiles/*.cfg
-#        - ~/distro_images/profiles/*.kopts
-#
     - name: "Register list of *.cfg files"
-      shell: "ls {{ project_path }}/distro_images/*.cfg"
+      shell: "ls {{ project_path }}/playbooks/container/cobbler/config/*.cfg"
       register: cfg_files
 
     - name: "Filter out default *.cfg files"
-      shell: "ls {{ project_path }}/distro_images/{{ item | basename | regex_replace('^(.*)[.]cfg$', '\\1.iso') }} || echo True"
+      shell: "ls {{ project_path }}/playbooks/container/cobbler/config/{{ item | basename | regex_replace('^(.*)[.]cfg$', '..\/os_images\/\\1.iso') }} || echo True"
       with_items:
         - "{{ cfg_files.stdout_lines }}"
       register: profile_files
@@ -30,21 +21,12 @@
     - debug: var=profile_files.results
 
     - name: "Read any associated *.kopts files"
-      shell: "cat {{ project_path }}/distro_images/{{ item.item | basename |regex_replace('^(.*)[.]cfg$', '\\1.kopts') }} || echo none"
+      shell: "cat {{ project_path }}/playbooks/container/cobbler/config/{{ item.item | basename |regex_replace('^(.*)[.]cfg$', '\\1.kopts') }} || echo none"
       with_items:
         - "{{ profile_files.results }}"
       register: kopts
 
     - debug: var=kopts.results
-
-#    - name: "Call python \"cobbler_add_profiles.py\" script to create additional profiles"
-#      debug:
-#        msg: "{{ python_executable }} {{ scripts_path }}/python/cobbler_add_profiles.py {{ item.0 | basename | regex_replace('^(.*)[.].*?[.]cfg$', '\\1') }} {{ item.0 | basename | regex_replace('^(.*)[.]cfg$', '\\1') }} \"{{ item.1.stdout }}\" {{ log_level }}"
-#      with_together:
-#        - "{{ cfg_files.stdout_lines }}"
-#        - "{{ kopts.results }}"
-#      become: yes
-#      become_method: sudo
 
     - name: "Call python \"cobbler_add_profiles.py\" script to create additional profiles"
       command: "{{ python_executable }} {{ scripts_path }}/python/cobbler_add_profiles.py {{ item.0.item | basename | regex_replace('^(.*)[.].*[.]cfg$', '\\1') }} {{ item.0.item | basename | regex_replace('^(.*)[.]cfg$', '\\1') }} \"{{ item.1.stdout }}\" {{ log_level }}"
