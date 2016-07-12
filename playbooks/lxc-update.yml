@@ -6,6 +6,7 @@
 - hosts: installer
   vars:
     scripts_path_local: "{{ hostvars['localhost']['scripts_path_local'] }}"
+    os_images_path_local: "{{ hostvars['localhost']['project_path_local'] }}/os_images"
     config_local: "{{ hostvars['localhost']['config_local'] }}"
   tasks:
     - debug:
@@ -69,6 +70,11 @@
     - name: "Copy scripts into deployment container"
       copy:
         src: "{{ scripts_path_local }}"
+        dest: "{{ project_path }}"
+
+    - name: "Copy OS images and configs into deployment container"
+      copy:
+        src: "{{ os_images_path_local }}"
         dest: "{{ project_path }}"
 
     - name: "Create log file"

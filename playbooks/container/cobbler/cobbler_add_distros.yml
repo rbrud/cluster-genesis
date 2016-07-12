@@ -19,25 +19,25 @@
     - name: "Copy OS installer images and configs to container"
       copy:
         src: "{{ item }}"
-        dest: "{{ project_path }}/playbooks/container/cobbler/os_images/"
+        dest: "{{ project_path }}/os_images/"
         force: no
       with_fileglob:
         - ~/distro_images/*.iso
 
     - name: "Register list of *.iso files"
-      shell: "ls {{ project_path }}/playbooks/container/cobbler/os_images/*.iso | grep -v mini"
+      shell: "ls {{ project_path }}/os_images/*.iso | grep -v mini"
       register: iso_files
 
     - name: "Register list of *.mini.iso files"
-      shell: "ls {{ project_path }}/playbooks/container/cobbler/os_images/*.mini.iso"
+      shell: "ls {{ project_path }}/os_images/*.mini.iso"
       register: mini_iso_files
 
     - name: "Register list of *.cfg files"
-      shell: "ls {{ project_path }}/playbooks/container/cobbler/config/*.cfg"
+      shell: "ls {{ project_path }}/os_images/config/*.cfg"
       register: cfg_files
 
     - name: "Register list of *.list files"
-      shell: "ls {{ project_path }}/playbooks/container/cobbler/config/*.list"
+      shell: "ls {{ project_path }}/os_images/config/*.list"
       register: list_files
 
     - name: "Mount Disto installer images"

@@ -9,11 +9,11 @@
   tasks:
 
     - name: "Register list of *.cfg files"
-      shell: "ls {{ project_path }}/playbooks/container/cobbler/config/*.cfg"
+      shell: "ls {{ project_path }}/os_images/config/*.cfg"
       register: cfg_files
 
     - name: "Filter out default *.cfg files"
-      shell: "ls {{ project_path }}/playbooks/container/cobbler/config/{{ item | basename | regex_replace('^(.*)[.]cfg$', '..\/os_images\/\\1.iso') }} || echo True"
+      shell: "ls {{ project_path }}/os_images/{{ item | basename | regex_replace('^(.*)[.]cfg$', '\\1.iso') }} || echo True"
       with_items:
         - "{{ cfg_files.stdout_lines }}"
       register: profile_files
@@ -21,7 +21,7 @@
     - debug: var=profile_files.results
 
     - name: "Read any associated *.kopts files"
-      shell: "cat {{ project_path }}/playbooks/container/cobbler/config/{{ item.item | basename |regex_replace('^(.*)[.]cfg$', '\\1.kopts') }} || echo none"
+      shell: "cat {{ project_path }}/os_images/config/{{ item.item | basename |regex_replace('^(.*)[.]cfg$', '\\1.kopts') }} || echo none"
       with_items:
         - "{{ profile_files.results }}"
       register: kopts
