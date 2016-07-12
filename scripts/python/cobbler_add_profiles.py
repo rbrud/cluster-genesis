@@ -51,6 +51,11 @@ class CobblerAddProfiles(object):
             kopts,
             token)
         cobbler_server.save_profile(new_profile_create, token)
+
+        log.info(
+            "Cobbler Add Profile: name=%s, distro=%s" %
+            (name, distro))
+
         cobbler_server.sync(token)
         log.info("Running Cobbler sync")
 

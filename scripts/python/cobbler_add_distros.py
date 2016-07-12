@@ -72,9 +72,16 @@ class CobblerAddDistros(object):
         cobbler_server.modify_distro(
             new_distro_create,
             "kernel_options",
-            "netcfg/dhcp_timeout=1024 netcfg/choose_interface=auto ipv6.disable=1",
+            "netcfg/dhcp_timeout=1024 "
+            "netcfg/choose_interface=auto "
+            "ipv6.disable=1",
             token)
         cobbler_server.save_distro(new_distro_create, token)
+
+        log.info(
+            "Cobbler Add Distro: name=%s, path=%s" %
+            (name, path))
+
         new_profile_create = cobbler_server.new_profile(token)
         cobbler_server.modify_profile(
             new_profile_create,
@@ -97,6 +104,11 @@ class CobblerAddDistros(object):
             "/var/lib/cobbler/kickstarts/" + name + ".cfg",
             token)
         cobbler_server.save_profile(new_profile_create, token)
+
+        log.info(
+            "Cobbler Add Profile: name=%s, distro=%s" %
+            (name, name))
+
         cobbler_server.sync(token)
         log.info("Running Cobbler sync")
 

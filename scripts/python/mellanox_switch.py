@@ -23,6 +23,7 @@ SHOW_MACS_CMD = '\"show mac-address-table\"'
 CLEAR_MACS_CMD = '\"clear mac-address-table dynamic\"'
 MAC_RE = re.compile('([\da-fA-F]{2}:){5}([\da-fA-F]{2})')
 
+
 class MellanoxSwitch(object):
     def __init__(self, log_level):
         self.SWITCH_PORT = 22
@@ -50,9 +51,11 @@ class MellanoxSwitch(object):
                     macAddr = mac_search.group().lower()
                     portInfo = line.split("/")
                     if len(portInfo) == 3:
-                        port = portInfo[1] + "/" + portInfo[2]  # port is String  type, if port = Eth1/59/4,
+                        # port is String  type, if port = Eth1/59/4,
+                        port = portInfo[1] + "/" + portInfo[2]
                     else:
-                        port = portInfo[1]  # port is integer type,  port = Eth1/48,
+                        # port is integer type,  port = Eth1/48,
+                        port = portInfo[1]
                     if port in port_to_mac:
                         port_to_mac[port].append(macAddr)
                     else:
@@ -63,7 +66,7 @@ class MellanoxSwitch(object):
     def clear_mac_address_table(self, inv):
         for switch_ip, creds in inv.get_data_switches().iteritems():
             self.issue_cmd(CLEAR_MACS_CMD, switch_ip, creds['user'],
-                                    creds['password'])
+                           creds['password'])
 
     def issue_cmd(self, cmd, ip, userid, pwd):
         if self.log_level == self.DEBUG or self.log_level == self.INFO:

@@ -55,7 +55,8 @@ class CobblerAddSystems(object):
             if YAML_COBBLER_PROFILE in node:
                 COBBLER_PROFILE = \
                     node[YAML_COBBLER_PROFILE]
-            elif CFG_COBBLER_PROFILE in inv.cfg[CFG_NODES_TEMPLATES][node[INV_TEMPLATE]]:
+            elif (CFG_COBBLER_PROFILE in
+                    inv.cfg[CFG_NODES_TEMPLATES][node[INV_TEMPLATE]]):
                 COBBLER_PROFILE = \
                     inv.cfg[CFG_NODES_TEMPLATES][node[INV_TEMPLATE]][CFG_COBBLER_PROFILE]
             elif (YAML_ARCH in node and
@@ -66,7 +67,7 @@ class CobblerAddSystems(object):
                     COBBLER_PROFILE = COBBLER_PROFILE_PPC64
                 else:
                     log.log_error(
-                        'Inventory: Invalid architecture set for ' +
+                        'Inventory: Invalid architecture set for %s' %
                         hostname)
             else:
                 COBBLER_PROFILE = COBBLER_PROFILE_X86_64
@@ -152,10 +153,8 @@ class CobblerAddSystems(object):
             cobbler_server.save_system(new_system_create, token)
 
             log.info(
-                "Cobbler Add System: " +
-                "name=" + hostname + ", " +
-                "profile=" + COBBLER_PROFILE
-                )
+                "Cobbler Add System: name=%s, profile=%s" %
+                (hostname, COBBLER_PROFILE))
 
         cobbler_server.sync(token)
 

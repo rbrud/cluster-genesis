@@ -30,7 +30,9 @@ class InventoryAddIpmi(object):
         inv.create_nodes(dhcp_mac_ip, mgmt_sw_cfg)
 
         for rack, mac, ip in inv.yield_node_ipmi():
-            log.info('IPMI node detected - Rack: %s - MAC: %s - IP: %s' % (rack, mac, ip))
+            log.info(
+                'IPMI node detected - Rack: %s - MAC: %s - IP: %s' %
+                (rack, mac, ip))
 
 if __name__ == '__main__':
     """

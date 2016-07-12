@@ -60,16 +60,19 @@ class IpmiSetBootdev(object):
                     'Rack: %s - IP: %s, %s' %
                     (rack_id, ipv4, str(rc['error'])))
                 sys.exit(1)
-            elif rc['bootdev'] == bootdev and str(rc['persistent']) == str(persist):
+            elif (rc['bootdev'] == bootdev and
+                    str(rc['persistent']) == str(persist)):
                 log.info(
                     'set_bootdev successful (device=%s persist=%s) - '
                     'Rack: %s - IP: %s' %
                     (bootdev, persist, rack_id, ipv4))
             else:
                 log.error(
-                    'set_bootdev failed - set: (device=%s persist=%s) but read: (device=%s persist=%s) - '
+                    'set_bootdev failed - set: (device=%s persist=%s) '
+                    'but read: (device=%s persist=%s) - '
                     'Rack: %s - IP: %s' %
-                    (bootdev, persist, rc['bootdev'], rc['persistent'], rack_id, ipv4))
+                    (bootdev, persist, rc['bootdev'], rc['persistent'],
+                     rack_id, ipv4))
                 sys.exit(1)
 
 

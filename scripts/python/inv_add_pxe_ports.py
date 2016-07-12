@@ -29,7 +29,9 @@ class InventoryAddPxe(object):
         inv.add_pxe(dhcp_mac_ip, mgmt_sw_cfg)
 
         for rack, mac, ip in inv.yield_node_pxe():
-            log.info('PXE node detected - Rack: %s - MAC: %s - IP: %s' % (rack, mac, ip))
+            log.info(
+                'PXE node detected - Rack: %s - MAC: %s - IP: %s' %
+                (rack, mac, ip))
 
 if __name__ == '__main__':
     """
