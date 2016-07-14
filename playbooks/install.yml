@@ -10,7 +10,7 @@
 - include: container/inv_add_ipmi_data.yml log_level=info
 - include: container/inv_add_pxe_ports.yml log_level=info
 - include: container/ipmi_power_off.yml log_level=info
-- include: container/inv_modify_pxe_ports_ip.yml log_level=info
+- include: container/inv_modify_ipv4_pxe.yml log_level=info
 - include: container/cobbler/cobbler_add_distros.yml
 - include: container/cobbler/cobbler_add_profiles.yml
 - include: container/cobbler/cobbler_add_systems.yml
