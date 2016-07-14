@@ -13,7 +13,7 @@ from get_mgmt_switch_config import GetMgmtSwitchConfig
 INV_IPV4_PXE = 'ipv4-pxe'
 
 
-class InventoryModifyPxeIP(object):
+class InventoryModifyIPv4Pxe(object):
     def __init__(self, log_level, inv_file, cfg_file, node_mgmt_ipv4_start):
         log = Logger(__file__)
         if log_level is not None:
@@ -58,5 +58,5 @@ if __name__ == '__main__':
     else:
         log_level = None
 
-    ipmi_data = InventoryModifyPxeIP(
+    ipmi_data = InventoryModifyIPv4Pxe(
         log_level, inv_file, cfg_file, node_mgmt_ipv4_start)

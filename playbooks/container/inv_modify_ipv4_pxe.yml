@@ -1,7 +1,7 @@
 ---
-- name: container/inv_modify_pxe_ports_ip.yml
+- name: container/inv_modify_ipv4_pxe.yml
   hosts: deployer
   vars:
     log_level: ""
   tasks:
-    - command: "{{ python_executable }} {{ scripts_path }}/python/inv_modify_pxe_ports_ip.py {{ config }} {{ inventory }} {{ node_mgmt_ipv4_start }} {{ log_level }}"
+    - command: "{{ python_executable }} {{ scripts_path }}/python/inv_modify_ipv4_pxe.py {{ config }} {{ inventory }} {{ node_mgmt_ipv4_start }} {{ log_level }}"
