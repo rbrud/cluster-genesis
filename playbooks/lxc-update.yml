@@ -2,6 +2,15 @@
 - name: lxc-update.yml
   hosts: localhost
   gather_facts: yes
+  tasks:
+    - name: "Download OS installer images from IBM GSA"
+      get_url:
+        url: "{{ item.url }}"
+        dest: "{{ item.dest }}"
+      with_items:
+        - { url: "http://ausgsa.ibm.com/~jwcarman/public/yggdrasil/os_images/ubuntu-14.04.4-server-amd64.iso", dest: "{{ project_path_local }}/os_images/" }
+        - { url: "http://ausgsa.ibm.com/~jwcarman/public/yggdrasil/os_images/ubuntu-14.04.4-server-ppc64el.iso", dest: "{{ project_path_local }}/os_images/" }
+        - { url: "http://ausgsa.ibm.com/~jwcarman/public/yggdrasil/os_images/ubuntu-14.04.4-server-ppc64el.mini.iso", dest: "{{ project_path_local }}/os_images/ubuntu-14.04.4-server-ppc64el.mini.iso" }
 
 - hosts: installer
   vars:
