@@ -157,6 +157,7 @@ class CobblerAddSystems(object):
                 (hostname, COBBLER_PROFILE))
 
         cobbler_server.sync(token)
+        log.info("Running Cobbler sync")
 
 if __name__ == '__main__':
     """
