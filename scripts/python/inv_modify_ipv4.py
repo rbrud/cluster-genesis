@@ -92,7 +92,6 @@ class InventoryModifyIPv4(object):
         log.info("Running Cobbler sync")
 
         for rack_id, ipv4, _userid, _password in inv_original.yield_ipmi_access_info():
-            log.info('DEBUG: bmc=%s userid=%s password=%s' % (ipv4, _userid, _password))
             ipmi_cmd = ipmi_command.Command(
                 bmc=ipv4,
                 userid=_userid,
@@ -100,7 +99,6 @@ class InventoryModifyIPv4(object):
 
             try:
                 rc = ipmi_cmd.reset_bmc()
-                log.info('DEBUG: rc=%s' % (rc))
             except pyghmi_exception.IpmiException as error:
                 log.error(
                     'BMC Cold Reset failed - Rack: %s - IP: %s, %s' %
