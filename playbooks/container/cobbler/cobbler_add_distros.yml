@@ -67,16 +67,6 @@
       become: yes
       become_method: sudo
     
-    - name: "Update preseed configurations with container IP"
-      replace:
-        dest: "{{ item }}"
-        regexp: "0.0.0.0"
-        replace: "{{ container_mgmt_ipv4 | ipaddr('address') }}"
-      with_items:
-        - "{{ cfg_files.stdout_lines }}"
-      become: yes
-      become_method: sudo
-
     - name: "Register default user id"
       shell: "grep userid-default {{ config }} | awk '{print $2}'"
       register: userid_default
