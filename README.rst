@@ -6,7 +6,8 @@ Installation
 ============
 ::
 
-$ git clone git@gitlabhost.rtp.raleigh.ibm.com:1A8420897/yggdrasil.git
+$ export GIT_SSL_NO_VERIFY=1
+$ git clone https://gitlabhost.rtp.raleigh.ibm.com/1A8420897/yggdrasil.git
 $ cd yggdrasil
 $ ./scripts/update-sudoers.sh
 $ ./scripts/install.sh
