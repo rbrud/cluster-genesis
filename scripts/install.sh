@@ -1,5 +1,5 @@
 DISTRIB_RELEASE=$(lsb_release -sr)
-sudo apt-get -y install python-pip python-dev libffi-dev libssl-dev python-netaddr
+sudo apt-get -y install python-pip python-dev libffi-dev libssl-dev python-netaddr ipmitool
 if [[ $DISTRIB_RELEASE == "14.04" ]]; then
     sudo apt-get -y install lxc-dev
 fi
