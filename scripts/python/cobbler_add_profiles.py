@@ -43,7 +43,7 @@ class CobblerAddProfiles(object):
         cobbler_server.modify_profile(
             new_profile_create,
             "kickstart",
-            "/var/lib/cobbler/kickstarts/" + name + ".cfg",
+            "/var/lib/cobbler/kickstarts/" + name + ".seed",
             token)
         cobbler_server.modify_profile(
             new_profile_create,

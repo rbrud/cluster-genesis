@@ -16,14 +16,6 @@
       become: yes
       become_method: sudo
 
-    - name: "Copy OS installer images and configs to container"
-      copy:
-        src: "{{ item }}"
-        dest: "{{ project_path }}/os_images/"
-        force: no
-      with_fileglob:
-        - ~/distro_images/*.iso
-
     - name: "Register list of *.iso files"
       shell: "ls {{ project_path }}/os_images/*.iso | grep -v mini"
       register: iso_files
@@ -32,15 +24,19 @@
       shell: "ls {{ project_path }}/os_images/*.mini.iso"
       register: mini_iso_files
 
-    - name: "Register list of *.cfg files"
-      shell: "ls {{ project_path }}/os_images/config/*.cfg"
-      register: cfg_files
+    - name: "Register list of *.seed files"
+      shell: "ls {{ project_path }}/os_images/config/*.seed"
+      register: seed_files
 
     - name: "Register list of *.list files"
       shell: "ls {{ project_path }}/os_images/config/*.list"
       register: list_files
 
-    - name: "Mount Disto installer images"
+    - name: "Register list of *.cfg files"
+      shell: "ls {{ project_path }}/os_images/config/*.cfg"
+      register: cfg_files
+
+    - name: "Mount Distro installer images"
       mount:
         name: "/mnt/{{ item | basename | regex_replace('^(.*).iso$', '\\1') }}"
         src: "{{ item }}"
@@ -53,7 +49,7 @@
       become: yes
       become_method: sudo
 
-    - name: "Copy distro images to web repo directory" 
+    - name: "Copy distro images to http repo directory" 
       command: "rsync -a /mnt/{{ item | basename | regex_replace('^(.*).iso$', '\\1') }}/ /var/www/html/{{ item | basename | regex_replace('^(.*).iso$', '\\1') }}/"
       with_items:
         - "{{ iso_files.stdout_lines }}"
@@ -77,7 +73,7 @@
         regexp: "defaultuser"
         replace: "{{ userid_default.stdout }}"
       with_items:
-        - "{{ cfg_files.stdout_lines }}"
+        - "{{ seed_files.stdout_lines }}"
       when: userid_default.stdout != ""
       become: yes
       become_method: sudo
@@ -92,7 +88,7 @@
         regexp: "passw0rd"
         replace: "{{ password_default.stdout }}"
       with_items:
-        - "{{ cfg_files.stdout_lines }}"
+        - "{{ seed_files.stdout_lines }}"
       when: password_default.stdout != ""
       become: yes
       become_method: sudo
@@ -103,7 +99,7 @@
         remote_src: True
         dest: /var/lib/cobbler/kickstarts/
       with_items:
-        - "{{ cfg_files.stdout_lines }}"
+        - "{{ seed_files.stdout_lines }}"
       become: yes
       become_method: sudo
 
@@ -130,7 +126,7 @@
       become_method: sudo
     
     - name: "Call python \"cobbler_add_distros.py\" script to import distros and create default profiles"
-      command: "{{ python_executable }} {{ scripts_path }}/python/cobbler_add_distros.py /var/www/html/{{ item | basename | regex_replace('^(.*)[.]iso$', '\\1') }} {{ item | basename | regex_replace('^(.*)[.]iso$', '\\1') }}  {{ item | basename | regex_replace('^.*-(.*)[.]iso$', '\\1') }} {{ log_level }}"
+      command: "{{ python_executable }} {{ scripts_path }}/python/cobbler_add_distros.py /var/www/html/{{ item | basename | regex_replace('^(.*)[.]iso$', '\\1') }} {{ item | basename | regex_replace('^(.*)[.]iso$', '\\1') }} {{ log_level }}"
       with_items:
         - "{{ iso_files.stdout_lines }}"
       become: yes
