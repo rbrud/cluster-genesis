@@ -17,49 +17,59 @@
       become_method: sudo
 
     - name: "Register list of *.iso files"
-      shell: "ls {{ project_path }}/os_images/*.iso | grep -v mini"
+      find:
+        paths: "{{ project_path }}/os_images"
+        patterns: "*[!mini].iso"
       register: iso_files
 
     - name: "Register list of *.mini.iso files"
-      shell: "ls {{ project_path }}/os_images/*.mini.iso"
+      find:
+        paths: "{{ project_path }}/os_images"
+        patterns: "*.mini.iso"
       register: mini_iso_files
 
     - name: "Register list of *.seed files"
-      shell: "ls {{ project_path }}/os_images/config/*.seed"
+      find:
+        paths: "{{ project_path }}/os_images/config"
+        patterns: "*.seed"
       register: seed_files
 
     - name: "Register list of *.list files"
-      shell: "ls {{ project_path }}/os_images/config/*.list"
+      find:
+        paths: "{{ project_path }}/os_images/config"
+        patterns: "*.list"
       register: list_files
 
     - name: "Register list of *.cfg files"
-      shell: "ls {{ project_path }}/os_images/config/*.cfg"
+      find:
+        paths: "{{ project_path }}/os_images/config"
+        patterns: "*.cfg"
       register: cfg_files
 
     - name: "Mount Distro installer images"
       mount:
-        name: "/mnt/{{ item | basename | regex_replace('^(.*).iso$', '\\1') }}"
-        src: "{{ item }}"
+        name: "/mnt/{{ item.path | basename | regex_replace('^(.*).iso$', '\\1') }}"
+        src: "{{ item.path }}"
         fstype: iso9660
         opts: loop,ro
         state: mounted
       with_items:
-        - "{{ iso_files.stdout_lines }}"
-        - "{{ mini_iso_files.stdout_lines }}"
+        - "{{ iso_files.files }}"
+        - "{{ mini_iso_files.files }}"
       become: yes
       become_method: sudo
 
     - name: "Copy distro images to http repo directory" 
-      command: "rsync -a /mnt/{{ item | basename | regex_replace('^(.*).iso$', '\\1') }}/ /var/www/html/{{ item | basename | regex_replace('^(.*).iso$', '\\1') }}/"
+      command: "rsync -a /mnt/{{ item.path | basename | regex_replace('^(.*).iso$', '\\1') }}/ /var/www/html/{{ item.path | basename | regex_replace('^(.*).iso$', '\\1') }}/"
       with_items:
-        - "{{ iso_files.stdout_lines }}"
+        - "{{ iso_files.files }}"
       become: yes
       become_method: sudo
  
     - name: "Copy \"mini\" netboot files to web repo directory" 
-      command: "rsync -a /mnt/{{ item | basename | regex_replace('^(.*).iso$', '\\1') }}/install/ /var/www/html/{{ item | basename | regex_replace('^(.*).mini.iso$', '\\1') }}/install/netboot/"
+      command: "rsync -a /mnt/{{ item.path | basename | regex_replace('^(.*).iso$', '\\1') }}/install/ /var/www/html/{{ item.path | basename | regex_replace('^(.*).mini.iso$', '\\1') }}/install/netboot/"
       with_items:
-        - "{{ mini_iso_files.stdout_lines }}"
+        - "{{ mini_iso_files.files }}"
       become: yes
       become_method: sudo
     
@@ -69,11 +79,11 @@
 
     - name: "Update preseed configurations with default user id"
       replace:
-        dest: "{{ item }}"
+        dest: "{{ item.path }}"
         regexp: "defaultuser"
         replace: "{{ userid_default.stdout }}"
       with_items:
-        - "{{ seed_files.stdout_lines }}"
+        - "{{ seed_files.files }}"
       when: userid_default.stdout != ""
       become: yes
       become_method: sudo
@@ -84,51 +94,51 @@
 
     - name: "Update preseed configurations with default user password"
       replace:
-        dest: "{{ item }}"
+        dest: "{{ item.path }}"
         regexp: "passw0rd"
         replace: "{{ password_default.stdout }}"
       with_items:
-        - "{{ seed_files.stdout_lines }}"
+        - "{{ seed_files.files }}"
       when: password_default.stdout != ""
       become: yes
       become_method: sudo
 
     - name: "Copy preseed configurations to cobbler kickstart directory"
       copy:
-        src: "{{ item }}"
+        src: "{{ item.path }}"
         remote_src: True
         dest: /var/lib/cobbler/kickstarts/
       with_items:
-        - "{{ seed_files.stdout_lines }}"
+        - "{{ seed_files.files }}"
       become: yes
       become_method: sudo
 
     - name: "Copy apt source lists to web repo directory" 
       copy:
-        src: "{{ item }}"
+        src: "{{ item.path }}"
         remote_src: True
-        dest: "/var/www/html/{{ item | basename | regex_replace('^(.*).sources.list$', '\\1') }}/sources.list"
+        dest: "/var/www/html/{{ item.path | basename | regex_replace('^(.*).sources.list$', '\\1') }}/sources.list"
       with_items:
-        - "{{ list_files.stdout_lines }}"
+        - "{{ list_files.files }}"
       become: yes
       become_method: sudo
 
     - name: "Unmount distro installer images"
       mount:
-        name: "/mnt/{{ item | basename | regex_replace('^(.*).iso$', '\\1') }}"
+        name: "/mnt/{{ item.path | basename | regex_replace('^(.*).iso$', '\\1') }}"
         src: "{{ item }}"
         fstype: iso9660
         state: unmounted
       with_items:
-        - "{{ iso_files.stdout_lines }}"
-        - "{{ mini_iso_files.stdout_lines }}"
+        - "{{ iso_files.files }}"
+        - "{{ mini_iso_files.files }}"
       become: yes
       become_method: sudo
     
     - name: "Call python \"cobbler_add_distros.py\" script to import distros and create default profiles"
-      command: "{{ python_executable }} {{ scripts_path }}/python/cobbler_add_distros.py /var/www/html/{{ item | basename | regex_replace('^(.*)[.]iso$', '\\1') }} {{ item | basename | regex_replace('^(.*)[.]iso$', '\\1') }} {{ log_level }}"
+      command: "{{ python_executable }} {{ scripts_path }}/python/cobbler_add_distros.py /var/www/html/{{ item.path | basename | regex_replace('^(.*)[.]iso$', '\\1') }} {{ item.path | basename | regex_replace('^(.*)[.]iso$', '\\1') }} {{ log_level }}"
       with_items:
-        - "{{ iso_files.stdout_lines }}"
+        - "{{ iso_files.files }}"
       become: yes
       become_method: sudo
 
