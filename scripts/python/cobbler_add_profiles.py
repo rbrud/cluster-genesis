@@ -2,8 +2,6 @@
 from __future__ import nested_scopes, generators, division, absolute_import, \
     with_statement, print_function, unicode_literals
 import sys
-import yaml
-from orderedattrdict.yamlutils import AttrDictYAMLLoader
 import xmlrpclib
 
 from lib.logger import Logger
@@ -43,7 +41,7 @@ class CobblerAddProfiles(object):
         cobbler_server.modify_profile(
             new_profile_create,
             "kickstart",
-            "/var/lib/cobbler/kickstarts/" + name + ".seed",
+            "/var/lib/cobbler/kickstarts/%s.seed" % name,
             token)
         cobbler_server.modify_profile(
             new_profile_create,
