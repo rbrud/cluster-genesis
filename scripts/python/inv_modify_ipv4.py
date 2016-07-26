@@ -2,18 +2,14 @@
 from __future__ import nested_scopes, generators, division, absolute_import, \
     with_statement, print_function, unicode_literals
 import sys
-import os.path
 import time
-from orderedattrdict import AttrDict
 import netaddr
-import fileinput
 import xmlrpclib
 from pyghmi.ipmi import command as ipmi_command
 from pyghmi import exceptions as pyghmi_exception
 
 from lib.inventory import Inventory
 from lib.logger import Logger
-from get_mgmt_switch_config import GetMgmtSwitchConfig
 
 COBBLER_USER = 'cobbler'
 COBBLER_PASS = 'cobbler'
@@ -62,7 +58,8 @@ class InventoryModifyIPv4(object):
                 (node[INV_RACK_ID], node[INV_HOSTNAME], INV_IPV4_IPMI,
                  node[INV_IPV4_IPMI]))
 
-            dnsmasq_template.write('dhcp-host=%s,%s-bmc,%s\n' %
+            dnsmasq_template.write(
+                'dhcp-host=%s,%s-bmc,%s\n' %
                 (node[INV_MAC_IPMI], node[INV_HOSTNAME], node[INV_IPV4_IPMI]))
 
             i += 1
@@ -91,23 +88,23 @@ class InventoryModifyIPv4(object):
         cobbler_server.sync(token)
         log.info("Running Cobbler sync")
 
-        for rack_id, ipv4, _userid, _password in inv_original.yield_ipmi_access_info():
+        for (rack, ip, user, passwd) in inv_original.yield_ipmi_access_info():
             ipmi_cmd = ipmi_command.Command(
-                bmc=ipv4,
-                userid=_userid,
-                password=_password)
+                bmc=ip,
+                userid=user,
+                password=passwd)
 
             try:
                 rc = ipmi_cmd.reset_bmc()
             except pyghmi_exception.IpmiException as error:
                 log.error(
                     'BMC Cold Reset failed - Rack: %s - IP: %s, %s' %
-                    (rack_id, ipv4, str(error)))
+                    (rack, ip, str(error)))
                 sys.exit(1)
 
             log.info(
                 'BMC Cold Reset Issued - Rack: %s - IP: %s' %
-                (rack_id, ipv4))
+                (rack, ip))
 
         time.sleep(60)
 
