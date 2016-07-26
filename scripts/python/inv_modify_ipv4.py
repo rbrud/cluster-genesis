@@ -94,13 +94,7 @@ class InventoryModifyIPv4(object):
                 userid=user,
                 password=passwd)
 
-            try:
-                rc = ipmi_cmd.reset_bmc()
-            except pyghmi_exception.IpmiException as error:
-                log.error(
-                    'BMC Cold Reset failed - Rack: %s - IP: %s, %s' %
-                    (rack, ip, str(error)))
-                sys.exit(1)
+            rc = ipmi_cmd.reset_bmc()
 
             log.info(
                 'BMC Cold Reset Issued - Rack: %s - IP: %s' %
