@@ -1,4 +1,6 @@
 ---
+# Copyright 2016, IBM US, Inc.
+
 - hosts: localhost
   vars:
     seconds: ""
@@ -22,4 +24,3 @@
       name: "Pause (wait for key press)"
       pause:
         prompt: "Pause: {{ message }} - Press <enter> to continue"
-

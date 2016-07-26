@@ -1,4 +1,6 @@
 ---
+# Copyright 2016, IBM US, Inc.
+
 - name: container/cobbler/cobbler_add_systems.yml
   hosts: deployer
   vars:

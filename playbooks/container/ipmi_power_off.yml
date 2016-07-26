@@ -1,5 +1,7 @@
 ---
-- name: container/ipmi_power_off.yml 
+# Copyright 2016, IBM US, Inc.
+
+- name: container/ipmi_power_off.yml
   hosts: deployer
   vars:
     log_level: ""

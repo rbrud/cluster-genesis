@@ -1,4 +1,6 @@
 ---
+# Copyright 2016, IBM US, Inc.
+
 - hosts: localhost
   gather_facts: yes
 
@@ -36,4 +38,3 @@
       when: item.0.stdout == "True"
       become: yes
       become_method: sudo
-

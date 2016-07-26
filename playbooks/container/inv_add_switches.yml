@@ -1,4 +1,6 @@
 ---
+# Copyright 2016, IBM US, Inc.
+
 - name: container/inv_add_switches.yml
   hosts: deployer
   vars:

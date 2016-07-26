@@ -1,3 +1,6 @@
+---
+# Copyright 2016, IBM US, Inc.
+
 - include: lxc-update.yml
 - include: container/cobbler/cobbler_install.yml
 - include: pause.yml message="Please reset BMC interfaces to obtain DHCP leases. Press <enter> to continue"

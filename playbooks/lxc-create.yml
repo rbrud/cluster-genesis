@@ -1,4 +1,6 @@
 ---
+# Copyright 2016, IBM US, Inc.
+
 - name: lxc-create.yml
   hosts: localhost
   tasks:
@@ -44,8 +46,8 @@
         line: "{{ item }}"
         create: yes
       with_items:
-      - lxc.id_map = u 0 100000 65536
-      - lxc.id_map = g 0 100000 65536
+        - lxc.id_map = u 0 100000 65536
+        - lxc.id_map = g 0 100000 65536
 
     - name: "Make backup of /etc/lxc/lxc-usernet"
       copy:
@@ -114,8 +116,8 @@
     - debug:
         msg: "{{ item }}"
       with_items:
-      - 'Deployment container internal IP: {{ container_ip.stdout_lines | first }}'
-      - 'Deployment container management network IP: {{ container_mgmt_ipv4 | ipaddr("address") }}'
+        - 'Deployment container internal IP: {{ container_ip.stdout_lines | first }}'
+        - 'Deployment container management network IP: {{ container_mgmt_ipv4 | ipaddr("address") }}'
 
     - name: "Update \"installer\" host with ssh private key."
       replace:
