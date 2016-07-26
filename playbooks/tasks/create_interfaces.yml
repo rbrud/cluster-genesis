@@ -2,8 +2,8 @@
 # Copyright 2016, IBM US, Inc.
 
 - name: Check for interface name collisions
-  fail:
-    msg: "The renaming of network interfaces on this host will fail because it already has interface {{ item }} which has the MAC address {{ hostvars[inventory_hostname]['ansible_' + item]['macaddress'] }}. This will prevent the interface with MAC address {{ name_interfaces.get(item) }} from being renamed to {{ item }}."
+  debug:
+    msg: "Host already has interface {{ item }} which has the MAC address {{ hostvars[inventory_hostname]['ansible_' + item]['macaddress'] }}. Renaming the interface with MAC address {{ name_interfaces.get(item) }} to {{ item }} will force rename of first interface."
   when:
     - name_interfaces is defined
     - "{{ item in name_interfaces }}"
