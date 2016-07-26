@@ -103,12 +103,13 @@
       become: yes
       become_method: sudo
 
-    - name: "Copy preseed configurations to cobbler kickstart directory"
+    - name: "Copy preseed & kickstart configurations to cobbler kickstart directory"
       copy:
         src: "{{ item.path }}"
         remote_src: True
         dest: /var/lib/cobbler/kickstarts/
       with_items:
+        - "{{ cfg_files.files }}"
         - "{{ seed_files.files }}"
       become: yes
       become_method: sudo
