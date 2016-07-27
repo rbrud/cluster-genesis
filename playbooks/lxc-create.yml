@@ -150,22 +150,3 @@
         replace: '\1={{ ipaddr_mgmt_network.stdout | ipaddr("2") | ipaddr("address") }}'
       become: yes
       become_method: sudo
-
-    - name: "Flush nat iptables"
-      command:
-        iptables -t nat -F
-      become: yes
-      become_method: sudo
-    # Implement this with iptables module with Ansible 2.1
-
-    - name: "Create nat iptables masquerade rule for internal LXC subnet"
-      command:
-        iptables
-        -t nat
-        -A POSTROUTING
-        -p all
-        -s {{ private_subnet }}
-        ! -d {{ private_subnet }}
-        -j MASQUERADE
-      become: yes
-      become_method: sudo
