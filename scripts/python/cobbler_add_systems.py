@@ -2,8 +2,6 @@
 from __future__ import nested_scopes, generators, division, absolute_import, \
     with_statement, print_function, unicode_literals
 import sys
-import os.path
-from orderedattrdict.yamlutils import AttrDictYAMLLoader
 import xmlrpclib
 
 from lib.inventory import Inventory
@@ -58,7 +56,8 @@ class CobblerAddSystems(object):
             elif (CFG_COBBLER_PROFILE in
                     inv.cfg[CFG_NODES_TEMPLATES][node[INV_TEMPLATE]]):
                 COBBLER_PROFILE = \
-                    inv.cfg[CFG_NODES_TEMPLATES][node[INV_TEMPLATE]][CFG_COBBLER_PROFILE]
+                    (inv.cfg[CFG_NODES_TEMPLATES][node[INV_TEMPLATE]]
+                            [CFG_COBBLER_PROFILE])
             elif (YAML_ARCH in node and
                     node[YAML_ARCH] is not None):
                 if node[YAML_ARCH].lower() == 'x86_64':
@@ -120,7 +119,8 @@ class CobblerAddSystems(object):
             if CFG_OS_DISK in inv.cfg[CFG_NODES_TEMPLATES][node[INV_TEMPLATE]]:
                 KS_META = (
                     'install_disk=%s' %
-                    inv.cfg[CFG_NODES_TEMPLATES][node[INV_TEMPLATE]][CFG_OS_DISK])
+                    inv.cfg[CFG_NODES_TEMPLATES][node[INV_TEMPLATE]]
+                    [CFG_OS_DISK])
                 cobbler_server.modify_system(
                     new_system_create,
                     "ks_meta",

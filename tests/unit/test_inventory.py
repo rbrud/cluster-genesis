@@ -1,16 +1,5 @@
+#!/usr/bin/env python
 # Copyright 2016, IBM US, Inc.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
 
 import copy
 from yggdrasil import inventory as test_mod
@@ -55,7 +44,6 @@ class TestOSInterfacesInventory(unittest.TestCase):
                               'otherkey': 'otherval6'},
                     'myIP6': {test_mod.HOST_IP_KEY: 'myIP6',
                               'otherkey': 'otherval7'}}
-        #self.maxDiff = None
         self.assertDictEqual(ret, expected)
 
     def test_populate_hosts_and_groups(self):
@@ -107,7 +95,6 @@ class TestOSInterfacesInventory(unittest.TestCase):
                 'net2': {'otherkey': 'otherval'},
                 'net3': {'otherkey': 'otherval'}}
         expected_output['all']['vars']['networks'] = nets
-        #self.maxDiff = None
         self.assertDictEqual(inventory, expected_output)
 
     def test_populate_host_networks(self):
@@ -146,9 +133,6 @@ class TestOSInterfacesInventory(unittest.TestCase):
         hv['nodeIP4']['host_networks'] = {'net2': {'addr': '2.2.2.5'},
                                           'net3': {'addr': '3.3.3.5'}}
         test_mod.populate_host_networks(inventory, net_list, ip_to_node)
-        #import json
-        #print 'Output %s' % json.dumps(inventory, indent=4)
-        #print 'Expected_output %s' % json.dumps(expected_output, indent=4)
         self.assertDictEqual(inventory, expected_output)
 
         # Now test again with nodes not having any IP addresses on networks
@@ -255,5 +239,4 @@ class TestOSInterfacesInventory(unittest.TestCase):
         self.assertEqual(hv['nodeIP2']['name_interfaces'], ifs)
 
 if __name__ == "__main__":
-    #import sys;sys.argv = ['', 'Test.testName']
     unittest.main()

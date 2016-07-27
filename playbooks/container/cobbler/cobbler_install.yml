@@ -1,4 +1,6 @@
 ---
+# Copyright 2016, IBM US, Inc.
+
 - hosts: localhost
   gather_facts: yes
 
@@ -22,22 +24,22 @@
       apt:
         name: "{{ item }}"
       with_items:
-      - createrepo
-      - apache2
-      - mkisofs
-      - libapache2-mod-wsgi
-      - python-cheetah
-      - python-netaddr
-      - python-simplejson
-      - python-yaml
-      - python-pycurl
-      - syslinux
-      - yum-utils
-      - python-django
-      - dnsmasq
-      - fence-agents
-      - wget
-      - vim
+        - createrepo
+        - apache2
+        - mkisofs
+        - libapache2-mod-wsgi
+        - python-cheetah
+        - python-netaddr
+        - python-simplejson
+        - python-yaml
+        - python-pycurl
+        - syslinux
+        - yum-utils
+        - python-django
+        - dnsmasq
+        - fence-agents
+        - wget
+        - vim
       become: yes
       become_method: sudo
 
@@ -84,20 +86,20 @@
       become: yes
       become_method: sudo
       with_items:
-      - { regexp: '#domain-needed', replace: 'domain-needed' }
-      - { regexp: "192.168.1.5",
-          replace: "{{container_mgmt_subnet | ipaddr('150') | ipaddr('address') }}" }
-      - { regexp: "192.168.1.200",
-          replace: "{{container_mgmt_subnet | ipaddr('200') | ipaddr('address') }}" }
+        - {regexp: '#domain-needed', replace: 'domain-needed'}
+        - {regexp: "192.168.1.5",
+           replace: "{{ container_mgmt_subnet | ipaddr('150') | ipaddr('address') }}"}
+        - {regexp: "192.168.1.200",
+           replace: "{{ container_mgmt_subnet | ipaddr('200') | ipaddr('address') }}"}
 
     - name: "Configure dnsmasq to enable TFTP server"
       lineinfile:
         dest: /etc/cobbler/dnsmasq.template
         line: "{{ item }}"
       with_items:
-      - enable-tftp
-      - tftp-root=/tftpboot
-      - user=root
+        - enable-tftp
+        - tftp-root=/tftpboot
+        - user=root
       become: yes
       become_method: sudo
 
@@ -115,8 +117,8 @@
         regexp: "{{ item.regexp }}"
         replace: "{{ item.line }}"
       with_items:
-      - { regexp: 'module = manage_bind', line: 'module = manage_dnsmasq' }
-      - { regexp: 'module = manage_isc', line: 'module = manage_dnsmasq' }
+        - {regexp: 'module = manage_bind', line: 'module = manage_dnsmasq'}
+        - {regexp: 'module = manage_isc', line: 'module = manage_dnsmasq'}
       become: yes
       become_method: sudo
 
@@ -193,8 +195,8 @@
         regexp: "Order allow,deny"
         state: absent
       with_items:
-      - /etc/apache2/conf-enabled/cobbler.conf
-      - /etc/apache2/conf-enabled/cobbler_web.conf
+        - /etc/apache2/conf-enabled/cobbler.conf
+        - /etc/apache2/conf-enabled/cobbler_web.conf
       become: yes
       become_method: sudo
 
@@ -204,8 +206,8 @@
         regexp: "Allow from all"
         replace: "Require all granted"
       with_items:
-      - /etc/apache2/conf-enabled/cobbler.conf
-      - /etc/apache2/conf-enabled/cobbler_web.conf
+        - /etc/apache2/conf-enabled/cobbler.conf
+        - /etc/apache2/conf-enabled/cobbler_web.conf
       become: yes
       become_method: sudo
 
@@ -228,10 +230,10 @@
         regexp: "{{ item.regexp }}"
         replace: "{{ item.line }}"
       with_items:
-      - { regexp: '127.0.0.1', line: "{{ container_mgmt_ipv4 | ipaddr('address') }}" }
-      - { regexp: 'manage_dhcp: 0', line: 'manage_dhcp: 1' }
-      - { regexp: 'manage_dns: 0', line: 'manage_dns: 1' }
-      - { regexp: 'pxe_just_once: 0', line: 'pxe_just_once: 1' }
+        - {regexp: '127.0.0.1', line: "{{ container_mgmt_ipv4 | ipaddr('address') }}"}
+        - {regexp: 'manage_dhcp: 0', line: 'manage_dhcp: 1'}
+        - {regexp: 'manage_dns: 0', line: 'manage_dns: 1'}
+        - {regexp: 'pxe_just_once: 0', line: 'pxe_just_once: 1'}
       become: yes
       become_method: sudo
 
@@ -249,8 +251,8 @@
         regexp: "{{ item.regexp }}"
         replace: "{{ item.replace }}"
       with_items:
-      - { regexp: 'TIMEOUT \d+', replace: 'TIMEOUT 35996' }
-      - { regexp: 'TOTALTIMEOUT \d+', replace: 'TOTALTIMEOUT 35996' }
+        - {regexp: 'TIMEOUT \d+', replace: 'TIMEOUT 35996'}
+        - {regexp: 'TOTALTIMEOUT \d+', replace: 'TOTALTIMEOUT 35996'}
       become: yes
       become_method: sudo
 
@@ -268,12 +270,12 @@
         regexp: "{{ item.regexp }}"
         replace: "{{ item.line }}"
       with_items:
-      - { regexp: 'set nopxe = \"\\nwget', line: 'set nopxe = "\\\\\\nwget' }
-      - { regexp: 'set saveks = \"\\nwget', line: 'set saveks = "\\\\\\nwget' }
-      - { regexp: 'set runpost = \"\\nwget', line: 'set runpost = "\\\\\\nwget' }
-      - { regexp: 'null', line: 'null;' }
-      - { regexp: 'cobbler.ks', line: 'cobbler.ks;' }
-      - { regexp: 'cobbler.seed', line: 'cobbler.seed;' }
+        - {regexp: 'set nopxe = \"\\nwget', line: 'set nopxe = "\\\\\\nwget'}
+        - {regexp: 'set saveks = \"\\nwget', line: 'set saveks = "\\\\\\nwget'}
+        - {regexp: 'set runpost = \"\\nwget', line: 'set runpost = "\\\\\\nwget'}
+        - {regexp: 'null', line: 'null;'}
+        - {regexp: 'cobbler.ks', line: 'cobbler.ks;'}
+        - {regexp: 'cobbler.seed', line: 'cobbler.seed;'}
       become: yes
       become_method: sudo
 
@@ -341,4 +343,3 @@
         enabled: yes
       become: yes
       become_method: sudo
-

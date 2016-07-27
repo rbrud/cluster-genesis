@@ -1,324 +1,312 @@
 #!/usr/bin/env python
 # Copyright 2016, IBM US, Inc.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
 
-# This is an ansible dynamic inventory module which loads an inventory file
-# describing networks, nodes, and their relationships and outputs ansible
-# inventory containing the host groups, hosts and network information
-# required to allow the configuration of the network interfaces on the nodes.
-#
-# An example output of this generation is:
-#{
-#    "controllers": [
-#        "192.168.0.111",
-#        "192.168.0.112",
-#        "192.168.0.113"
-#    ],
-#    "ceph-osd": [
-#        "192.168.0.121",
-#        "192.168.0.122",
-#        "192.168.0.123",
-#        "192.168.0.124"
-#    ],
-#    "all": {
-#        "children": [
-#            "controllers",
-#            "ceph-osd",
-#            "compute"
-#        ],
-#        "vars": {
-#            "networks": {
-#                "openstack-stg": {
-#                    "bridge": "br-storage",
-#                    "network": "172.29.244.0",
-#                    "eth-port": "eth10",
-#                    "vlan": 20,
-#                    "tcp_segmentation_offload": false,
-#                    "netmask": "255.255.252.0",
-#                    "method": "static",
-#                    "description": "OpenStack storage network"
-#                },
-#                "openstack-tenant-vlan": {
-#                    "bridge": "br-vlan",
-#                    "description": "Openstack Networking vlan",
-#                    "method": "static",
-#                    "eth-port": "eth11"
-#                },
-#                "external2": {
-#                    "description": "Interface for eth11",
-#                    "method": "manual",
-#                    "eth-port": "eth11"
-#                },
-#                "external1": {
-#                    "network": "10.40.204.0",
-#                    "eth-port": "eth10",
-#                    "dns-search": "acme.com",
-#                    "dns-nameservers": "10.40.1.200",
-#                    "method": "static",
-#                    "broadcast": "10.40.204.255",
-#                    "netmask": "255.255.255.0",
-#                    "gateway": "10.40.204.1",
-#                    "description": "Site network"
-#                },
-#                "ceph-replication": {
-#                    "bridge": "br-replication",
-#                    "network": "172.29.248.0",
-#                    "eth-port": "eth11",
-#                    "vlan": 40,
-#                    "netmask": "255.255.252.0",
-#                    "method": "static",
-#                    "description": "OpenStack storage network"
-#                },
-#                "openstack-tenant-vxlan": {
-#                    "bridge": "br-vxlan",
-#                    "network": "172.29.240.0",
-#                    "eth-port": "eth11",
-#                    "vlan": 30,
-#                    "netmask": "255.255.252.0",
-#                    "method": "static",
-#                    "description": "Openstack Networking VXLAN (tunnel/overlay)"
-#                },
-#                "openstack-mgmt": {
-#                    "bridge": "br-mgmt",
-#                    "network": "172.29.236.0",
-#                    "eth-port": "eth10",
-#                    "vlan": 10,
-#                    "tcp_segmentation_offload": false,
-#                    "netmask": "255.255.252.0",
-#                    "method": "static",
-#                    "description": "OpenStack management network"
-#                }
-#            }
-#        }
-#    },
-#    "compute": [
-#        "192.168.0.125",
-#        "192.168.0.126",
-#        "192.168.0.127"
-#    ],
-#    "_meta": {
-#        "hostvars": {
-#            "192.168.0.124": {
-#                "host_networks": {
-#                    "ceph-replication": {
-#                        "addr": "172.29.248.4"
-#                    },
-#                    "openstack-stg": {
-#                        "addr": "172.29.244.6"
-#                    },
-#                    "external1": {
-#                        "addr": "10.40.204.179"
-#                    }
-#                },
-#                "name_interfaces": {
-#                    "eth11": "98:be:94:5c:f0:05",
-#                    "eth10": "98:be:94:5c:f0:04",
-#                    "eth15": "98:be:94:5c:f0:06"
-#                }
-#            },
-#            "192.168.0.123": {
-#                "host_networks": {
-#                    "ceph-replication": {
-#                        "addr": "172.29.248.3"
-#                    },
-#                    "openstack-stg": {
-#                        "addr": "172.29.244.5"
-#                    },
-#                    "external1": {
-#                        "addr": "10.40.204.178"
-#                    }
-#                },
-#                "name_interfaces": {
-#                    "eth15": "98:be:94:5c:ee:b6"
-#                }
-#            },
-#            "192.168.0.122": {
-#                "host_networks": {
-#                    "ceph-replication": {
-#                        "addr": "172.29.248.2"
-#                    },
-#                    "openstack-stg": {
-#                        "addr": "172.29.244.4"
-#                    },
-#                    "external1": {
-#                        "addr": "10.40.204.177"
-#                    }
-#                },
-#                "name_interfaces": {
-#                    "eth15": "98:be:94:5c:ef:0e"
-#                }
-#            },
-#            "192.168.0.121": {
-#                "host_networks": {
-#                    "ceph-replication": {
-#                        "addr": "172.29.248.1"
-#                    },
-#                    "openstack-stg": {
-#                        "addr": "172.29.244.3"
-#                    },
-#                    "external1": {
-#                        "addr": "10.40.204.176"
-#                    }
-#                },
-#                "name_interfaces": {
-#                    "eth11": "98:be:94:5c:f0:25",
-#                    "eth10": "98:be:94:5c:f0:24",
-#                    "eth15": "98:be:94:5c:f0:26"
-#                }
-#            },
-#            "192.168.0.112": {
-#                "host_networks": {
-#                    "openstack-stg": {
-#                        "addr": "172.29.244.10"
-#                    },
-#                    "openstack-tenant-vlan": {
-#                        "addr": "0.0.0.0"
-#                    },
-#                    "external2": {},
-#                    "external1": {
-#                        "addr": "10.40.204.191"
-#                    },
-#                    "openstack-tenant-vxlan": {
-#                        "addr": "172.29.240.1"
-#                    },
-#                    "openstack-mgmt": {
-#                        "addr": "172.29.236.1"
-#                    }
-#                },
-#                "name_interfaces": {
-#                    "eth15": "0c:c4:7a:51:ed:90"
-#                }
-#            },
-#            "192.168.0.113": {
-#                "host_networks": {
-#                    "openstack-stg": {
-#                        "addr": "172.29.244.2"
-#                    },
-#                    "openstack-tenant-vlan": {
-#                        "addr": "0.0.0.0"
-#                    },
-#                    "external2": {},
-#                    "external1": {
-#                        "addr": "10.40.204.192"
-#                    },
-#                    "openstack-tenant-vxlan": {
-#                        "addr": "172.29.240.2"
-#                    },
-#                    "openstack-mgmt": {
-#                        "addr": "172.29.236.2"
-#                    }
-#                },
-#                "name_interfaces": {
-#                    "eth15": "0c:c4:7a:51:eb:16"
-#                }
-#            },
-#            "192.168.0.125": {
-#                "host_networks": {
-#                    "openstack-stg": {
-#                        "addr": "172.29.244.7"
-#                    },
-#                    "openstack-tenant-vlan": {
-#                        "addr": "0.0.0.0"
-#                    },
-#                    "external2": {},
-#                    "external1": {
-#                        "addr": "10.40.204.180"
-#                    },
-#                    "openstack-tenant-vxlan": {
-#                        "addr": "172.29.240.3"
-#                    },
-#                    "openstack-mgmt": {
-#                        "addr": "172.29.236.3"
-#                    }
-#                },
-#                "name_interfaces": {
-#                    "eth15": "98:be:94:58:e4:8a"
-#                }
-#            },
-#            "192.168.0.111": {
-#                "host_networks": {
-#                    "openstack-stg": {
-#                        "addr": "172.29.244.1"
-#                    },
-#                    "openstack-tenant-vlan": {
-#                        "addr": "0.0.0.0"
-#                    },
-#                    "external2": {},
-#                    "external1": {
-#                        "addr": "10.40.204.190"
-#                    },
-#                    "openstack-tenant-vxlan": {
-#                        "addr": "172.29.240.6"
-#                    },
-#                    "openstack-mgmt": {
-#                        "addr": "172.29.236.6"
-#                    }
-#                },
-#                "name_interfaces": {
-#                    "eth15": "0c:c4:7a:51:ed:cc"
-#                }
-#            },
-#            "192.168.0.127": {
-#                "host_networks": {
-#                    "openstack-stg": {
-#                        "addr": "172.29.244.9"
-#                    },
-#                    "openstack-tenant-vlan": {
-#                        "addr": "0.0.0.0"
-#                    },
-#                    "external2": {},
-#                    "external1": {
-#                        "addr": "10.40.204.182"
-#                    },
-#                    "openstack-tenant-vxlan": {
-#                        "addr": "172.29.240.5"
-#                    },
-#                    "openstack-mgmt": {
-#                        "addr": "172.29.236.5"
-#                    }
-#                },
-#                "name_interfaces": {
-#                    "eth15": "98:be:94:58:21:82"
-#                }
-#            },
-#            "192.168.0.126": {
-#                "host_networks": {
-#                    "openstack-stg": {
-#                        "addr": "172.29.244.8"
-#                    },
-#                    "openstack-tenant-vlan": {
-#                        "addr": "0.0.0.0"
-#                    },
-#                    "external2": {},
-#                    "external1": {
-#                        "addr": "10.40.204.181"
-#                    },
-#                    "openstack-tenant-vxlan": {
-#                        "addr": "172.29.240.4"
-#                    },
-#                    "openstack-mgmt": {
-#                        "addr": "172.29.236.4"
-#                    }
-#                },
-#                "name_interfaces": {
-#                    "eth15": "98:be:94:58:08:86"
-#                }
-#            }
-#        }
-#    }
-#}
+""" This is an ansible dynamic inventory module which loads an inventory file
+describing networks, nodes, and their relationships and outputs ansible
+inventory containing the host groups, hosts and network information
+required to allow the configuration of the network interfaces on the nodes.
 
+An example output of this generation is:
+{
+    "controllers": [
+        "192.168.0.111",
+        "192.168.0.112",
+        "192.168.0.113"
+    ],
+    "ceph-osd": [
+        "192.168.0.121",
+        "192.168.0.122",
+        "192.168.0.123",
+        "192.168.0.124"
+    ],
+    "all": {
+        "children": [
+            "controllers",
+            "ceph-osd",
+            "compute"
+        ],
+        "vars": {
+            "networks": {
+                "openstack-stg": {
+                    "bridge": "br-storage",
+                    "network": "172.29.244.0",
+                    "eth-port": "eth10",
+                    "vlan": 20,
+                    "tcp_segmentation_offload": false,
+                    "netmask": "255.255.252.0",
+                    "method": "static",
+                    "description": "OpenStack storage network"
+                },
+                "openstack-tenant-vlan": {
+                    "bridge": "br-vlan",
+                    "description": "Openstack Networking vlan",
+                    "method": "static",
+                    "eth-port": "eth11"
+                },
+                "external2": {
+                    "description": "Interface for eth11",
+                    "method": "manual",
+                    "eth-port": "eth11"
+                },
+                "external1": {
+                    "network": "10.40.204.0",
+                    "eth-port": "eth10",
+                    "dns-search": "acme.com",
+                    "dns-nameservers": "10.40.1.200",
+                    "method": "static",
+                    "broadcast": "10.40.204.255",
+                    "netmask": "255.255.255.0",
+                    "gateway": "10.40.204.1",
+                    "description": "Site network"
+                },
+                "ceph-replication": {
+                    "bridge": "br-replication",
+                    "network": "172.29.248.0",
+                    "eth-port": "eth11",
+                    "vlan": 40,
+                    "netmask": "255.255.252.0",
+                    "method": "static",
+                    "description": "OpenStack storage network"
+                },
+                "openstack-tenant-vxlan": {
+                    "bridge": "br-vxlan",
+                    "network": "172.29.240.0",
+                    "eth-port": "eth11",
+                    "vlan": 30,
+                    "netmask": "255.255.252.0",
+                    "method": "static",
+                    "description": "Openstack Networking VXLAN"
+                },
+                "openstack-mgmt": {
+                    "bridge": "br-mgmt",
+                    "network": "172.29.236.0",
+                    "eth-port": "eth10",
+                    "vlan": 10,
+                    "tcp_segmentation_offload": false,
+                    "netmask": "255.255.252.0",
+                    "method": "static",
+                    "description": "OpenStack management network"
+                }
+            }
+        }
+    },
+    "compute": [
+        "192.168.0.125",
+        "192.168.0.126",
+        "192.168.0.127"
+    ],
+    "_meta": {
+        "hostvars": {
+            "192.168.0.124": {
+                "host_networks": {
+                    "ceph-replication": {
+                        "addr": "172.29.248.4"
+                    },
+                    "openstack-stg": {
+                        "addr": "172.29.244.6"
+                    },
+                    "external1": {
+                        "addr": "10.40.204.179"
+                    }
+                },
+                "name_interfaces": {
+                    "eth11": "98:be:94:5c:f0:05",
+                    "eth10": "98:be:94:5c:f0:04",
+                    "eth15": "98:be:94:5c:f0:06"
+                }
+            },
+            "192.168.0.123": {
+                "host_networks": {
+                    "ceph-replication": {
+                        "addr": "172.29.248.3"
+                    },
+                    "openstack-stg": {
+                        "addr": "172.29.244.5"
+                    },
+                    "external1": {
+                        "addr": "10.40.204.178"
+                    }
+                },
+                "name_interfaces": {
+                    "eth15": "98:be:94:5c:ee:b6"
+                }
+            },
+            "192.168.0.122": {
+                "host_networks": {
+                    "ceph-replication": {
+                        "addr": "172.29.248.2"
+                    },
+                    "openstack-stg": {
+                        "addr": "172.29.244.4"
+                    },
+                    "external1": {
+                        "addr": "10.40.204.177"
+                    }
+                },
+                "name_interfaces": {
+                    "eth15": "98:be:94:5c:ef:0e"
+                }
+            },
+            "192.168.0.121": {
+                "host_networks": {
+                    "ceph-replication": {
+                        "addr": "172.29.248.1"
+                    },
+                    "openstack-stg": {
+                        "addr": "172.29.244.3"
+                    },
+                    "external1": {
+                        "addr": "10.40.204.176"
+                    }
+                },
+                "name_interfaces": {
+                    "eth11": "98:be:94:5c:f0:25",
+                    "eth10": "98:be:94:5c:f0:24",
+                    "eth15": "98:be:94:5c:f0:26"
+                }
+            },
+            "192.168.0.112": {
+                "host_networks": {
+                    "openstack-stg": {
+                        "addr": "172.29.244.10"
+                    },
+                    "openstack-tenant-vlan": {
+                        "addr": "0.0.0.0"
+                    },
+                    "external2": {},
+                    "external1": {
+                        "addr": "10.40.204.191"
+                    },
+                    "openstack-tenant-vxlan": {
+                        "addr": "172.29.240.1"
+                    },
+                    "openstack-mgmt": {
+                        "addr": "172.29.236.1"
+                    }
+                },
+                "name_interfaces": {
+                    "eth15": "0c:c4:7a:51:ed:90"
+                }
+            },
+            "192.168.0.113": {
+                "host_networks": {
+                    "openstack-stg": {
+                        "addr": "172.29.244.2"
+                    },
+                    "openstack-tenant-vlan": {
+                        "addr": "0.0.0.0"
+                    },
+                    "external2": {},
+                    "external1": {
+                        "addr": "10.40.204.192"
+                    },
+                    "openstack-tenant-vxlan": {
+                        "addr": "172.29.240.2"
+                    },
+                    "openstack-mgmt": {
+                        "addr": "172.29.236.2"
+                    }
+                },
+                "name_interfaces": {
+                    "eth15": "0c:c4:7a:51:eb:16"
+                }
+            },
+            "192.168.0.125": {
+                "host_networks": {
+                    "openstack-stg": {
+                        "addr": "172.29.244.7"
+                    },
+                    "openstack-tenant-vlan": {
+                        "addr": "0.0.0.0"
+                    },
+                    "external2": {},
+                    "external1": {
+                        "addr": "10.40.204.180"
+                    },
+                    "openstack-tenant-vxlan": {
+                        "addr": "172.29.240.3"
+                    },
+                    "openstack-mgmt": {
+                        "addr": "172.29.236.3"
+                    }
+                },
+                "name_interfaces": {
+                    "eth15": "98:be:94:58:e4:8a"
+                }
+            },
+            "192.168.0.111": {
+                "host_networks": {
+                    "openstack-stg": {
+                        "addr": "172.29.244.1"
+                    },
+                    "openstack-tenant-vlan": {
+                        "addr": "0.0.0.0"
+                    },
+                    "external2": {},
+                    "external1": {
+                        "addr": "10.40.204.190"
+                    },
+                    "openstack-tenant-vxlan": {
+                        "addr": "172.29.240.6"
+                    },
+                    "openstack-mgmt": {
+                        "addr": "172.29.236.6"
+                    }
+                },
+                "name_interfaces": {
+                    "eth15": "0c:c4:7a:51:ed:cc"
+                }
+            },
+            "192.168.0.127": {
+                "host_networks": {
+                    "openstack-stg": {
+                        "addr": "172.29.244.9"
+                    },
+                    "openstack-tenant-vlan": {
+                        "addr": "0.0.0.0"
+                    },
+                    "external2": {},
+                    "external1": {
+                        "addr": "10.40.204.182"
+                    },
+                    "openstack-tenant-vxlan": {
+                        "addr": "172.29.240.5"
+                    },
+                    "openstack-mgmt": {
+                        "addr": "172.29.236.5"
+                    }
+                },
+                "name_interfaces": {
+                    "eth15": "98:be:94:58:21:82"
+                }
+            },
+            "192.168.0.126": {
+                "host_networks": {
+                    "openstack-stg": {
+                        "addr": "172.29.244.8"
+                    },
+                    "openstack-tenant-vlan": {
+                        "addr": "0.0.0.0"
+                    },
+                    "external2": {},
+                    "external1": {
+                        "addr": "10.40.204.181"
+                    },
+                    "openstack-tenant-vxlan": {
+                        "addr": "172.29.240.4"
+                    },
+                    "openstack-mgmt": {
+                        "addr": "172.29.236.4"
+                    }
+                },
+                "name_interfaces": {
+                    "eth15": "98:be:94:58:08:86"
+                }
+            }
+        }
+    }
+}
+"""
 
 import argparse
 import copy

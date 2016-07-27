@@ -1,20 +1,9 @@
 ---
 # Copyright 2016, IBM US, Inc.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+
 - name: Check for interface name collisions
-  fail:
-    msg: "The renaming of network interfaces on this host will fail because it already has interface {{ item }} which has the MAC address {{ hostvars[inventory_hostname]['ansible_' + item]['macaddress'] }}. This will prevent the interface with MAC address {{ name_interfaces.get(item) }} from being renamed to {{ item }}."
+  debug:
+    msg: "Host already has interface {{ item }} which has the MAC address {{ hostvars[inventory_hostname]['ansible_' + item]['macaddress'] }}. Renaming the interface with MAC address {{ name_interfaces.get(item) }} to {{ item }} will force rename of first interface."
   when:
     - name_interfaces is defined
     - "{{ item in name_interfaces }}"

@@ -2,8 +2,6 @@
 from __future__ import nested_scopes, generators, division, absolute_import, \
     with_statement, print_function, unicode_literals
 import sys
-import yaml
-from orderedattrdict.yamlutils import AttrDictYAMLLoader
 import xmlrpclib
 
 from lib.logger import Logger
@@ -25,35 +23,39 @@ class CobblerAddDistros(object):
             for item in name_list:
                 if item.lower() == 'amd64':
                     arch = 'x86_64'
-                    kernel = path + "/install/netboot/ubuntu-installer/amd64/linux"
-                    initrd = path + "/install/netboot/ubuntu-installer/amd64/initrd.gz"
+                    kernel = (
+                        "%s/install/netboot/ubuntu-installer/amd64/linux" %
+                        path)
+                    initrd = (
+                        "%s/install/netboot/ubuntu-installer/amd64/initrd.gz" %
+                        path)
                 elif item.lower() == 'ppc64el':
                     arch = 'ppc64le'
-                    kernel = path + "/install/netboot/vmlinux"
-                    initrd = path + "/install/netboot/initrd.gz"
+                    kernel = "%s/install/netboot/vmlinux" % path
+                    initrd = "%s/install/netboot/initrd.gz" % path
                 elif item.lower().startswith('14.04'):
                     os_version = 'trusty'
             kernel_options = (
                 "netcfg/dhcp_timeout=1024 "
                 "netcfg/choose_interface=auto "
                 "ipv6.disable=1")
-            kickstart = "/var/lib/cobbler/kickstarts/" + name + ".seed"
+            kickstart = "/var/lib/cobbler/kickstarts/%s.seed" % name
 
         elif ('CentOS' in name_list) or ('RHEL' in name_list):
             breed = 'redhat'
             for item in name_list:
                 if item.lower() == 'x86_64':
                     arch = 'x86_64'
-                    kernel = path + "/images/pxeboot/vmlinuz"
-                    initrd = path + "/images/pxeboot/initrd.img"
+                    kernel = "%s/images/pxeboot/vmlinuz" % path
+                    initrd = "%s/images/pxeboot/initrd.img" % path
                 elif item.lower() == 'ppc64le':
                     arch = 'ppc64le'
-                    kernel = path + "/ppc/ppc64/vmlinuz"
-                    initrd = path + "/ppc/ppc64/initrd.img"
+                    kernel = "%s/ppc/ppc64/vmlinuz" % path
+                    initrd = "%s/ppc/ppc64/initrd.img" % path
                 elif item.lower().startswith('7'):
                     os_version = 'rhel7'
             kernel_options = "text"
-            kickstart = "/var/lib/cobbler/kickstarts/" + name + ".cfg"
+            kickstart = "/var/lib/cobbler/kickstarts/%s.cfg" % name
 
         cobbler_server = xmlrpclib.Server("http://127.0.0.1/cobbler_api")
         token = cobbler_server.login(COBBLER_USER, COBBLER_PASS)

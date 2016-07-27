@@ -1,7 +1,11 @@
 ---
+# Copyright 2016, IBM US, Inc.
+
 - name: container/ipmi_power_on.yml
   hosts: deployer
   vars:
     log_level: ""
   tasks:
-    - command: "{{ python_executable }} {{ scripts_path }}/python/ipmi_power_on.py {{ inventory }} {{ log_level }}"
+    - name: "Power on all nodes"
+      command: "{{ python_executable }} {{ scripts_path }}/python/ipmi_power_on.py {{ inventory }} {{ log_level }}"
+      ignore_errors: yes

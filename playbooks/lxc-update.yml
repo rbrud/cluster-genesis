@@ -1,4 +1,6 @@
 ---
+# Copyright 2016, IBM US, Inc.
+
 - name: lxc-update.yml
   hosts: localhost
   gather_facts: yes
@@ -8,9 +10,9 @@
         url: "{{ item.url }}"
         dest: "{{ item.dest }}"
       with_items:
-        - { url: "http://ausgsa.ibm.com/~jwcarman/public/yggdrasil/os_images/ubuntu-14.04.4-server-amd64.iso", dest: "{{ project_path_local }}/os_images/" }
-        - { url: "http://ausgsa.ibm.com/~jwcarman/public/yggdrasil/os_images/ubuntu-14.04.4-server-ppc64el.iso", dest: "{{ project_path_local }}/os_images/" }
-        - { url: "http://ausgsa.ibm.com/~jwcarman/public/yggdrasil/os_images/ubuntu-14.04.4-server-ppc64el.mini.iso", dest: "{{ project_path_local }}/os_images/ubuntu-14.04.4-server-ppc64el.mini.iso" }
+        - {url: "http://ausgsa.ibm.com/~jwcarman/public/yggdrasil/os_images/ubuntu-14.04.4-server-amd64.iso", dest: "{{ project_path_local }}/os_images/"}
+        - {url: "http://ausgsa.ibm.com/~jwcarman/public/yggdrasil/os_images/ubuntu-14.04.4-server-ppc64el.iso", dest: "{{ project_path_local }}/os_images/"}
+        - {url: "http://ausgsa.ibm.com/~jwcarman/public/yggdrasil/os_images/ubuntu-14.04.4-server-ppc64el.mini.iso", dest: "{{ project_path_local }}/os_images/ubuntu-14.04.4-server-ppc64el.mini.iso"}
 
 - hosts: installer
   vars:
@@ -21,8 +23,8 @@
     - debug:
         msg: "{{ item }}"
       with_items:
-      - "Local Scripts Path: {{ scripts_path_local }}"
-      - "Local Config file: {{ config_local }}"
+        - "Local Scripts Path: {{ scripts_path_local }}"
+        - "Local Config file: {{ config_local }}"
 
     - name: "Update apt cache and upgrade (safe)"
       apt:
@@ -35,13 +37,13 @@
       apt:
         name: "{{ item }}"
       with_items:
-      - python-pip 
-      - python-dev
-      - libffi-dev
-      - libssl-dev
-      - python-pysnmp4
-      - ipmitool
-      - git
+        - python-pip
+        - python-dev
+        - libffi-dev
+        - libssl-dev
+        - python-pysnmp4
+        - ipmitool
+        - git
       become: yes
       become_method: sudo
 
@@ -49,10 +51,10 @@
       pip:
         name: "{{ item }}"
       with_items:
-      - pip
-      - setuptools
-      - wheel
-      - virtualenv
+        - pip
+        - setuptools
+        - wheel
+        - virtualenv
       become: yes
       become_method: sudo
 
