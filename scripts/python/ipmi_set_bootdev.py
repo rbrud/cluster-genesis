@@ -2,7 +2,6 @@
 from __future__ import nested_scopes, generators, division, absolute_import, \
     with_statement, print_function, unicode_literals
 import sys
-import os.path
 import time
 from pyghmi.ipmi import command as ipmi_command
 from pyghmi import exceptions as pyghmi_exception
@@ -34,14 +33,14 @@ class IpmiSetBootdev(object):
                     'set_bootdev failed (device=%s persist=%s) - '
                     'Rack: %s - IP: %s, %s' %
                     (bootdev, persist, rack_id, ipv4, str(error)))
-                sys.exit(1)
+                # sys.exit(1)
 
             if 'error' in rc:
                 log.error(
                     'set_bootdev failed (device=%s persist=%s) - '
                     'Rack: %s - IP: %s, %s' %
                     (bootdev, persist, rack_id, ipv4, str(rc['error'])))
-                sys.exit(1)
+                # sys.exit(1)
 
             time.sleep(5)
 
@@ -52,14 +51,14 @@ class IpmiSetBootdev(object):
                     'get_bootdev failed - '
                     'Rack: %s - IP: %s, %s' %
                     (rack_id, ipv4, str(error)))
-                sys.exit(1)
+                # sys.exit(1)
 
             if 'error' in rc:
                 log.error(
                     'get_bootdev failed - '
                     'Rack: %s - IP: %s, %s' %
                     (rack_id, ipv4, str(rc['error'])))
-                sys.exit(1)
+                # sys.exit(1)
             elif (rc['bootdev'] == bootdev and
                     str(rc['persistent']) == str(persist)):
                 log.info(
@@ -73,7 +72,7 @@ class IpmiSetBootdev(object):
                     'Rack: %s - IP: %s' %
                     (bootdev, persist, rc['bootdev'], rc['persistent'],
                      rack_id, ipv4))
-                sys.exit(1)
+                # sys.exit(1)
 
 
 if __name__ == '__main__':

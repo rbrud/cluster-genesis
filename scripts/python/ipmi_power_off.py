@@ -2,7 +2,6 @@
 from __future__ import nested_scopes, generators, division, absolute_import, \
     with_statement, print_function, unicode_literals
 import sys
-import os.path
 from pyghmi.ipmi import command as ipmi_command
 from pyghmi import exceptions as pyghmi_exception
 
@@ -33,7 +32,7 @@ class IpmiPowerOff(object):
                 log.error(
                     'Power status failed - Rack: %s - IP: %s, %s' %
                     (rack_id, ipv4, str(error)))
-                sys.exit(1)
+                # sys.exit(1)
 
             if rc.get(POWERSTATE) == OFF:
                 log.info(
@@ -47,13 +46,13 @@ class IpmiPowerOff(object):
                 log.error(
                     'Power off failed - Rack: %s - IP: %s, %s' %
                     (rack_id, ipv4, str(error)))
-                sys.exit(1)
+                # sys.exit(1)
 
             if rc.get(POWERSTATE) != OFF:
                 log.error(
                     'Power off did not occur - Rack: %s - IP: %s' %
                     (rack_id, ipv4))
-                sys.exit(1)
+                # sys.exit(1)
 
             log.info('Power off - Rack: %s - IP: %s' % (rack_id, ipv4))
 
