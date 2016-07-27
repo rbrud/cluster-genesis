@@ -9,3 +9,4 @@
     persistent: False
   tasks:
     - command: "{{ python_executable }} {{ scripts_path }}/python/ipmi_set_bootdev.py {{ inventory }} {{ bootdev }} {{ persistent }} {{ log_level }}"
+      ignore_errors: yes
