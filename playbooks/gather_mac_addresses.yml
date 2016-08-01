@@ -5,6 +5,7 @@
   hosts: localhost
   tasks:
     - name: Clear switch MAC address table switch and write them to the inventory file
+      include_vars: host_vars/localhost
       command: "{{ python_executable_local }} {{ scripts_path_local }}/python/clear_port_macs.py /var/oprc/inventory.yml {{ log_level }}"
 
 - name: Bring up all non-ansible comm interfaces on IPv6
