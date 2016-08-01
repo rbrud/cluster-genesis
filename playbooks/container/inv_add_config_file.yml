@@ -5,4 +5,4 @@
   hosts: deployer
   tasks:
     - name: "Append config.yml to inventory.yml"
-      shell: "cat {{ config }} >> {{ inventory }}"
+      shell: "sed '/^---/d' {{ config }} >> {{ inventory }}"
