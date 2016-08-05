@@ -118,7 +118,8 @@
       become: yes
       become_method: sudo
 
-    - debug:
+    - name: "Print container IP information"
+      debug:
         msg: "{{ item }}"
       with_items:
         - 'Deployment container internal IP: {{ container_ip.stdout_lines | first }}'

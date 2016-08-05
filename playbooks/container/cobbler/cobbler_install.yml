@@ -213,7 +213,8 @@
       become: yes
       become_method: sudo
 
-    - file:
+    - name: "Chown www-data /var/lib/cobbler/webui_sessions"
+      file:
         path: /var/lib/cobbler/webui_sessions
         owner: www-data
       become: yes
@@ -227,7 +228,8 @@
       become: yes
       become_method: sudo
 
-    - replace:
+    - name: "Update cobbler server settings"
+      replace:
         dest: /etc/cobbler/settings
         regexp: "{{ item.regexp }}"
         replace: "{{ item.line }}"
