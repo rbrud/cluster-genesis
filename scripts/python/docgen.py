@@ -19,7 +19,7 @@ def print_tasks(task_list, indent):
         if 'name' in task:
             print("%s#. %s " % (indent, task['name']), end="")
         else:
-            print("%s#. Unamed task " % indent, end="")
+            print("%s#. Unnamed task " % indent, end="")
         if 'include' in task:
             print("")
             print("%s    * Include: %s" % (indent, task['include']))

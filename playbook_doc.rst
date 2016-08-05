@@ -22,7 +22,7 @@ Play: lxc-create.yml
 #. Create LXC deployment container \[lxc_container]
 #. Pause 5 seconds \[pause]
 #. Register container internal ip address \[command: lxc-info -n {{ container_name }} -iH]
-#. Unamed task \[debug]
+#. Unnamed task \[debug]
 #. Update "installer" host with ssh private key. \[replace]
 #. Update "installer" host with container internal IP address. \[replace]
 #. Update "deployer" host with ssh private key. \[replace]
@@ -42,7 +42,7 @@ Play: lxc-update.yml
 
 * Hosts: installer 
 
-#. Unamed task \[debug]
+#. Unnamed task \[debug]
 #. Update apt cache and upgrade (safe) \[apt]
 #. Install distro packages \[apt]
 #. Install python pip packages \[pip]
@@ -89,9 +89,9 @@ Play: container/cobbler/cobbler_install.yml
 #. Save original /etc/apache2/conf-enabled/cobbler_web.conf file \[copy]
 #. Apache2 config \[lineinfile]
 #. Apache2 config \[replace]
-#. Unamed task \[file]
+#. Unnamed task \[file]
 #. Save original /etc/cobbler/settings file \[copy]
-#. Unamed task \[replace]
+#. Unnamed task \[replace]
 #. Save original /etc/cobbler/pxe/pxedefault.template file \[copy]
 #. Set PXE timeout to maximum \[replace]
 #. Save original /var/lib/cobbler/snippets/kickstart_done file \[copy]
@@ -125,7 +125,7 @@ Play: container/set_data_switch_config.yml
 ------------------------------------------
 * Hosts: deployer 
 
-#. Unamed task \[command: {{ python_executable }} {{ scripts_path }}/python/set_data_switch_config.py {{ config }} {{ log_level }}]
+#. Unnamed task \[command: {{ python_executable }} {{ scripts_path }}/python/set_data_switch_config.py {{ config }} {{ log_level }}]
 
 
 Include: container/inv_add_switches.yml log_level=info
@@ -134,7 +134,7 @@ Play: container/inv_add_switches.yml
 ------------------------------------
 * Hosts: deployer 
 
-#. Unamed task \[command: {{ python_executable }} {{ scripts_path }}/python/inv_add_switches.py {{ config }} {{ inventory }} {{ log_level }}]
+#. Unnamed task \[command: {{ python_executable }} {{ scripts_path }}/python/inv_add_switches.py {{ config }} {{ inventory }} {{ log_level }}]
 
 
 Include: container/inv_add_ipmi_ports.yml log_level=info
@@ -143,8 +143,8 @@ Play: container/inv_add_ipmi_ports.yml
 --------------------------------------
 * Hosts: deployer 
 
-#. Unamed task \[command: awk '{system("ping -c 5 "$3)}' {{ dhcp_leases_file }}]
-#. Unamed task \[command: {{ python_executable }} {{ scripts_path }}/python/inv_add_ipmi_ports.py {{ config }} {{ inventory }} {{ dhcp_leases_file }} {{ log_level }}]
+#. Unnamed task \[command: awk '{system("ping -c 5 "$3)}' {{ dhcp_leases_file }}]
+#. Unnamed task \[command: {{ python_executable }} {{ scripts_path }}/python/inv_add_ipmi_ports.py {{ config }} {{ inventory }} {{ dhcp_leases_file }} {{ log_level }}]
 
 
 Include: container/ipmi_set_bootdev.yml log_level=info bootdev=network persistent=False
@@ -153,7 +153,7 @@ Play: container/ipmi_set_bootdev.yml
 ------------------------------------
 * Hosts: deployer 
 
-#. Unamed task \[command: {{ python_executable }} {{ scripts_path }}/python/ipmi_set_bootdev.py {{ inventory }} {{ bootdev }} {{ persistent }} {{ log_level }}]
+#. Unnamed task \[command: {{ python_executable }} {{ scripts_path }}/python/ipmi_set_bootdev.py {{ inventory }} {{ bootdev }} {{ persistent }} {{ log_level }}]
 
 
 Include: container/ipmi_power_on.yml log_level=info
@@ -182,7 +182,7 @@ Play: container/inv_add_ipmi_data.yml
 -------------------------------------
 * Hosts: deployer 
 
-#. Unamed task \[command: {{ python_executable }} {{ scripts_path }}/python/inv_add_ipmi_data.py {{ config }} {{ inventory }} {{ log_level }}]
+#. Unnamed task \[command: {{ python_executable }} {{ scripts_path }}/python/inv_add_ipmi_data.py {{ config }} {{ inventory }} {{ log_level }}]
 
 
 Include: container/inv_add_pxe_ports.yml log_level=info
@@ -191,8 +191,8 @@ Play: container/inv_add_pxe_ports.yml
 -------------------------------------
 * Hosts: deployer 
 
-#. Unamed task \[command: awk '{system("ping -c 5 "$3)}' {{ dhcp_leases_file }}]
-#. Unamed task \[command: {{ python_executable }} {{ scripts_path }}/python/inv_add_pxe_ports.py {{ config }} {{ inventory }} {{ dhcp_leases_file }} {{ log_level }}]
+#. Unnamed task \[command: awk '{system("ping -c 5 "$3)}' {{ dhcp_leases_file }}]
+#. Unnamed task \[command: {{ python_executable }} {{ scripts_path }}/python/inv_add_pxe_ports.py {{ config }} {{ inventory }} {{ dhcp_leases_file }} {{ log_level }}]
 
 
 Include: container/ipmi_power_off.yml log_level=info
@@ -210,7 +210,7 @@ Play: container/inv_modify_ipv4.yml
 -----------------------------------
 * Hosts: deployer 
 
-#. Unamed task \[command: {{ python_executable }} {{ scripts_path }}/python/inv_modify_ipv4.py {{ config }} {{ inventory }} {{ node_mgmt_ipv4_start }} {{ log_level }}]
+#. Unnamed task \[command: {{ python_executable }} {{ scripts_path }}/python/inv_modify_ipv4.py {{ config }} {{ inventory }} {{ node_mgmt_ipv4_start }} {{ log_level }}]
 
 
 Include: container/cobbler/cobbler_add_distros.yml
@@ -254,8 +254,8 @@ Play: container/cobbler/cobbler_add_profiles.yml
 
 #. Register list of *.seed files \[shell: ls {{ project_path }}/os_images/config/*.seed]
 #. Filter out default *.seed files \[shell: ls {{ project_path }}/os_images/{{ item | basename | regex_replace('^(.*)[.]seed$', '\1.iso') }} || echo True]
-#. Unamed task #. Read any associated *.kopts files \[shell: cat {{ project_path }}/os_images/config/{{ item.item | basename |regex_replace('^(.*)[.]seed$', '\1.kopts') }} || echo none]
-#. Unamed task #. Call python "cobbler_add_profiles.py" script to create additional profiles \[command: {{ python_executable }} {{ scripts_path }}/python/cobbler_add_profiles.py {{ item.0.item | basename | regex_replace('^(.*)[.].*[.]seed$', '\1') }} {{ item.0.item | basename | regex_replace('^(.*)[.]seed$', '\1') }} "{{ item.1.stdout }}" {{ log_level }}]
+#. Unnamed task #. Read any associated *.kopts files \[shell: cat {{ project_path }}/os_images/config/{{ item.item | basename |regex_replace('^(.*)[.]seed$', '\1.kopts') }} || echo none]
+#. Unnamed task #. Call python "cobbler_add_profiles.py" script to create additional profiles \[command: {{ python_executable }} {{ scripts_path }}/python/cobbler_add_profiles.py {{ item.0.item | basename | regex_replace('^(.*)[.].*[.]seed$', '\1') }} {{ item.0.item | basename | regex_replace('^(.*)[.]seed$', '\1') }} "{{ item.1.stdout }}" {{ log_level }}]
 
 
 Include: container/cobbler/cobbler_add_systems.yml
@@ -264,7 +264,7 @@ Play: container/cobbler/cobbler_add_systems.yml
 -----------------------------------------------
 * Hosts: deployer 
 
-#. Unamed task \[command: {{ python_executable }} {{ scripts_path }}/python/cobbler_add_systems.py {{ config }} {{ inventory }} {{ log_level }}]
+#. Unnamed task \[command: {{ python_executable }} {{ scripts_path }}/python/cobbler_add_systems.py {{ config }} {{ inventory }} {{ log_level }}]
 
 
 Include: container/inv_add_config_file.yml
@@ -282,7 +282,7 @@ Play: container/allocate_ip_addresses.yml
 -----------------------------------------
 * Hosts: deployer 
 
-#. Unamed task \[command: {{ python_executable }} {{ scripts_path }}/python/yggdrasil/allocate_ip_addresses.py --inventory {{ inventory }}]
+#. Unnamed task \[command: {{ python_executable }} {{ scripts_path }}/python/yggdrasil/allocate_ip_addresses.py --inventory {{ inventory }}]
 
 
 Include: container/get_inv_file.yml dest=/var/oprc
@@ -306,7 +306,7 @@ Play: container/ipmi_set_bootdev.yml
 ------------------------------------
 * Hosts: deployer 
 
-#. Unamed task \[command: {{ python_executable }} {{ scripts_path }}/python/ipmi_set_bootdev.py {{ inventory }} {{ bootdev }} {{ persistent }} {{ log_level }}]
+#. Unnamed task \[command: {{ python_executable }} {{ scripts_path }}/python/ipmi_set_bootdev.py {{ inventory }} {{ bootdev }} {{ persistent }} {{ log_level }}]
 
 
 Include: container/ipmi_power_on.yml log_level=info
@@ -335,7 +335,7 @@ Play: container/ipmi_set_bootdev.yml
 ------------------------------------
 * Hosts: deployer 
 
-#. Unamed task \[command: {{ python_executable }} {{ scripts_path }}/python/ipmi_set_bootdev.py {{ inventory }} {{ bootdev }} {{ persistent }} {{ log_level }}]
+#. Unnamed task \[command: {{ python_executable }} {{ scripts_path }}/python/ipmi_set_bootdev.py {{ inventory }} {{ bootdev }} {{ persistent }} {{ log_level }}]
 
 
 ----
@@ -382,7 +382,7 @@ Play: Configure interfaces
 --------------------------
 * Hosts: all 
 
-#. Unamed task 
+#. Unnamed task 
     * Include: tasks/create_interfaces.yml
         #. Check for interface name collisions \[debug]
         #. Generate udev persistent net rules \[template]
@@ -393,7 +393,7 @@ Play: Transfer keys
 -------------------
 * Hosts: controllers:compute 
 
-#. Unamed task 
+#. Unnamed task 
     * Include: tasks/transfer_keys.yml
         #. Transferring private key \[copy]
         #. Transferring public key \[copy]
@@ -402,7 +402,7 @@ Play: Transfer inventory file
 -----------------------------
 * Hosts: controllers 
 
-#. Unamed task 
+#. Unnamed task 
     * Include: tasks/transfer_inventory.yml
         #. Create inventory file target directory \[file]
         #. Transferring inventory file \[copy]
@@ -411,7 +411,7 @@ Play: Prepare Cluster Configuration Software
 --------------------------------------------
 * Hosts: controllers[0] 
 
-#. Unamed task 
+#. Unnamed task 
     * Include: tasks/os_services_install.yml
         #. Debug \[debug]
 
