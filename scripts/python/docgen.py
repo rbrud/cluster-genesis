@@ -18,6 +18,10 @@ def print_tasks(task_list, indent):
     for task in task_list:
         if 'name' in task:
             print("%s#. %s " % (indent, task['name']), end="")
+        elif 'command' in task:
+            print("%s#. " % indent, end="")
+        elif 'shell' in task:
+            print("%s#. " % indent, end="")
         else:
             print("%s#. Unnamed task " % indent, end="")
         if 'include' in task:
