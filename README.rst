@@ -22,7 +22,7 @@ Create a network bridge named "br0" with port connected to management
 network (192.168.3.0/24).
 
 Below is an example interface defined in the local
-"/etc/network/interface" file. Note that "p1p1" is the name of the
+"/etc/network/interfaces" file. Note that "p1p1" is the name of the
 interface connected to the management network.
 
 ::
