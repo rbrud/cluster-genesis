@@ -1,7 +1,8 @@
 ---
 # Copyright 2016, IBM US, Inc.
 
-- hosts: localhost
+- name: "Gather facts from localhost"
+  hosts: localhost
   gather_facts: yes
 
 - name: container/cobbler/cobbler_install.yml
@@ -9,7 +10,8 @@
   tasks:
 
     - name: "Install aptitude to enable apt upgrade safe "
-      apt: name=aptitude
+      apt:
+        name: aptitude
       become: yes
       become_method: sudo
 
@@ -211,7 +213,8 @@
       become: yes
       become_method: sudo
 
-    - file:
+    - name: "Chown www-data /var/lib/cobbler/webui_sessions"
+      file:
         path: /var/lib/cobbler/webui_sessions
         owner: www-data
       become: yes
@@ -225,7 +228,8 @@
       become: yes
       become_method: sudo
 
-    - replace:
+    - name: "Update cobbler server settings"
+      replace:
         dest: /etc/cobbler/settings
         regexp: "{{ item.regexp }}"
         replace: "{{ item.line }}"

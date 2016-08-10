@@ -20,7 +20,8 @@
     os_images_path_local: "{{ hostvars['localhost']['project_path_local'] }}/os_images"
     config_local: "{{ hostvars['localhost']['config_local'] }}"
   tasks:
-    - debug:
+    - name: "Print local scripts/config paths"
+      debug:
         msg: "{{ item }}"
       with_items:
         - "Local Scripts Path: {{ scripts_path_local }}"

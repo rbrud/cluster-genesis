@@ -4,7 +4,8 @@
 - name: lxc-create.yml
   hosts: localhost
   tasks:
-    - debug:
+    - name: "Print local project path"
+      debug:
         msg: "{{ item }}"
       with_items:
         - "Project name: {{ project_path_local }}"
@@ -24,18 +25,21 @@
       become_method: sudo
 
     - name: "Install LXC"
-      apt: name=lxc
+      apt:
+        name: lxc
       become: yes
       become_method: sudo
 
     - name: "Install liblxc1"
-      apt: name=liblxc1
+      apt:
+        name: liblxc1
       become: yes
       become_method: sudo
       when: ansible_distribution_version == "14.04"
 
     - name: "Install python-lxc"
-      apt: name=python-lxc
+      apt:
+        name: python-lxc
       become: yes
       become_method: sudo
       when: ansible_distribution_version == "16.04"
@@ -105,7 +109,8 @@
       become_method: sudo
 
     - name: "Pause 5 seconds"
-      pause: seconds=5
+      pause:
+        seconds: 5
 
     - name: "Register container internal ip address"
       command: lxc-info -n {{ container_name }} -iH
@@ -113,7 +118,8 @@
       become: yes
       become_method: sudo
 
-    - debug:
+    - name: "Print container IP information"
+      debug:
         msg: "{{ item }}"
       with_items:
         - 'Deployment container internal IP: {{ container_ip.stdout_lines | first }}'

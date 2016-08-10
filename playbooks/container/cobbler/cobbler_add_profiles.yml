@@ -1,7 +1,8 @@
 ---
 # Copyright 2016, IBM US, Inc.
 
-- hosts: localhost
+- name: "Gather facts from localhost"
+  hosts: localhost
   gather_facts: yes
 
 - name: container/cobbler/cobbler_add_profiles.yml
@@ -20,15 +21,11 @@
         - "{{ seed_files.stdout_lines }}"
       register: profile_files
 
-    - debug: var=profile_files.results
-
     - name: "Read any associated *.kopts files"
       shell: "cat {{ project_path }}/os_images/config/{{ item.item | basename |regex_replace('^(.*)[.]seed$', '\\1.kopts') }} || echo none"
       with_items:
         - "{{ profile_files.results }}"
       register: kopts
-
-    - debug: var=kopts.results
 
     - name: "Call python \"cobbler_add_profiles.py\" script to create additional profiles"
       command: "{{ python_executable }} {{ scripts_path }}/python/cobbler_add_profiles.py {{ item.0.item | basename | regex_replace('^(.*)[.].*[.]seed$', '\\1') }} {{ item.0.item | basename | regex_replace('^(.*)[.]seed$', '\\1') }} \"{{ item.1.stdout }}\" {{ log_level }}"
