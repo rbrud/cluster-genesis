@@ -9,7 +9,6 @@ Installation
 $ export GIT_SSL_NO_VERIFY=1
 $ git clone https://gitlabhost.rtp.raleigh.ibm.com/1A8420897/yggdrasil.git
 $ cd yggdrasil
-$ ./scripts/update-sudoers.sh
 $ ./scripts/install.sh
 $ source scripts/setup-env
 $ export ANSIBLE_HOST_KEY_CHECKING=False
