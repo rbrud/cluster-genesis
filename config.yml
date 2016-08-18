@@ -1,3 +1,4 @@
+---
 ipaddr-mgmt-network: 192.168.3.0/24
 ipaddr-mgmt-switch:
     rack1: 192.168.3.5
