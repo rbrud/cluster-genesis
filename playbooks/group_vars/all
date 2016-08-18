@@ -4,8 +4,9 @@ user: deployer
 project_path: "/home/{{ user }}/{{ project_name }}"
 venv_path: "{{ project_path }}/deployenv"
 python_executable: "{{ venv_path }}/bin/python"
-container_mgmt_subnet: 192.168.3.0/24
-container_mgmt_ipv4: "{{ container_mgmt_subnet | ipaddr('2') }}"
+container_mgmt_subnet: 192.168.0.0/24
+container_mgmt_ipv4_offset: 2
+container_mgmt_ipv4: "{{ container_mgmt_subnet | ipaddr(container_mgmt_ipv4_offset) }}"
 node_mgmt_ipv4_start: "{{ container_mgmt_subnet | ipaddr('101') }}"
 
 scripts_path: "{{ project_path }}/scripts"

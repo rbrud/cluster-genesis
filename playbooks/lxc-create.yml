@@ -82,7 +82,9 @@
       replace:
         dest: "{{ project_path_local }}/playbooks/lxc.conf"
         regexp: '^(lxc.network.ipv4 =).*$'
-        replace: '\1 {{ ipaddr_mgmt_network.stdout | ipaddr("2") }}'
+        replace: |
+            \1 {{ ipaddr_mgmt_network.stdout |
+            ipaddr(container_mgmt_ipv4_offset) }}
 
     - name: "Create private/public ssh key pair"
       user:
@@ -122,8 +124,13 @@
       debug:
         msg: "{{ item }}"
       with_items:
-        - 'Deployment container internal IP: {{ container_ip.stdout_lines | first }}'
-        - 'Deployment container management network IP: {{ container_mgmt_ipv4 | ipaddr("address") }}'
+        - |
+            Deployment container internal IP:
+            {{ container_ip.stdout_lines | first }}
+        - |
+            Deployment container management network IP:
+            {{ ipaddr_mgmt_network.stdout | ipaddr(container_mgmt_ipv4_offset) |
+            ipaddr("address") }}'
 
     - name: "Update \"installer\" host with ssh private key."
       replace:
@@ -149,10 +156,14 @@
       become: yes
       become_method: sudo
 
-    - name: "Update \"deployer\" host with container management network IP address."
+    - name: |
+        Update "deployer" host with container management network IP
+        address.
       replace:
         dest: "{{ project_path_local }}/playbooks/hosts"
         regexp: '^(deployer .+?)=\d+\.\d+\.\d+\.\d+$'
-        replace: '\1={{ ipaddr_mgmt_network.stdout | ipaddr("2") | ipaddr("address") }}'
+        replace: |
+            \1={{ ipaddr_mgmt_network.stdout |
+            ipaddr(container_mgmt_ipv4_offset) | ipaddr("address") }}
       become: yes
       become_method: sudo
