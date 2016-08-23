@@ -35,6 +35,8 @@ class CobblerAddDistros(object):
                     initrd = "%s/install/netboot/initrd.gz" % path
                 elif item.lower().startswith('14.04'):
                     os_version = 'trusty'
+                elif item.lower().startswith('16.04'):
+                    os_version = 'xenial'
             kernel_options = (
                 "netcfg/dhcp_timeout=1024 "
                 "netcfg/choose_interface=auto "
