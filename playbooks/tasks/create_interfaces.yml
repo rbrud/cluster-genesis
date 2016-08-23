@@ -19,15 +19,59 @@
     mode: "0644"
   register: wrote_netrules
 
-- name: Generate interfaces file
+- name: Generate Ubuntu interfaces file
   template:
-    src: "{{ playbook_dir }}/templates/interfaces.j2"
+    src: "{{ playbook_dir }}/templates/interfaces_ubuntu.j2"
     dest: "/etc/network/interfaces"
     owner: "root"
     group: "root"
     mode: "0644"
     backup: yes
+  when:
+  - "{{ ansible_distribution == 'Ubuntu' }}"
   register: wrote_interfaces
+
+- name: Generate RHEL/CentOS interfaces files
+  template:
+    src: "{{ playbook_dir }}/templates/interfaces_rhel.j2"
+    dest: "/etc/sysconfig/network-scripts/ifcfg-{{ networks[item].get('eth-port') }}"
+    owner: "root"
+    group: "root"
+    mode: "0644"
+    backup: yes
+  when:
+  - networks[item].bridge is not defined
+  - "{{ ansible_distribution == 'CentOS' }}"
+  with_items: "{{ host_networks.keys() }}"
+  register: wrote_interfaces
+
+- name: Generate RHEL/CentOS vlan files
+  template:
+    src: "{{ playbook_dir }}/templates/interfaces_rhel.j2"
+    dest: "/etc/sysconfig/network-scripts/ifcfg-{{ networks[item].get('eth-port') }}"
+    owner: "root"
+    group: "root"
+    mode: "0644"
+    backup: yes
+  when:
+  - networks[item].vlan is defined
+  - "{{ ansible_distribution == 'CentOS' }}"
+  with_items: "{{ host_networks.keys() }}"
+  register: wrote_interfaces
+
+- name: Generate RHEL/CentOS bridge files
+  template:
+    src: "{{ playbook_dir }}/templates/bridges_rhel.j2"
+    dest: "/etc/sysconfig/network-scripts/ifcfg-{{ networks[item].get('bridge') }}"
+    owner: "root"
+    group: "root"
+    mode: "0644"
+    backup: yes
+  when:
+  - networks[item] is defined
+  - networks[item].bridge is defined
+  - "{{ ansible_distribution == 'CentOS' }}"
+  with_items: "{{ host_networks.keys() }}"
 
 - name: Reboot
   command: reboot
