@@ -4,6 +4,9 @@
 - name: Gather facts from localhost
   hosts: localhost
   gather_facts: yes
+  tasks:
+    - name: Include localhost variables
+      include_vars: host_vars/localhost
 
 - name: Configure interfaces
   hosts: all
