@@ -117,10 +117,21 @@ class CobblerAddSystems(object):
                     "dnsname-eth0": hostname},
                 token)
             if CFG_OS_DISK in inv.cfg[CFG_NODES_TEMPLATES][node[INV_TEMPLATE]]:
-                KS_META = (
-                    'install_disk=%s' %
+                disks = (
                     inv.cfg[CFG_NODES_TEMPLATES][node[INV_TEMPLATE]]
                     [CFG_OS_DISK])
+                if isinstance(disks, basestring):
+                    KS_META = 'install_disk=%s' % disks
+                elif isinstance(disks, list) and len(disks) == 2:
+                    KS_META = (
+                        'install_disk=%s install_disk_2=%s' %
+                        (disks[0], disks[1]))
+                else:
+                    log.error(
+                        'Invalid %s[%s][%s] value: '
+                        'Must be string or two item list.' %
+                        (CFG_NODES_TEMPLATES, node[INV_TEMPLATE],
+                            CFG_OS_DISK))
                 cobbler_server.modify_system(
                     new_system_create,
                     "ks_meta",
