@@ -4,6 +4,7 @@ from __future__ import nested_scopes, generators, division, absolute_import, \
 import sys
 from pyghmi.ipmi import command as ipmi_command
 from pyghmi import exceptions as pyghmi_exception
+import time
 
 from lib.inventory import Inventory
 from lib.logger import Logger
@@ -55,6 +56,8 @@ class IpmiPowerOff(object):
                 # sys.exit(1)
 
             log.info('Power off - Rack: %s - IP: %s' % (rack_id, ipv4))
+
+        time.sleep(180)
 
 if __name__ == '__main__':
     log = Logger(__file__)
