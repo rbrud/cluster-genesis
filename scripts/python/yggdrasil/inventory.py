@@ -346,6 +346,35 @@ def load_input_file():
             sys.exit(1)
 
 
+def generic_variable_conversion(inventory, inventory_source):
+    # Generically convert top level settings in the inventory to
+    # all vars and node level properties as host level vars.
+
+    # All vars:
+    for key, value in inventory_source.iteritems():
+        # We don't variablize the nodes tree in all vars
+        if key == 'nodes':
+            continue
+
+        var_name = _sanitize_variable_name(key)
+        inventory['all']['vars'][var_name] = value
+
+    # Flatten the nodes from the inventory into a single list
+    nodes = [node for sublist in inventory_source['nodes'].values() for node
+             in sublist]
+
+    hv = inventory['_meta']['hostvars']
+    # host vars:
+    for node in nodes:
+        for key, value in node.iteritems():
+            var_name = _sanitize_variable_name(key)
+            hv[node[HOST_IP_KEY]][var_name] = value
+
+
+def _sanitize_variable_name(name):
+    return name.replace('-', '_')
+
+
 def get_host_ip_to_node(inventory_source):
     # Process the inventory file and make a map of the IP address ansible
     # will use for the host communication to the node dictionary from
@@ -379,8 +408,8 @@ def populate_network_variables(inventory, inventory_source):
     # Add the networks from the inventory source into the host_vars
     networks = copy.deepcopy(inventory_source['networks'])
     for network in networks.values():
-        # Take the addr out and replace it with the network and the netmask
-        addr = network.pop('addr', None)
+        # Add properties network address and the netmask
+        addr = network.get('addr', None)
         if addr:
             ip = netaddr.IPNetwork(addr)
             if ip.prefixlen != 1:
@@ -391,7 +420,7 @@ def populate_network_variables(inventory, inventory_source):
                 # on a bridge.
                 network['network'] = str(ip.network)
                 network['netmask'] = str(ip.netmask)
-    inventory['all']['vars'] = {'networks': networks}
+    inventory['all']['vars']['networks'] = networks
 
 
 def populate_host_networks(inventory, net_list, ip_to_node):
@@ -435,6 +464,7 @@ def generate_dynamic_inventory():
     inventory = {'all': {'vars': {}},
                  '_meta': {'hostvars': {}}}
     populate_hosts_and_groups(inventory, inventory_source)
+    generic_variable_conversion(inventory, inventory_source)
     populate_network_variables(inventory, inventory_source)
     populate_host_networks(inventory, inventory_source['networks'].keys(),
                            ip_to_node)

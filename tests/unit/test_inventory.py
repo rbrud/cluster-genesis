@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 #!/usr/bin/env python
 # Copyright 2016 IBM Corp.
 #
@@ -21,9 +22,14 @@ import mock
 import unittest
 
 TEST_PKG_MOD = 'yggdrasil.inventory'
+DEBUG_TEST_CASES = False
 
 
 class TestOSInterfacesInventory(unittest.TestCase):
+
+    def setUp(self):
+        if DEBUG_TEST_CASES:
+            self.maxDiff = None
 
     def test_get_host_ip_to_node(self):
         source = {'nodes': {'type1': [{test_mod.HOST_IP_KEY: 'myIP',
@@ -92,6 +98,48 @@ class TestOSInterfacesInventory(unittest.TestCase):
                     }
         self.assertDictEqual(inventory, expected)
 
+    def test_sanitize_variable_name(self):
+        name = 'hi-this-is-me'
+        self.assertEqual('hi_this_is_me',
+                         test_mod._sanitize_variable_name(name))
+
+    def test_generic_variable_conversion(self):
+        inventory = {'all': {'vars': {}},
+                     '_meta': {'hostvars': {'ip1': {},
+                                            'ip2': {},
+                                            'ip3': {}}}
+                     }
+        nodes1 = [{test_mod.HOST_IP_KEY: 'ip1',
+                   'some-key1': 'some-val1',
+                   'somekey2': ['someval2']},
+                  {test_mod.HOST_IP_KEY: 'ip2',
+                  'some-key3': 'some-val3',
+                  'somekey4': ['someval4']}]
+        nodes2 = [{test_mod.HOST_IP_KEY: 'ip3',
+                  'some-key4': 'some-val5',
+                  'somekey6': ['someval6']}]
+        inventory_source = {
+            'global1': ['1', '2'],
+            'global2': 'string-2',
+            'global-3': {'a-1': 'b'},
+            'nodes': {'group1': nodes1,
+                      'group2': nodes2}}
+        test_mod.generic_variable_conversion(inventory, inventory_source)
+        san_ip = test_mod._sanitize_variable_name(test_mod.HOST_IP_KEY)
+        expected = {'all': {'vars': {'global1': ['1', '2'],
+                                     'global2': 'string-2',
+                                     'global_3': {'a-1': 'b'}}},
+                    '_meta': {'hostvars': {'ip1': {san_ip: 'ip1',
+                                                   'some_key1': 'some-val1',
+                                                   'somekey2': ['someval2']},
+                                           'ip2': {san_ip: 'ip2',
+                                                   'some_key3': 'some-val3',
+                                                   'somekey4': ['someval4']},
+                                           'ip3': {san_ip: 'ip3',
+                                                   'some_key4': 'some-val5',
+                                                   'somekey6': ['someval6']}}}}
+        self.assertEqual(inventory, expected)
+
     def test_populate_network_variables(self):
         inventory = {'all': {'vars': {}},
                      '_meta': {'hostvars': {}}
@@ -103,10 +151,12 @@ class TestOSInterfacesInventory(unittest.TestCase):
                                          'otherkey': 'otherval'},
                                 'net3':  {'otherkey': 'otherval'}}}
         test_mod.populate_network_variables(inventory, inv_src)
-        nets = {'net1': {'network': '10.5.0.0',
+        nets = {'net1': {'addr': '10.5.1.5/22',
+                         'network': '10.5.0.0',
                          'netmask': '255.255.252.0',
                          'otherkey': 'otherval'},
-                'net2': {'otherkey': 'otherval'},
+                'net2': {'addr': '0.0.0.0/1',
+                         'otherkey': 'otherval'},
                 'net3': {'otherkey': 'otherval'}}
         expected_output['all']['vars']['networks'] = nets
         self.assertDictEqual(inventory, expected_output)
@@ -147,6 +197,10 @@ class TestOSInterfacesInventory(unittest.TestCase):
         hv['nodeIP4']['host_networks'] = {'net2': {'addr': '2.2.2.5'},
                                           'net3': {'addr': '3.3.3.5'}}
         test_mod.populate_host_networks(inventory, net_list, ip_to_node)
+        if DEBUG_TEST_CASES:
+            import json
+            print 'Output %s' % json.dumps(inventory, indent=4)
+            print 'Expected_output %s' % json.dumps(expected_output, indent=4)
         self.assertDictEqual(inventory, expected_output)
 
         # Now test again with nodes not having any IP addresses on networks
