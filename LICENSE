@@ -13,10 +13,3 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-{% for interface, mac in name_interfaces.iteritems() %}
-# Rule "{{ interface }}"
-SUBSYSTEM=="net", ACTION=="add", DRIVERS=="?*", ATTR{address}=="{{ mac }}", ATTR{dev_id}=="0x0", ATTR{type}=="1", KERNEL=="eth*", NAME="{{ interface }}"
-SUBSYSTEM=="net", ACTION=="add", DRIVERS=="?*", ATTR{address}=="{{ mac }}", ATTR{dev_id}=="0x0", ATTR{type}=="1", KERNEL=="p*", NAME="{{ interface }}"
-
-{% endfor %}
