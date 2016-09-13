@@ -9,7 +9,7 @@
 - include: container/inv_add_ipmi_ports.yml log_level=info
 - include: container/ipmi_set_bootdev.yml log_level=info bootdev=network persistent=False
 - include: container/ipmi_power_on.yml log_level=info
-- include: pause.yml minutes=5 message="Power-on Nodes"
+- include: pause.yml minutes=20 message="Power-on Nodes"
 - include: container/inv_add_ipmi_data.yml log_level=info
 - include: container/inv_add_pxe_ports.yml log_level=info
 - include: container/ipmi_power_off.yml log_level=info
