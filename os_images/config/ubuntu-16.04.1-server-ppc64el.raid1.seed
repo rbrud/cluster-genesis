@@ -71,9 +71,9 @@ d-i partman/confirm boolean true
 d-i partman/confirm_nooverwrite boolean true
 d-i partman-auto/confirm boolean true
 d-i passwd/user-fullname string Default User
-d-i passwd/username string ibm
-d-i passwd/user-password password yggdrasil
-d-i passwd/user-password-again password yggdrasil
+d-i passwd/username string defaultuser
+d-i passwd/user-password password passw0rd
+d-i passwd/user-password-again password passw0rd
 d-i user-setup/allow-password-weak boolean true
 d-i user-setup/encrypt-home boolean false
 tasksel tasksel/first multiselect standard
@@ -85,9 +85,9 @@ d-i preseed/late_command string \
 in-target /usr/bin/wget http://$http_server/ubuntu-16.04.1-server-ppc64el/sources.list -O /etc/apt/sources.list; \
 in-target mkdir /root/.ssh; \
 in-target /usr/bin/wget http://$http_server/authorized_keys -O /root/.ssh/authorized_keys; \
-in-target mkdir /home/ibm/.ssh; \
-in-target /usr/bin/wget http://$http_server/authorized_keys -O /home/ibm/.ssh/authorized_keys; \
-echo -e 'ibm\tALL=NOPASSWD: ALL' > /target/etc/sudoers.d/ibm; \
-in-target chmod 440 /etc/sudoers.d/ibm; \
+in-target mkdir /home/defaultuser/.ssh; \
+in-target /usr/bin/wget http://$http_server/authorized_keys -O /home/defaultuser/.ssh/authorized_keys; \
+echo -e 'defaultuser\tALL=NOPASSWD: ALL' > /target/etc/sudoers.d/defaultuser; \
+in-target chmod 440 /etc/sudoers.d/defaultuser; \
 $SNIPPET('kickstart_done')
 d-i finish-install/reboot_in_progress note
