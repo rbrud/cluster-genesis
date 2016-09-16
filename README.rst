@@ -8,7 +8,7 @@ Installation
 
 $ sudo apt update; sudo apt install git
 $ export GIT_SSL_NO_VERIFY=1
-$ git clone https://gitlabhost.rtp.raleigh.ibm.com/1A8420897/yggdrasil.git
+$ git clone https://gitlabhost.rtp.raleigh.ibm.com/Ulysses/yggdrasil.git
 $ cd yggdrasil
 $ ./scripts/install.sh
 $ source scripts/setup-env
@@ -37,5 +37,12 @@ Container Installation
 ======================
 ::
 
-$ ansible-playbook -i hosts lxc-create.yml
-$ ansible-playbook -i hosts install.yml
+$ ansible-playbook -i hosts lxc-create.yml -K
+$ ansible-playbook -i hosts install.yml -K
+
+Setting up networks on the cluster nodes
+========================================
+::
+
+$ ansible-playbook -i ../scripts/python/yggdrasil/inventory.py gather_mac_addresses.yml -u root --private-key=~/.ssh/id_rsa_ansible-generated
+$ ansible-playbook -i ../scripts/python/yggdrasil/inventory.py configure_operating_systems.yml -u root --private-key=~/.ssh/id_rsa_ansible-generated
