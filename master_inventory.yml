@@ -127,10 +127,57 @@ networks:
         description: Interface for eth11
         method: manual
         eth-port: eth11
+    base-eth0:
+        description: Interface for eth0
+        method: manual
+        eth-port: eth0
+    base-eth1:
+        description: Interface for eth1
+        method: manual
+        eth-port: eth1
     pxe-dhcp:
         description: Change pxe port(eth15) to dhcp
         method: dhcp
         eth-port: eth15
+    standalone-bond0:
+        description: Multilink bond
+        bond: mybond0
+        addr: 10.0.16.0/22
+        broadcast: 10.0.16.255
+        gateway: 10.0.16.1
+        dns-nameservers: 10.0.16.200
+        dns-search: mycompany.domain.com
+        method: static
+        #name of physical interfaces to bond together.
+        bond-interfaces:
+            - eth0
+            - eth1
+        #if necessary not all bond modes support a primary slave
+        bond-primary: eth10
+        #bond-mode, needs to be one of 7 types
+        # either name or number can be used.
+        #0 balance-rr
+        #1 active-backup
+        #2 balance-xor
+        #3 broadcast
+        #4 802.3ad
+        #5 balance-tlb
+        #6 balance-alb
+        #bond-mode: active-backup
+        bond-mode: 1
+        #there is a long list of optional bond arguments.
+        #Specify them here and they will be added to end of bond definition
+        optional-bond-arguments:
+            bond-miimon: 100
+            bond-lacp-rate: 1
+    manual-bond1:
+        description: bond network to be used by future bridges
+        bond: bond1
+        method: manual
+        bond-mode: balance-rr
+        bond-interfaces:
+              - eth10
+              - eth11
     openstack-mgmt:
         description: OpenStack Management Network
         bridge: br-mgmt
@@ -138,7 +185,7 @@ networks:
         tcp_segmentation_offload: off
         addr: 172.29.236.0/22  # ipv4 openstack management network
         vlan: 10
-        eth-port: eth10
+        eth-port: bond1
     openstack-stg:
         description: OpenStack Management Network
         bridge: br-storage
@@ -172,7 +219,6 @@ networks:
         method: static
         vlan: 50
         eth-port: eth11
-
 racks:   # This information is optional (not required to be present)
     - rack-id: rack1
       data-center: dataeast
@@ -208,8 +254,6 @@ node-templates:
             mac-pxe: eth15
             mac-eth10: eth10
             mac-eth11: eth11
-        bond-interfaces:  # not used, not implemented
-            - [eth10, eth11]
         ports:
             pxe:
                 rack1:
@@ -248,8 +292,6 @@ node-templates:
             mac-pxe: eth15
             mac-eth10: eth10
             mac-eth11: eth11
-        bond-interfaces:  # not used, not implemented
-            - [eth10, eth11]
         ports:
             pxe:
                 rack1:
@@ -279,6 +321,10 @@ node-templates:
             - external1
             - external2
             - pxe-dhcp
+            - base-eth0
+            - base-eth1
+            - manual-bond1
+            - standalone-bond0
     ceph-mon:
         hostname: hostname seed
         # The ceph-mon template is only used in the ceph-standalone
@@ -296,8 +342,6 @@ node-templates:
             mac-pxe: eth15
             mac-eth10: eth10
             mac-eth11: eth11
-        bond-interfaces:  # not used, not implemented
-            - [eth10, eth11]
         ports:
             pxe:
                 rack1:
