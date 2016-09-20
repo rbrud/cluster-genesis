@@ -18,7 +18,6 @@
 - name: container/inv_add_pxe_ports.yml
   hosts: deployer
   vars:
-    log_level: ""
     dhcp_leases_file: "/var/lib/misc/dnsmasq.leases"
   tasks:
     - command: "awk '{system(\"ping -c 5 \"$3)}' {{ dhcp_leases_file }}"

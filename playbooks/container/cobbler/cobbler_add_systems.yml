@@ -17,7 +17,5 @@
 
 - name: container/cobbler/cobbler_add_systems.yml
   hosts: deployer
-  vars:
-    log_level: ""
   tasks:
     - command: "{{ python_executable }} {{ scripts_path }}/python/cobbler_add_systems.py {{ config }} {{ inventory }} {{ log_level }}"

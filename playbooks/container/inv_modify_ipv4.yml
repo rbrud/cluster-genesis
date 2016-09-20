@@ -17,8 +17,6 @@
 
 - name: container/inv_modify_ipv4.yml
   hosts: deployer
-  vars:
-    log_level: ""
   tasks:
     - command: "{{ python_executable }} {{ scripts_path }}/python/inv_modify_ipv4.py {{ config }} {{ inventory }} {{ node_mgmt_ipv4_start }} {{ log_level }}"
       become: yes

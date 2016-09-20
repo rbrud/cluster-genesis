@@ -17,8 +17,6 @@
 
 - name: container/ipmi_power_on.yml
   hosts: deployer
-  vars:
-    log_level: ""
   tasks:
     - name: "Power on all nodes"
       command: "{{ python_executable }} {{ scripts_path }}/python/ipmi_power_on.py {{ inventory }} {{ log_level }}"

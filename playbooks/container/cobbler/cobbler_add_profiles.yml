@@ -21,8 +21,6 @@
 
 - name: container/cobbler/cobbler_add_profiles.yml
   hosts: deployer
-  vars:
-    log_level: ""
   tasks:
 
     - name: "Register list of *.seed files"

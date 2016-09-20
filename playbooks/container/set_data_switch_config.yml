@@ -17,7 +17,5 @@
 
 - name: container/set_data_switch_config.yml
   hosts: deployer
-  vars:
-    log_level: ""
   tasks:
     - command: "{{ python_executable }} {{ scripts_path }}/python/set_data_switch_config.py {{ config }} {{ log_level }}"

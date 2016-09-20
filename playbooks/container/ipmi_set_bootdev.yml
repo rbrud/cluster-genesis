@@ -18,7 +18,6 @@
 - name: container/ipmi_set_bootdev.yml
   hosts: deployer
   vars:
-    log_level: ""
     bootdev: pxe
     persistent: False
   tasks:

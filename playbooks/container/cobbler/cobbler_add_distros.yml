@@ -21,8 +21,6 @@
 
 - name: container/cobbler/cobbler_add_distros.yml
   hosts: deployer
-  vars:
-    log_level: ""
   tasks:
 
     - name: "Restore original /etc/cobbler/pxe/pxedefault.template file"

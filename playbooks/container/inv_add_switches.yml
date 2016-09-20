@@ -17,7 +17,5 @@
 
 - name: container/inv_add_switches.yml
   hosts: deployer
-  vars:
-    log_level: ""
   tasks:
     - command: "{{ python_executable }} {{ scripts_path }}/python/inv_add_switches.py {{ config }} {{ inventory }} {{ log_level }}"

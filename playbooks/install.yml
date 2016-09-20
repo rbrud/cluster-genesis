@@ -18,23 +18,23 @@
 - include: lxc-update.yml
 - include: container/cobbler/cobbler_install.yml
 - include: pause.yml message="Please reset BMC interfaces to obtain DHCP leases"
-- include: container/set_data_switch_config.yml log_level=info
-- include: container/inv_add_switches.yml log_level=info
-- include: container/inv_add_ipmi_ports.yml log_level=info
-- include: container/ipmi_set_bootdev.yml log_level=info bootdev=network persistent=False
-- include: container/ipmi_power_on.yml log_level=info
+- include: container/set_data_switch_config.yml
+- include: container/inv_add_switches.yml
+- include: container/inv_add_ipmi_ports.yml
+- include: container/ipmi_set_bootdev.yml bootdev=network persistent=False
+- include: container/ipmi_power_on.yml
 - include: pause.yml minutes=20 message="Power-on Nodes"
-- include: container/inv_add_ipmi_data.yml log_level=info
-- include: container/inv_add_pxe_ports.yml log_level=info
-- include: container/ipmi_power_off.yml log_level=info
-- include: container/inv_modify_ipv4.yml log_level=info
+- include: container/inv_add_ipmi_data.yml
+- include: container/inv_add_pxe_ports.yml
+- include: container/ipmi_power_off.yml
+- include: container/inv_modify_ipv4.yml
 - include: container/cobbler/cobbler_add_distros.yml
 - include: container/cobbler/cobbler_add_profiles.yml
 - include: container/cobbler/cobbler_add_systems.yml
 - include: container/inv_add_config_file.yml
 - include: container/allocate_ip_addresses.yml
 - include: container/get_inv_file.yml dest=/var/oprc
-- include: container/ipmi_set_bootdev.yml log_level=info bootdev=network persistent=False
-- include: container/ipmi_power_on.yml log_level=info
+- include: container/ipmi_set_bootdev.yml bootdev=network persistent=False
+- include: container/ipmi_power_on.yml
 - include: pause.yml minutes=5 message="Power-on Nodes"
-- include: container/ipmi_set_bootdev.yml log_level=info bootdev=default persistent=True
+- include: container/ipmi_set_bootdev.yml bootdev=default persistent=True
