@@ -38,6 +38,18 @@ class CobblerAddProfiles(object):
         cobbler_server = xmlrpclib.Server("http://127.0.0.1/cobbler_api")
         token = cobbler_server.login(COBBLER_USER, COBBLER_PASS)
 
+        distro_list = cobbler_server.get_distros()
+        existing_distro_list = []
+        for existing_distro in distro_list:
+            existing_distro_list.append(existing_distro['name'])
+
+        if distro not in existing_distro_list:
+            log.warning(
+                "Cobbler Skipping Profile - Distro Unavailable: "
+                "name=%s, distro=%s" %
+                (name, distro))
+            return
+
         new_profile_create = cobbler_server.new_profile(token)
         cobbler_server.modify_profile(
             new_profile_create,

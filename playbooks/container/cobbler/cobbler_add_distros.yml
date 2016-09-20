@@ -53,6 +53,14 @@
       find:
         paths: "{{ project_path }}/os_images/config"
         patterns: "*.list"
+      register: list_files_all
+
+    - name: "Filter out *.list files that are not needed"
+      stat:
+        path: "/var/www/html/{{ item.path | basename | \
+               regex_replace('^(.*).sources.list$', '\\1') }}"
+      with_items:
+        - "{{ list_files_all.files }}"
       register: list_files
 
     - name: "Register list of *.cfg files"
@@ -131,11 +139,13 @@
 
     - name: "Copy apt source lists to web repo directory"
       copy:
-        src: "{{ item.path }}"
+        src: "{{ item.item.path }}"
         remote_src: True
-        dest: "/var/www/html/{{ item.path | basename | regex_replace('^(.*).sources.list$', '\\1') }}/sources.list"
+        dest: "/var/www/html/{{ item.item.path | basename | \
+               regex_replace('^(.*).sources.list$', '\\1') }}/sources.list"
       with_items:
-        - "{{ list_files.files }}"
+        - "{{ list_files.results }}"
+      when: item.stat.exists
       become: yes
       become_method: sudo
 
