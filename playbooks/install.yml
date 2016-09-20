@@ -17,7 +17,7 @@
 
 - include: lxc-update.yml
 - include: container/cobbler/cobbler_install.yml
-- include: pause.yml message="Please reset BMC interfaces to obtain DHCP leases. Press <enter> to continue"
+- include: pause.yml message="Please reset BMC interfaces to obtain DHCP leases"
 - include: container/set_data_switch_config.yml log_level=info
 - include: container/inv_add_switches.yml log_level=info
 - include: container/inv_add_ipmi_ports.yml log_level=info
