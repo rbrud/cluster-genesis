@@ -116,7 +116,7 @@ class InventoryModifyIPv4(object):
                 'BMC Cold Reset Issued - Rack: %s - IP: %s' %
                 (rack, ip))
 
-        time.sleep(60)
+        time.sleep(120)
 
         for rack_id, ipv4, _userid, _password in inv.yield_ipmi_access_info():
             ipmi_cmd = ipmi_command.Command(
