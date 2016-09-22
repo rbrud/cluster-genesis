@@ -34,7 +34,12 @@ def load_input(inventory_file):
 
 def save_inventory(inventory, inventory_file):
     stream = file(inventory_file, 'w')
-    yaml.dump(inventory, stream, default_flow_style=False, explicit_start=True)
+    yaml.dump(
+        inventory,
+        stream,
+        indent=4,
+        default_flow_style=False,
+        explicit_start=True)
 
 
 def get_networks(inventory):
