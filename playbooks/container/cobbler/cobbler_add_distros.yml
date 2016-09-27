@@ -55,14 +55,6 @@
         patterns: "*.list"
       register: list_files_all
 
-    - name: "Filter out *.list files that are not needed"
-      stat:
-        path: "/var/www/html/{{ item.path | basename | \
-               regex_replace('^(.*).sources.list$', '\\1') }}"
-      with_items:
-        - "{{ list_files_all.files }}"
-      register: list_files
-
     - name: "Register list of *.cfg files"
       find:
         paths: "{{ project_path }}/os_images/config"
@@ -136,6 +128,14 @@
         - "{{ seed_files.files }}"
       become: yes
       become_method: sudo
+
+    - name: "Filter out *.list files that are not needed"
+      stat:
+        path: "/var/www/html/{{ item.path | basename | \
+               regex_replace('^(.*).sources.list$', '\\1') }}"
+      with_items:
+        - "{{ list_files_all.files }}"
+      register: list_files
 
     - name: "Copy apt source lists to web repo directory"
       copy:
