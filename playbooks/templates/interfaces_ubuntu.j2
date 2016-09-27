@@ -47,6 +47,9 @@ iface {{ networks[network]['eth-port'] }} inet {{ networks[network]['method'] }}
 {% if 'dns-nameservers' in networks[network] %}
     dns-nameservers {{ networks[network]['dns-nameservers'] }}
 {% endif %}
+{% if 'mtu' in networks[network] %}
+    mtu {{ networks[network]['mtu'] }}
+{% endif %}
 {% endif %}
 
 {% endfor %}
@@ -72,6 +75,9 @@ iface {{ networks[network]['bridge'] }} inet {{ networks[network]['method'] }}
     address {{ host_networks[network]['addr'] }}
 {% if 'netmask' in networks[network] %}
     netmask {{ networks[network]['netmask'] }}
+{% endif %}
+{% if 'mtu' in networks[network] %}
+    mtu {{ networks[network]['mtu'] }}
 {% endif %}
 {% if 'tcp_segmentation_offload' in networks[network] %}
     offload-sg {{ networks[network]['tcp_segmentation_offload'] }}
