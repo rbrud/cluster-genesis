@@ -77,5 +77,16 @@ iface {{ networks[network]['bridge'] }} inet {{ networks[network]['method'] }}
     offload-sg {{ networks[network]['tcp_segmentation_offload'] }}
 {% endif %}
 
+{% if 'bridge-port' in networks[network] %}
+   # Create veth pair, don't bomb if already exists
+   pre-up ip link add {{ networks[network]['bridge'] }}-veth type veth peer name {{ networks[network]['bridge-port'] }} || true
+   # Set both ends UP
+   pre-up ip link set {{ networks[network]['bridge'] }}-veth up
+   pre-up ip link set {{ networks[network]['bridge-port'] }} up
+   # Delete veth pair on DOWN
+   post-down ip link del {{ networks[network]['bridge'] }}-veth || true
+   # Add bond1 trunk and one veth end to bridge
+   bridge_ports {{ networks[network]['eth-port'] }} {{ networks[network]['bridge'] }}-veth
+{% endif %}
 {% endif %}
 {% endfor %}

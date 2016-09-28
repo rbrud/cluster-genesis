@@ -154,6 +154,7 @@ networks:
         addr: 172.29.240.0/22  # ipv4 openstack tenant network
         vlan: 30     # vxlan vlan id
         eth-port: eth11
+        bridge-port: veth12
     openstack-tenant-vlan:
         description: OpenStack Tenant vlan Network
         bridge: br-vlan
