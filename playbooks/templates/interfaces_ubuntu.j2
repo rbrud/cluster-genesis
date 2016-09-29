@@ -21,8 +21,6 @@
 auto lo
 iface lo inet loopback
 
-auto eth15
-iface eth15 inet dhcp
 {% for network in host_networks %}
 {% if 'bridge' not in networks[network] %}
 # {{ networks[network]['description'] }}

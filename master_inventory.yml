@@ -127,6 +127,10 @@ networks:
         description: Interface for eth11
         method: manual
         eth-port: eth11
+    pxe-dhcp:
+        description: Change pxe port(eth15) to dhcp
+        method: dhcp
+        eth-port: eth15
     openstack-mgmt:
         description: OpenStack Management Network
         bridge: br-mgmt
@@ -234,6 +238,7 @@ node-templates:
             - openstack-tenant-vxlan
             - external1
             - external2
+            - pxe-dhcp
     compute:
         hostname: hostname seed
         userid-ipmi: userid
@@ -273,6 +278,7 @@ node-templates:
             - openstack-tenant-vxlan
             - external1
             - external2
+            - pxe-dhcp
     ceph-mon:
         hostname: hostname seed
         # The ceph-mon template is only used in the ceph-standalone
@@ -317,6 +323,7 @@ node-templates:
             - external1
             - openstack-stg
             - ceph-replication
+            - pxe-dhcp
         journal-devices:
             - /dev/sdc
             - /dev/sdd
@@ -331,6 +338,7 @@ node-templates:
             - openstack-stg
             - external1
             - external2
+            - pxe-dhcp
         # <common properties> All of the other common node
         # template properties
 
@@ -341,6 +349,7 @@ node-templates:
             - swift-replication
             - external1
             - external2
+            - pxe-dhcp
         # <common properties> All of the other common node
         # template properties
 
@@ -386,6 +395,7 @@ node-templates:
             - swift-replication
             - external1
             - external2
+            - pxe-dhcp
         # <common properties> All of the other common node
         # template properties
 

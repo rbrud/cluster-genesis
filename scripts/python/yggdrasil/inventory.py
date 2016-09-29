@@ -423,10 +423,10 @@ def populate_network_variables(inventory, inventory_source):
     inventory['all']['vars']['networks'] = networks
 
 
-def populate_host_networks(inventory, net_list, ip_to_node):
+def populate_host_networks(inventory, inventory_source, ip_to_node):
     hostvars = inventory['_meta']['hostvars']
     for ip, node in ip_to_node.iteritems():
-        for net in net_list:
+        for net in inventory_source['networks'].keys():
             node_ip_addr = node.get(net+'-addr')
             # If the node is connected to this network
             if node_ip_addr is not None:
@@ -439,6 +439,10 @@ def populate_host_networks(inventory, net_list, ip_to_node):
                 if 'host_networks' not in hostvars[ip]:
                     hostvars[ip]['host_networks'] = {}
                 hostvars[ip]['host_networks'][net] = net_addr
+            elif inventory_source['networks'][net]['method'] == "dhcp":
+                if 'host_networks' not in hostvars[ip]:
+                    hostvars[ip]['host_networks'] = {}
+                hostvars[ip]['host_networks'][net] = {}
 
 
 def populate_name_interfaces(inventory, inventory_source, ip_to_node):
@@ -466,7 +470,7 @@ def generate_dynamic_inventory():
     populate_hosts_and_groups(inventory, inventory_source)
     generic_variable_conversion(inventory, inventory_source)
     populate_network_variables(inventory, inventory_source)
-    populate_host_networks(inventory, inventory_source['networks'].keys(),
+    populate_host_networks(inventory, inventory_source,
                            ip_to_node)
     populate_name_interfaces(inventory, inventory_source, ip_to_node)
     return inventory
