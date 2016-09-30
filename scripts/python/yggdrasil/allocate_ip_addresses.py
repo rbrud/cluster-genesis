@@ -42,7 +42,7 @@ def save_inventory(inventory, inventory_file):
         explicit_start=True)
 
 
-def get_networks(inventory):
+def get_networks(inventory, available_network_ips):
     networks = inventory['networks']
     nets = {}
     for net_name, net in networks.iteritems():
@@ -61,8 +61,17 @@ def get_networks(inventory):
                     exclude_addrs.append(dns)
 
             ip_net = netaddr.IPNetwork(address)
+
+            available_ips = available_network_ips.get(net_name)
+            if available_ips:
+                # If an available IP list is provided, use that
+                ip_iterator = iter(available_ips)
+            else:
+                # Otherwise the available IP range is the entire subnet
+                ip_iterator = ip_net.iter_hosts()
+
             nets[net_name] = {'net': ip_net,
-                              'ip_iterator': ip_net.iter_hosts(),
+                              'ip_iterator': ip_iterator,
                               'exclude': exclude_addrs}
         elif method == 'manual':
             nets[net_name] = {'manual_addr': ''}
@@ -110,9 +119,29 @@ def get_next_ip(network):
 
 def allocate_ips(inventory):
     inv = load_input(inventory)
-    nets = get_networks(inv)
+    available_network_ips = load_network_ips(inv)
+    nets = get_networks(inv, available_network_ips)
     allocate_ips_to_nodes(inv, nets)
     save_inventory(inv, inventory)
+
+
+def load_network_ips(inventory):
+    networks = inventory['networks']
+    available_network_ips = {}
+    for net_name, net in networks.iteritems():
+        if 'available-ips' in net:
+            ip_list_raw = net.get('available-ips')
+            ip_list_out = []
+            for ip in ip_list_raw:
+                if ' ' in ip:
+                    ip_range = ip.split()
+                    for _ip in netaddr.iter_iprange(ip_range[0], ip_range[1]):
+                        ip_list_out.append(_ip)
+                else:
+                    ip_list_out.append(ip)
+            available_network_ips[net_name] = ip_list_out
+
+    return available_network_ips
 
 
 def main():

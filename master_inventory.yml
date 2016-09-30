@@ -119,6 +119,11 @@ networks:
     external1:
         description: Organization site or external network
         addr: 10.0.16.0/22
+        available-ips:
+            - 10.0.16.20
+            - 10.0.16.35
+            - 10.0.16.106 10.0.16.110
+            - 10.0.16.115
         broadcast: 10.0.16.255
         gateway: 10.0.16.1
         dns-nameservers: 10.0.16.200
@@ -450,7 +455,7 @@ node-templates:
 nodes:
     controllers:     # OpenStack controller nodes
         - hostname: controller1  # (associated with external1-addr below)
-          external1-addr: 10.0.16.4  # on the eth10 interface
+          external1-addr: 10.0.16.20  # on the eth10 interface
           external2-addr: ''
           template: controller
           userid: janeuser
@@ -475,7 +480,7 @@ nodes:
           openstack-tenant-vlxan-addr: 172.29.240.2
           openstack-tenant-vlan-addr: 0.0.0.0
         - hostname: controller2  # (associated with external1-addr below)
-          external1-addr: 10.0.16.5  # on the eth10 interface
+          external1-addr: 10.0.16.35  # on the eth10 interface
           external2-addr: ''
           template: controller
           userid: janeuser
@@ -500,7 +505,7 @@ nodes:
           openstack-tenant-vlxan-addr: 172.29.240.3
           openstack-tenant-vlan-addr: 0.0.0.0
         - hostname: controller3  # (associated with external1-addr below)
-          external1-addr: 10.0.16.5  # on the eth10 interface
+          external1-addr: 10.0.16.106  # on the eth10 interface
           external2-addr: ''
           template: controller
           userid: janeuser
@@ -526,7 +531,7 @@ nodes:
           openstack-tenant-vlan-addr: 0.0.0.0
     compute:    # OpenStack compute nodes
         - hostname: compute1
-          external1-addr: 10.0.16.6  # on the eth10 port
+          external1-addr: 10.0.16.107  # on the eth10 port
           external2-addr: ''
           template: compute
           userid: janeuser
@@ -550,7 +555,7 @@ nodes:
           openstack-tenant-vlxan-addr: 172.29.240.5  # ipv4 tenant network
           openstack-tenant-vlan-addr: 0.0.0.0
         - hostname: compute2
-          external1-addr: 10.0.16.3  # on the eth10 port
+          external1-addr: 10.0.16.108  # on the eth10 port
           external2-addr: ''
           template: compute
           userid: janeuser
@@ -579,7 +584,7 @@ nodes:
 
     ceph-osd:
         - hostname: ceph-osd1  # Linux hostname
-          external1-addr: 10.0.16.4  # on the eth10 interface
+          external1-addr: 10.0.16.109  # on the eth10 interface
           template: ceph-osd
           userid: janeuser
           rack-id: rack1
@@ -599,7 +604,7 @@ nodes:
           openstack-stg-addr: 172.29.244.7     # ipv4 storage network
           ceph-replication-addr: 172.29.240.7  # ipv4 replication network
         - hostname: ceph-osd2
-          external1-addr: 10.0.16.5  # on the eth10 port
+          external1-addr: 10.0.16.110  # on the eth10 port
           template: ceph-osd
           userid: janeuser
           rack-id: rack1
@@ -619,7 +624,7 @@ nodes:
           openstack-stg-addr: 172.29.244.8     # ipv4 storage network
           ceph-replication-addr: 172.29.240.8  # ipv4 replication network
         - hostname: ceph-osd3
-          external1-addr: 10.0.16.6  # on the eth10 port
+          external1-addr: 10.0.16.115  # on the eth10 port
           template: ceph-osd
           userid: janeuser
           rack-id: rack1
