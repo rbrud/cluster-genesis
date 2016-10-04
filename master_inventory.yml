@@ -22,6 +22,8 @@
 # Its purpose is to act as the authoritative source on key names,
 # structure, and representative values.
 
+version: 1.0
+
 reference-architecture:
     - private-compute-cloud
 # The reference-architecture setting specifies which of the reference
