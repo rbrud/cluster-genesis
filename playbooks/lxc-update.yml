@@ -68,7 +68,7 @@
         force: no
       with_items: "{{ image_list_unique }}"
 
-- hosts: installer
+- hosts: deployer
   vars:
     scripts_path_local: "{{ hostvars['localhost']['scripts_path_local'] }}"
     images_local: "{{ hostvars['localhost']['project_path_local'] }}/os_images"

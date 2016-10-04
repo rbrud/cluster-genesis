@@ -20,7 +20,7 @@
   gather_facts: yes
 
 - name: container/cobbler/cobbler_install.yml
-  hosts: installer
+  hosts: deployer
   tasks:
 
     - name: "Install aptitude to enable apt upgrade safe "

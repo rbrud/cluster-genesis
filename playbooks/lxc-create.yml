@@ -146,22 +146,6 @@
             {{ ipaddr_mgmt_network.stdout | ipaddr(container_mgmt_ipv4_offset) |
             ipaddr("address") }}'
 
-    - name: "Update \"installer\" host with ssh private key."
-      replace:
-        dest: "{{ project_path_local }}/playbooks/hosts"
-        regexp: '^(installer .+?ansible_ssh_private_key_file=).+?[ ]'
-        replace: '\1{{ ssh_key_private }} '
-      become: yes
-      become_method: sudo
-
-    - name: "Update \"installer\" host with container internal IP address."
-      replace:
-        dest: "{{ project_path_local }}/playbooks/hosts"
-        regexp: '^(installer .+?)=\d+\.\d+\.\d+\.\d+$'
-        replace: '\1={{ container_ip.stdout_lines | first }}'
-      become: yes
-      become_method: sudo
-
     - name: "Update \"deployer\" host with ssh private key."
       replace:
         dest: "{{ project_path_local }}/playbooks/hosts"

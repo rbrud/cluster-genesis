@@ -15,7 +15,6 @@
 # limitations under the License.
 
 localhost ansible_connection=local
-installer ansible_user=deployer ansible_ssh_private_key_file=~/.ssh/id_rsa_yggdrasil ansible_host=0.0.0.0
 
 [deployers]
 deployer ansible_user=deployer ansible_ssh_private_key_file=~/.ssh/id_rsa_yggdrasil ansible_host=0.0.0.0
