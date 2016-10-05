@@ -34,6 +34,7 @@ CFG_USERID_DATA_SWITCH = 'userid-data-switch'
 CFG_PASSWORD_DATA_SWITCH = 'password-data-switch'
 CFG_RACK_ID = 'rack-id'
 CFG_NODES_TEMPLATES = 'node-templates'
+CFG_ETH_PORT = 'eth-port'
 CFG_PORTS = 'ports'
 CFG_ETH10 = 'eth10'
 CFG_ETH11 = 'eth11'
@@ -74,6 +75,7 @@ INV_PORT_ETH11 = 'port-eth11'
 INV_USERID_IPMI = 'userid-ipmi'
 INV_PASSWORD_IPMI = 'password-ipmi'
 INV_TEMPLATE = 'template'
+
 
 class Inventory():
     INV_CHASSIS_PART_NUMBER = 'chassis-part-number'
@@ -180,7 +182,7 @@ class Inventory():
             for _key, _value in value.items():
                 if _key == CFG_PORTS:
                     for ports_key, ports_value in _value.items():
-                        if ports_key == CFG_ETH10 or ports_key == CFG_ETH11:
+                        if ports_key != CFG_IPMI and ports_key != CFG_PXE:
                             for rack in ports_value:
                                 for networks in value[CFG_NETWORKS]:
                                     if CFG_VLAN in self.cfg[CFG_NETWORKS][networks]:
@@ -207,15 +209,17 @@ class Inventory():
             for _key, _value in value.items():
                 if _key == CFG_PORTS:
                     for ports_key, ports_value in _value.items():
-                        if ports_key == CFG_ETH10 or ports_key == CFG_ETH11:
+                        if ports_key != CFG_IPMI and ports_key != CFG_PXE:
                             for rack, ports in ports_value.items():
                                 for port in ports:
                                     _list = []
                                     for networks in value[CFG_NETWORKS]:
                                         if CFG_VLAN in self.cfg[CFG_NETWORKS][networks]:
-                                            vlan = self.cfg[CFG_NETWORKS][networks][CFG_VLAN]
-                                            _list.append(vlan)
-                                            _dict[port] = _list
+                                            if CFG_ETH_PORT in self.cfg[CFG_NETWORKS][networks].keys():
+                                                if self.cfg[CFG_NETWORKS][networks][CFG_ETH_PORT] == ports_key:
+                                                    vlan = self.cfg[CFG_NETWORKS][networks][CFG_VLAN]
+                                                    _list.append(vlan)
+                                                    _dict[port] = _list
                                 __dict[CFG_USERID_DATA_SWITCH] = userid
                                 __dict[CFG_PASSWORD_DATA_SWITCH] = password
                                 __dict['port_vlan'] = _dict
@@ -366,7 +370,7 @@ class Inventory():
                         node_port_on_rack = str(node.get(INV_PORT_PATTERN % port_name, ''))
                         macs = switch_ports_to_MACs.get(node_port_on_rack, [])
                         if macs:
-                            mac_key = INV_MAC_PATTERN  % port_name
+                            mac_key = INV_MAC_PATTERN % port_name
                             node[mac_key] = macs[0]
                         else:
                             msg = ('Unable to find a MAC address for %(port_name)s'
