@@ -36,8 +36,3 @@
   hosts: controllers
   tasks:
     - include: tasks/transfer_inventory.yml
-
-- name: Prepare Cluster Configuration Software
-  hosts: controllers[0]
-  tasks:
-    - include: tasks/os_services_install.yml
