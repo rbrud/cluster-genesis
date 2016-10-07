@@ -50,6 +50,7 @@ CFG_USERID_IPMI = 'userid-ipmi'
 CFG_PASSWORD_IPMI = 'password-ipmi'
 CFG_NETWORKS = 'networks'
 CFG_VLAN = 'vlan'
+CFG_MTU = 'mtu'
 CFG_MANAGEMENT_PORTS = ('ipmi', 'pxe')
 
 INV_SWITCHES = 'switches'
@@ -184,12 +185,12 @@ class Inventory():
                     for ports_key, ports_value in _value.items():
                         if ports_key != CFG_IPMI and ports_key != CFG_PXE:
                             for rack in ports_value:
-                                for networks in value[CFG_NETWORKS]:
-                                    if CFG_VLAN in self.cfg[CFG_NETWORKS][networks]:
+                                for network in value[CFG_NETWORKS]:
+                                    if CFG_VLAN in self.cfg[CFG_NETWORKS][network]:
                                         _dict[CFG_USERID_DATA_SWITCH] = userid
                                         _dict[CFG_PASSWORD_DATA_SWITCH] = password
-                                        if self.cfg[CFG_NETWORKS][networks][CFG_VLAN] not in _list:
-                                            _list.append(self.cfg[CFG_NETWORKS][networks][CFG_VLAN])
+                                        if self.cfg[CFG_NETWORKS][network][CFG_VLAN] not in _list:
+                                            _list.append(self.cfg[CFG_NETWORKS][network][CFG_VLAN])
                                             _dict['vlan'] = _list
                                             __dict[self.cfg[CFG_IPADDR_DATA_SWITCH][rack]] = _dict
         for key, value in __dict.items():
@@ -203,6 +204,7 @@ class Inventory():
         _dict = AttrDict()
         __dict = AttrDict()
         ___dict = AttrDict()
+        mtu = None
         userid = self.cfg[CFG_USERID_DATA_SWITCH]
         password = self.cfg[CFG_PASSWORD_DATA_SWITCH]
         for key, value in self.cfg[CFG_NODES_TEMPLATES].items():
@@ -213,23 +215,37 @@ class Inventory():
                             for rack, ports in ports_value.items():
                                 for port in ports:
                                     _list = []
-                                    for networks in value[CFG_NETWORKS]:
-                                        if CFG_VLAN in self.cfg[CFG_NETWORKS][networks]:
-                                            if CFG_ETH_PORT in self.cfg[CFG_NETWORKS][networks].keys():
-                                                if self.cfg[CFG_NETWORKS][networks][CFG_ETH_PORT] == ports_key:
-                                                    vlan = self.cfg[CFG_NETWORKS][networks][CFG_VLAN]
+                                    mtu = None
+                                    for network in value[CFG_NETWORKS]:
+                                        if CFG_ETH_PORT in self.cfg[CFG_NETWORKS][network].keys():
+                                            if self.cfg[CFG_NETWORKS][network][CFG_ETH_PORT] == ports_key:
+                                                if CFG_VLAN in self.cfg[CFG_NETWORKS][network]:
+                                                    vlan = self.cfg[CFG_NETWORKS][network][CFG_VLAN]
                                                     _list.append(vlan)
-                                                    _dict[port] = _list
+                                                    if 'vlan' not in _dict:
+                                                        _dict['vlan'] = {}
+                                                    _dict['vlan'][port] = _list
+                                                if CFG_MTU in self.cfg[CFG_NETWORKS][network]:
+                                                    if mtu is None:
+                                                        mtu = self.cfg[CFG_NETWORKS][network][CFG_MTU]
+                                                    else:
+                                                        if mtu < self.cfg[CFG_NETWORKS][network][CFG_MTU]:
+                                                            mtu = self.cfg[CFG_NETWORKS][network][CFG_MTU]
+                                                    if 'mtu' not in _dict:
+                                                        _dict['mtu'] = {}
+                                                    _dict['mtu'][port] = mtu
                                 __dict[CFG_USERID_DATA_SWITCH] = userid
                                 __dict[CFG_PASSWORD_DATA_SWITCH] = password
-                                __dict['port_vlan'] = _dict
+                                __dict['port_vlan'] = _dict['vlan']
+                                __dict['port_mtu'] = _dict['mtu']
                                 ___dict[self.cfg[CFG_IPADDR_DATA_SWITCH][rack]] = __dict
         for key, value in ___dict.items():
             yield (
                 key,
                 value[CFG_USERID_DATA_SWITCH],
                 value[CFG_PASSWORD_DATA_SWITCH],
-                value['port_vlan'])
+                value['port_vlan'],
+                value['port_mtu'])
 
     def get_data_switches(self):
         # This methods a dict of switch IP to a dict with user

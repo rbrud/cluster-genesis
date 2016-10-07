@@ -33,14 +33,17 @@ class ConfigureDataSwitch(object):
 
         self.DEBUG = b'DEBUG'
         self.INFO = b'INFO'
-        self.SSH_LOG = 'leaf-switch-ssh.log'
+        self.SSH_LOG = 'data-switch-ssh.log'
 
         self.ENABLE_REMOTE_CONFIG = 'cli enable \"configure terminal\" %s'
         SET_VLAN = '\"vlan %d\"'
+        SET_MTU = '\"mtu %d\"'
         INTERFACE_ETHERNET = '\"interface ethernet 1/%s\"'
         SWITCHPORT_MODE_HYBRID = '\"switchport mode hybrid\"'
         SWITCHPORT_HYBRID_ALLOWED_VLAN = \
             '\"switchport hybrid allowed-vlan add %d\"'
+        SHUTDOWN = '"shutdown"'
+        NO_SHUTDOWN = '"no shutdown"'
 
         self.log = Logger(__file__)
         self.log_level = log_level
@@ -55,9 +58,9 @@ class ConfigureDataSwitch(object):
                 self.log.info('Create vlan %s' % (vlan))
                 self.issue_cmd(SET_VLAN % (vlan))
 
-        for self.ipv4, self.userid, self.password, ports \
+        for self.ipv4, self.userid, self.password, port_vlans, port_mtu \
                 in inv.yield_data_switch_ports():
-            for port, vlans in ports.items():
+            for port, vlans in port_vlans.items():
                 self.log.info(
                     'Enable hybrid mode for port %s' % (port))
                 self.issue_cmd(
@@ -72,6 +75,22 @@ class ConfigureDataSwitch(object):
                         INTERFACE_ETHERNET % (port) +
                         ' ' +
                         SWITCHPORT_HYBRID_ALLOWED_VLAN % (vlan))
+            for port, mtu in port_mtu.items():
+                self.log.info(
+                    'Port %s mtu set to %s' %
+                    (port, mtu))
+                self.issue_cmd(
+                    INTERFACE_ETHERNET % (port) +
+                    ' ' +
+                    SHUTDOWN)
+                self.issue_cmd(
+                    INTERFACE_ETHERNET % (port) +
+                    ' ' +
+                    SET_MTU % (mtu))
+                self.issue_cmd(
+                    INTERFACE_ETHERNET % (port) +
+                    ' ' +
+                    NO_SHUTDOWN)
 
     def issue_cmd(self, cmd):
         if self.log_level == self.DEBUG or self.log_level == self.INFO:
