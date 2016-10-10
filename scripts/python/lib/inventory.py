@@ -210,6 +210,8 @@ class Inventory():
         for key, value in self.cfg[CFG_NODES_TEMPLATES].items():
             for _key, _value in value.items():
                 if _key == CFG_PORTS:
+                    _dict['vlan'] = {}
+                    _dict['mtu'] = {}
                     for ports_key, ports_value in _value.items():
                         if ports_key != CFG_IPMI and ports_key != CFG_PXE:
                             for rack, ports in ports_value.items():
@@ -222,8 +224,6 @@ class Inventory():
                                                 if CFG_VLAN in self.cfg[CFG_NETWORKS][network]:
                                                     vlan = self.cfg[CFG_NETWORKS][network][CFG_VLAN]
                                                     _list.append(vlan)
-                                                    if 'vlan' not in _dict:
-                                                        _dict['vlan'] = {}
                                                     _dict['vlan'][port] = _list
                                                 if CFG_MTU in self.cfg[CFG_NETWORKS][network]:
                                                     if mtu is None:
@@ -231,8 +231,6 @@ class Inventory():
                                                     else:
                                                         if mtu < self.cfg[CFG_NETWORKS][network][CFG_MTU]:
                                                             mtu = self.cfg[CFG_NETWORKS][network][CFG_MTU]
-                                                    if 'mtu' not in _dict:
-                                                        _dict['mtu'] = {}
                                                     _dict['mtu'][port] = mtu
                                 __dict[CFG_USERID_DATA_SWITCH] = userid
                                 __dict[CFG_PASSWORD_DATA_SWITCH] = password
