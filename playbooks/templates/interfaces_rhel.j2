@@ -60,4 +60,8 @@ DOMAIN={{ networks[network]['dns-search'] }}
 {% if 'dns-nameservers' in networks[network] %}
 DNS1={{ networks[network]['dns-nameservers'] }}
 {% endif %}
+{% if 'mtu' in networks[network] %}
+MTU={{ networks[network]['mtu'] }}
+{% endif %}
+
 
