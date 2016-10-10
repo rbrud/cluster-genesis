@@ -496,6 +496,16 @@ node-templates:
                 # be distributed equally among zones 0 to 'zone-count'-1.
                 # Defaults to 3 if not specified.
 
+software-bootstrap-hosts: controllers[0]  # Select first 'controllers' node
+software-bootstrap-cmd: |
+    git clone https://github.com/open-power/os-services
+    cd os-services
+    git checkout v1.0.0
+    export VAR1=x
+    export VAR2=y
+    ./scripts/bootstrap-cluster.sh
+    ./scripts/create-cluster.sh
+
 nodes:
     controllers:     # OpenStack controller nodes
         - hostname: controller1  # (associated with external1-addr below)
