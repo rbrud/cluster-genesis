@@ -61,8 +61,8 @@
 
 - name: Generate RHEL/CentOS vlan files
   template:
-    src: "{{ playbook_dir }}/templates/interfaces_rhel.j2"
-    dest: "/etc/sysconfig/network-scripts/ifcfg-{{ networks[item].get('eth-port') }}"
+    src: "{{ playbook_dir }}/templates/vlan_rhel.j2"
+    dest: "/etc/sysconfig/network-scripts/ifcfg-{{ networks[item].get('eth-port') }}.{{ networks[item].get('vlan') }}"
     owner: "root"
     group: "root"
     mode: "0644"
