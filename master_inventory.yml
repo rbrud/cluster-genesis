@@ -130,7 +130,7 @@ networks:
         dns-search: mycompany.domain.com
         method: static
         eth-port: eth10
-        mtu: 9000`
+        mtu: 9000
     external2:
         description: Interface for eth11
         method: manual
