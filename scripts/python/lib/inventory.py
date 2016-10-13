@@ -204,14 +204,14 @@ class Inventory():
         _dict = AttrDict()
         __dict = AttrDict()
         ___dict = AttrDict()
+        _dict['vlan'] = {}
+        _dict['mtu'] = {}
         mtu = None
         userid = self.cfg[CFG_USERID_DATA_SWITCH]
         password = self.cfg[CFG_PASSWORD_DATA_SWITCH]
         for key, value in self.cfg[CFG_NODES_TEMPLATES].items():
             for _key, _value in value.items():
                 if _key == CFG_PORTS:
-                    _dict['vlan'] = {}
-                    _dict['mtu'] = {}
                     for ports_key, ports_value in _value.items():
                         if ports_key != CFG_IPMI and ports_key != CFG_PXE:
                             for rack, ports in ports_value.items():
